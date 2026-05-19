@@ -1,59 +1,59 @@
 # Eval — full-movie100k
 
-_Generated 2026-05-19T22:57:49Z by `bin/eval`._
+_Generated 2026-05-19T23:14:38Z by `bin/eval`._
 
-Corpus: `pretrained/movie-100k.DSY` — 10313 sentences, 100008 words
-Generator: `ppm:4` | Scorer: `bm25` | max_length: `75` chars
+Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
+Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
 
 | metric | value |
 |---|---|
-| fallthrough rate (unconditioned-Markov fallback) | 0.100 |
-| ugliness rate (winner had ugly flag) | 0.143 |
-| recitation rate (response = a corpus sentence verbatim) | 0.710 |
-| acceptance rate (kept / attempted candidates) | 0.019 |
-| distinct-2, across all trials | 0.672 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.925 |
-| KL(responses ‖ corpus) bigrams, nats | 0.200 |
-| latency p50 (ms) | 11.683 |
-| latency p95 (ms) | 41.939 |
-| KL drift from baseline `baseline-movie100k` (nats) | 0.475 |
+| fallthrough rate (unconditioned-Markov fallback) | 0.107 |
+| ugliness rate (winner had ugly flag) | 0.150 |
+| recitation rate (response = a corpus sentence verbatim) | 0.633 |
+| acceptance rate (kept / attempted candidates) | 0.020 |
+| distinct-2, across all trials | 0.610 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.899 |
+| KL(responses ‖ corpus) bigrams, nats | 0.181 |
+| latency p50 (ms) | 20.262 |
+| latency p95 (ms) | 78.352 |
+| KL drift from baseline `baseline-movie100k` (nats) | 0.496 |
 
-Diagnostic counts (kept in JSON): mean attempts 407.133, mean kept 7.663, mean length 8.947 tokens, distinct-3 0.748.
+Diagnostic counts (kept in JSON): mean attempts 395.037, mean kept 7.773, mean length 11.240 tokens, distinct-3 0.689.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | just a half-a-cup. hello, dottie. i'm so sorry to hear of your troubles... |
-| hi daisy | hi, happy. well, you're obviously making him happy. |
-| good morning | that's not good in prison. it's just not good. |
-| how are you | is that how you answer the phone? |
-| what do you like | what do you mean? |
-| tell me about yourself | i say freddie, what are you about? |
-| what makes you happy | you beast, you monster, what have you done to nanook?! what have you done to |
-| what is your favorite | deceiving someone without knowing it is something new for me. |
-| i had a good day | your call. have a good night. |
-| the weather is nice today | it's so nice to meet young men who are so well mannered. |
-| i feel tired | i don't think i can walk. |
-| computers are fun | are you kidding?! that heap of junk will never leave the ground! |
-| tell me about a platypus | so what are you gonna tell him? |
-| what about electricity | what about thursdays and fridays? |
-| i love astronomy | i don't think i can walk. |
-| explain photosynthesis | what are his qualifications besides being a white male and directing a hot new |
-| describe a unicorn | oh, a little savage, is he? |
-| what do you think | what do you mean? |
-| give me advice | dennis won't let me go to the desk. he makes me sit on the floor. |
-| say something | can i offer you something. |
-| anything you want | oh, no you don't! look, osgood - i'm going to level with you. |
-| and then what | what about thursdays and fridays? |
-| really | hey. i'm really glad you called. |
-| go on | dennis won't let me go to the desk. he makes me sit on the floor. |
-| purple monkey dishwasher | what are his qualifications besides being a white male and directing a hot new |
-| asdf | what are his qualifications besides being a white male and directing a hot new |
-| the the the | we just missed the turnoff to the party. |
-| i was wondering if you could tell me what you think about... | there's nothing selfish about pursuing your own life, your own career. |
-| do you have any thoughts on the future of technology | yes. you see, the truth is, trinity, that we humans have a place in the future. |
-| imagine if computers could dream what would they dream about | water on arrakis!!! i have seen this place in a dream. |
+| hello | but you have to consider all possibilities, sandro. |
+| hi daisy | hi, welcome back to the 'world of the psychic,' hairless pets. until then, this is peter venkman saying |
+| good morning | no, you're very good at it. |
+| how are you | how long you been doing this? |
+| what do you like | what? why? what do you mean? |
+| tell me about yourself | several, i think. there is not much to tell. |
+| what makes you happy | what? why? what do you mean? |
+| what is your favorite | i'll pay you for your fare. i'll send you to montana first class. |
+| i had a good day | good. you sat in front...i saw you there... |
+| the weather is nice today | alvy singer. it was nice nice... thanks very much... for everything. |
+| i feel tired | this is my mother's house. i don't live with my mother. i just stop by, help out. i'm good like that. |
+| computers are fun | of which we are neither. are you out of your mind? |
+| tell me about a platypus | how about lankaster merrin. |
+| what about electricity | what? why? what do you mean? |
+| i love astronomy | no, i mean... you love your son? |
+| explain photosynthesis | but you have to consider all possibilities, sandro. |
+| describe a unicorn | oh, just a old letter from a friend. |
+| what do you think | what? why? what do you mean? |
+| give me advice | you an' me, chief. |
+| say something | we've got to do something about this life. |
+| anything you want | did you discover anything in that tunnel, dr. jones? |
+| and then what | what? why? what do you mean? |
+| really | do you think i'm ready? do you really? |
+| go on | i'm not going to go, george. i changed my mind. |
+| purple monkey dishwasher | but you have to consider all possibilities, sandro. |
+| asdf | but you have to consider all possibilities, sandro. |
+| the the the | the basic principles of time travel are there. so you have the vessel and the portal. and the vessel |
+| i was wondering if you could tell me what you think about... | hey, you're always saying, 'bring me real life. bring me street life. and, like, one man's mundane and |
+| do you have any thoughts on the future of technology | this is the future of america here. |
+| imagine if computers could dream what would they dream about | it was a bad dream... |

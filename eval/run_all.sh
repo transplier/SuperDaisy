@@ -44,21 +44,28 @@ for spec in "${CORPORA[@]}"; do
 done
 wait
 
-echo "[run_all] +ppm, +bm25, full × all corpora (parallel)"
+echo "[run_all] variants × all corpora (parallel)"
 for spec in "${CORPORA[@]}"; do
   tag="${spec%%:*}"; path="${spec#*:}"
+  base="--baseline eval/baseline_${tag}.json"
 
-  bin/eval --personality "$path" --label "ppm-$tag" --generator ppm:4 \
-           --baseline "eval/baseline_${tag}.json" \
+  # core matrix
+  bin/eval --personality "$path" --label "ppm-$tag" --generator ppm:4 $base \
            --report "eval/ppm_${tag}.md" --data "eval/ppm_${tag}.json" &
-
-  bin/eval --personality "$path" --label "bm25-$tag" --scorer bm25 \
-           --baseline "eval/baseline_${tag}.json" \
+  bin/eval --personality "$path" --label "bm25-$tag" --scorer bm25 $base \
            --report "eval/bm25_${tag}.md" --data "eval/bm25_${tag}.json" &
-
-  bin/eval --personality "$path" --label "full-$tag" --generator ppm:4 --scorer bm25 \
-           --baseline "eval/baseline_${tag}.json" \
+  bin/eval --personality "$path" --label "full-$tag" --generator ppm:4 --scorer bm25 $base \
            --report "eval/full_${tag}.md" --data "eval/full_${tag}.json" &
+
+  # coherence probes: BM25 with low and mid temperature
+  bin/eval --personality "$path" --label "bm25t05-$tag" --scorer bm25 --sampler temperature:0.5 $base \
+           --report "eval/bm25t05_${tag}.md" --data "eval/bm25t05_${tag}.json" &
+  bin/eval --personality "$path" --label "bm25t07-$tag" --scorer bm25 --sampler temperature:0.7 $base \
+           --report "eval/bm25t07_${tag}.md" --data "eval/bm25t07_${tag}.json" &
+
+  # PPM at order 2: lower-context PPM as a less-recitation-prone alternative
+  bin/eval --personality "$path" --label "ppm2-$tag" --generator ppm:2 $base \
+           --report "eval/ppm2_${tag}.md" --data "eval/ppm2_${tag}.json" &
 done
 wait
 

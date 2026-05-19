@@ -195,6 +195,7 @@ require_relative "super_daisy/components/whitespace_tokenizer"
 require_relative "super_daisy/components/rarest_word_scorer"
 require_relative "super_daisy/components/bm25_scorer"
 require_relative "super_daisy/components/uniform_sampler"
+require_relative "super_daisy/components/temperature_sampler"
 require_relative "super_daisy/components/stride_three_markov_generator"
 require_relative "super_daisy/components/ppm_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
@@ -228,6 +229,20 @@ module SuperDaisy
         BM25Scorer.new(top_k: top_k)
       else
         raise ArgumentError, "unknown scorer spec: #{spec.inspect}"
+      end
+    end
+
+    # Parse a sampler spec into a sampler instance.
+    # "uniform" (default) | "temperature" (T=1, equivalent) | "temperature:0.5"
+    def self.build_sampler(spec)
+      case spec
+      when nil, "uniform"
+        UniformSampler.new
+      when /\Atemperature(?::([\d.]+))?\z/
+        t = $1 ? $1.to_f : 1.0
+        TemperatureSampler.new(temperature: t)
+      else
+        raise ArgumentError, "unknown sampler spec: #{spec.inspect}"
       end
     end
   end

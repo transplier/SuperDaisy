@@ -1,9 +1,9 @@
 # Eval — full-mem
 
-_Generated 2026-05-19T22:57:43Z by `bin/eval`._
+_Generated 2026-05-19T23:14:27Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
-Generator: `ppm:4` | Scorer: `bm25` | max_length: `52` chars
+Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | max_length: `70` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -11,17 +11,17 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.267 |
-| ugliness rate (winner had ugly flag) | 0.067 |
+| ugliness rate (winner had ugly flag) | 0.000 |
 | recitation rate (response = a corpus sentence verbatim) | 1.000 |
 | acceptance rate (kept / attempted candidates) | 0.019 |
-| distinct-2, across all trials | 0.159 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.551 |
-| KL(responses ‖ corpus) bigrams, nats | 0.456 |
-| latency p50 (ms) | 4.207 |
-| latency p95 (ms) | 23.763 |
-| KL drift from baseline `baseline-mem` (nats) | 1.184 |
+| distinct-2, across all trials | 0.160 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.542 |
+| KL(responses ‖ corpus) bigrams, nats | 0.429 |
+| latency p50 (ms) | 6.695 |
+| latency p95 (ms) | 40.105 |
+| KL drift from baseline `baseline-mem` (nats) | 1.056 |
 
-Diagnostic counts (kept in JSON): mean attempts 385.460, mean kept 7.333, mean length 6.720 tokens, distinct-3 0.174.
+Diagnostic counts (kept in JSON): mean attempts 385.027, mean kept 7.333, mean length 6.927 tokens, distinct-3 0.173.
 
 ## Sample responses (seed=1)
 
@@ -34,14 +34,14 @@ Diagnostic counts (kept in JSON): mean attempts 385.460, mean kept 7.333, mean l
 | what do you like | do unto others as you want others to do unto you. |
 | tell me about yourself | i feel good about myself. |
 | what makes you happy | what did you do today? |
-| what is your favorite | what have you been up to lately, daisy? |
+| what is your favorite | you should learn to lower your expectations of other people. |
 | i had a good day | i love the taste of good food. |
 | the weather is nice today | it's not nice to make fun of people. |
-| i feel tired | i'm so smart that i don't even know how smart i am. |
+| i feel tired | i think i'm happier now than i have ever been in my life. |
 | computers are fun | that's very true. are you making fun of me? |
 | tell me about a platypus | i feel good about myself. |
 | what about electricity | the most important thing about life is being happy. |
-| i love astronomy | i love the taste of good food. |
+| i love astronomy | i think i'm happier now than i have ever been in my life. |
 | explain photosynthesis | have you ever traveled the world, daisy? |
 | describe a unicorn | i'm at a loss for words. |
 | what do you think | do unto others as you want others to do unto you. |

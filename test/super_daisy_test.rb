@@ -266,6 +266,56 @@ class SuperDaisyComponentContractTest < Minitest::Test
     assert_includes [10, 20, 30], picked
   end
 
+  def test_temperature_sampler_t1_matches_uniform_distribution
+    # 1000 draws of a multiset; T=1 should preserve raw frequencies.
+    items = %i[a a a b]  # 75% a, 25% b
+    s = SuperDaisy::Components::TemperatureSampler.new(temperature: 1.0)
+    rng = Random.new(42)
+    counts = Hash.new(0)
+    1000.times { counts[s.call(items, rng)] += 1 }
+    # Allow generous tolerance — sampling noise is real with 1k draws.
+    assert_in_delta 0.75, counts[:a] / 1000.0, 0.05
+  end
+
+  def test_temperature_sampler_low_t_concentrates_on_mode
+    # T<<1 should push almost all mass to the most-frequent item.
+    items = %i[a a a b]
+    s = SuperDaisy::Components::TemperatureSampler.new(temperature: 0.1)
+    rng = Random.new(42)
+    counts = Hash.new(0)
+    1000.times { counts[s.call(items, rng)] += 1 }
+    assert_operator counts[:a], :>, 950, "low T should concentrate on the mode"
+  end
+
+  def test_temperature_sampler_high_t_flattens
+    # T>>1 should flatten toward uniform-over-unique.
+    items = %i[a a a b]
+    s = SuperDaisy::Components::TemperatureSampler.new(temperature: 10.0)
+    rng = Random.new(42)
+    counts = Hash.new(0)
+    1000.times { counts[s.call(items, rng)] += 1 }
+    # b's share should rise noticeably from 25% baseline.
+    assert_operator counts[:b] / 1000.0, :>, 0.35,
+                    "high T should give rarer items more mass"
+  end
+
+  def test_temperature_sampler_handles_singleton
+    s = SuperDaisy::Components::TemperatureSampler.new(temperature: 0.5)
+    assert_equal :only, s.call([:only], Random.new(0))
+  end
+
+  def test_build_sampler_helper
+    assert_kind_of SuperDaisy::Components::UniformSampler,
+                   SuperDaisy::Components.build_sampler(nil)
+    assert_kind_of SuperDaisy::Components::UniformSampler,
+                   SuperDaisy::Components.build_sampler("uniform")
+    t = SuperDaisy::Components.build_sampler("temperature:0.5")
+    assert_kind_of SuperDaisy::Components::TemperatureSampler, t
+    assert_in_delta 0.5, t.temperature, 1e-9
+    assert_raises(ArgumentError) { SuperDaisy::Components.build_sampler("nope") }
+    assert_raises(ArgumentError) { SuperDaisy::Components::TemperatureSampler.new(temperature: 0) }
+  end
+
   def test_stride_three_markov_generator_returns_string
     c = corpus_with("hello world.", "hello there.", klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::StrideThreeMarkovGenerator.new

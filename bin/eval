@@ -34,6 +34,7 @@ OptionParser.new do |o|
   o.on("--label NAME", "Variant label in the report (default: corpus basename)") { |v| options[:label] = v }
   o.on("--generator NAME", "Generator: classic | ppm | ppm:N (default classic)") { |v| options[:generator] = v }
   o.on("--scorer NAME", "Scorer: classic | bm25 | bm25:K (default classic)") { |v| options[:scorer] = v }
+  o.on("--sampler NAME", "Sampler: uniform | temperature | temperature:T (default uniform)") { |v| options[:sampler] = v }
   o.on("--max-length N", Integer, "Char cap on responses (default: auto from corpus mean × 1.5)") { |v| options[:max_length] = v }
   o.on("--baseline FILE", "Baseline data JSON; report KL drift from its response_bigrams") { |v| options[:baseline] = v }
   o.on("-h", "--help") { puts o; exit 0 }
@@ -59,6 +60,13 @@ scorer =
     SuperDaisy::Components.build_scorer(options[:scorer])
   rescue ArgumentError => e
     abort "--scorer: #{e.message}"
+  end
+
+sampler =
+  begin
+    SuperDaisy::Components.build_sampler(options[:sampler])
+  rescue ArgumentError => e
+    abort "--sampler: #{e.message}"
   end
 
 # ----- helpers ---------------------------------------------------------------
@@ -131,13 +139,13 @@ end
 # ----- run -------------------------------------------------------------------
 
 effective_max_length = options[:max_length] || SuperDaisy::Bot.auto_max_length(corpus)
-warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]} generator=#{options[:generator] || 'classic'} scorer=#{options[:scorer] || 'classic'} max_length=#{effective_max_length}"
+warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]} generator=#{options[:generator] || 'classic'} scorer=#{options[:scorer] || 'classic'} sampler=#{options[:sampler] || 'uniform'} max_length=#{effective_max_length}"
 warn "[eval] tokens=#{corpus.tokens.size} sentences=#{corpus.sentences.size}"
 
 records = []  # one entry per (prompt, seed) trial
 prompts.each_with_index do |prompt, pi|
   (1..options[:seeds]).each do |seed|
-    bot_kwargs = { generator: generator, scorer: scorer, rng: Random.new(seed) }
+    bot_kwargs = { generator: generator, scorer: scorer, sampler: sampler, rng: Random.new(seed) }
     bot_kwargs[:max_length] = options[:max_length] if options[:max_length]
     bot = SuperDaisy::Bot.new(corpus, **bot_kwargs)
     t0 = monotime
@@ -215,6 +223,7 @@ aggregate = {
   label: label,
   generator: options[:generator] || "classic",
   scorer: options[:scorer] || "classic",
+  sampler: options[:sampler] || "uniform",
   max_length: effective_max_length,
   corpus: {
     path: options[:personality],
@@ -255,7 +264,7 @@ begin
   io.puts
   c = aggregate[:corpus]
   io.puts "Corpus: `#{c[:path]}` — #{c[:sentences]} sentences, #{c[:word_tokens]} words"
-  io.puts "Generator: `#{aggregate[:generator]}` | Scorer: `#{aggregate[:scorer]}` | max_length: `#{aggregate[:max_length]}` chars"
+  io.puts "Generator: `#{aggregate[:generator]}` | Scorer: `#{aggregate[:scorer]}` | Sampler: `#{aggregate[:sampler]}` | max_length: `#{aggregate[:max_length]}` chars"
   io.puts "Prompts: #{aggregate[:config][:prompts]} (`#{options[:prompts]}`), #{aggregate[:config][:seeds]} seeds each, #{aggregate[:config][:trials]} trials"
   io.puts
   io.puts "## Metrics"
