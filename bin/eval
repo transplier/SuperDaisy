@@ -32,6 +32,7 @@ OptionParser.new do |o|
   o.on("--data FILE", "Write raw stats JSON for future drift comparison") { |v| options[:data] = v }
   o.on("--label NAME", "Variant label in the report (default: corpus basename)") { |v| options[:label] = v }
   o.on("--generator NAME", "Generator: classic | ppm | ppm:N (default classic)") { |v| options[:generator] = v }
+  o.on("--scorer NAME", "Scorer: classic | bm25 | bm25:K (default classic)") { |v| options[:scorer] = v }
   o.on("--baseline FILE", "Baseline data JSON; report KL drift from its response_bigrams") { |v| options[:baseline] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end.parse!
@@ -49,6 +50,13 @@ generator =
     SuperDaisy::Components.build_generator(options[:generator])
   rescue ArgumentError => e
     abort "--generator: #{e.message}"
+  end
+
+scorer =
+  begin
+    SuperDaisy::Components.build_scorer(options[:scorer])
+  rescue ArgumentError => e
+    abort "--scorer: #{e.message}"
   end
 
 # ----- helpers ---------------------------------------------------------------
@@ -120,13 +128,13 @@ end
 
 # ----- run -------------------------------------------------------------------
 
-warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]} generator=#{options[:generator]}"
+warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]} generator=#{options[:generator] || 'classic'} scorer=#{options[:scorer] || 'classic'}"
 warn "[eval] tokens=#{corpus.tokens.size} sentences=#{corpus.sentences.size}"
 
 records = []  # one entry per (prompt, seed) trial
 prompts.each_with_index do |prompt, pi|
   (1..options[:seeds]).each do |seed|
-    bot = SuperDaisy::Bot.new(corpus, generator: generator, rng: Random.new(seed))
+    bot = SuperDaisy::Bot.new(corpus, generator: generator, scorer: scorer, rng: Random.new(seed))
     t0 = monotime
     reply = bot.respond(prompt, learn: false)
     elapsed = monotime - t0
@@ -179,7 +187,8 @@ end
 
 aggregate = {
   label: label,
-  generator: options[:generator],
+  generator: options[:generator] || "classic",
+  scorer: options[:scorer] || "classic",
   corpus: {
     path: options[:personality],
     tokens: corpus.tokens.size,
@@ -216,7 +225,7 @@ begin
   io.puts
   c = aggregate[:corpus]
   io.puts "Corpus: `#{c[:path]}` — #{c[:sentences]} sentences, #{c[:word_tokens]} words"
-  io.puts "Generator: `#{aggregate[:generator]}`"
+  io.puts "Generator: `#{aggregate[:generator]}` | Scorer: `#{aggregate[:scorer]}`"
   io.puts "Prompts: #{aggregate[:config][:prompts]} (`#{options[:prompts]}`), #{aggregate[:config][:seeds]} seeds each, #{aggregate[:config][:trials]} trials"
   io.puts
   io.puts "## Metrics"

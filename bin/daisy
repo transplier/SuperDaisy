@@ -18,12 +18,13 @@ parser = OptionParser.new do |o|
   o.on("--timeout SECS", Float, "Wall-clock cap on response generation (default 0.5; 0 to disable)") { |v| options[:timeout] = v }
   o.on("--model NAME", MODELS.keys, "Backend: #{MODELS.keys.join(' | ')} (default daisy)") { |v| options[:model] = v }
   o.on("--generator NAME", "Generator (super_daisy only): classic | ppm | ppm:N") { |v| options[:generator] = v }
+  o.on("--scorer NAME",    "Scorer (super_daisy only): classic | bm25 | bm25:K") { |v| options[:scorer] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
 
-if options[:generator] && options[:model] != "super_daisy"
-  abort "--generator requires --model super_daisy"
+if (options[:generator] || options[:scorer]) && options[:model] != "super_daisy"
+  abort "--generator and --scorer require --model super_daisy"
 end
 
 model = MODELS.fetch(options[:model])
@@ -51,6 +52,13 @@ if options[:generator]
     bot_opts[:generator] = SuperDaisy::Components.build_generator(options[:generator])
   rescue ArgumentError => e
     abort "--generator: #{e.message}"
+  end
+end
+if options[:scorer]
+  begin
+    bot_opts[:scorer] = SuperDaisy::Components.build_scorer(options[:scorer])
+  rescue ArgumentError => e
+    abort "--scorer: #{e.message}"
   end
 end
 bot = mod::Bot.new(corpus, **bot_opts)

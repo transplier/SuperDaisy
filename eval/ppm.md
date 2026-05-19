@@ -1,4 +1,14 @@
-# PPM generator — evaluation
+# PPM generator — evaluation (historical writeup)
+
+> **Live matrix:** see [`eval/comparison.md`](comparison.md) for the current
+> four-config comparison (baseline / +ppm / +bm25 / full) on both corpora.
+> This document is kept as the iteration narrative for the PPM swap —
+> useful for the methodology evolution but not the source of truth for
+> headline numbers.
+>
+> The per-order PPM data files (`ppm3_*`, `ppm5_*`) referenced in earlier
+> drafts have been removed from `eval/` since we settled on PPM:4 as the
+> single PPM config to track.
 
 First real Super-DAISY component swap: replacing the classic stride-3
 1st-order Markov walker (`StrideThreeMarkovGenerator`) with a variable-order

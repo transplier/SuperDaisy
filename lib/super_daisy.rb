@@ -110,6 +110,13 @@ module SuperDaisy
       ngram_index(context.size)[context] || EMPTY
     end
 
+    # Number of sentences containing `token` (case- and punctuation-
+    # insensitive). The "document frequency" half of an IDF score, where
+    # each sentence is one document.
+    def sentence_document_frequency(token)
+      sentence_df_index[Corpus.clean(token).downcase] || 0
+    end
+
     def terminator_bigrams
       @terminator_cache ||= begin
         set = {}
@@ -155,12 +162,29 @@ module SuperDaisy
       end
     end
 
+    def sentence_df_index
+      @sentence_df_cache ||= begin
+        df = Hash.new(0)
+        sentences.each do |sent|
+          seen = {}
+          sent.each do |t|
+            c = Corpus.clean(t).downcase
+            next if seen[c]
+            seen[c] = true
+            df[c] += 1
+          end
+        end
+        df
+      end
+    end
+
     def invalidate_caches!
       @frequency_cache = nil
       @sentences_cache = nil
       @positions_cache = nil
       @terminator_cache = nil
       @ngram_cache = nil
+      @sentence_df_cache = nil
     end
   end
 end
@@ -169,6 +193,7 @@ end
 # SuperDaisy::SENTINEL and SuperDaisy::Corpus.clean.
 require_relative "super_daisy/components/whitespace_tokenizer"
 require_relative "super_daisy/components/rarest_word_scorer"
+require_relative "super_daisy/components/bm25_scorer"
 require_relative "super_daisy/components/uniform_sampler"
 require_relative "super_daisy/components/stride_three_markov_generator"
 require_relative "super_daisy/components/ppm_markov_generator"
@@ -190,6 +215,19 @@ module SuperDaisy
         PpmMarkovGenerator.new(order: order)
       else
         raise ArgumentError, "unknown generator spec: #{spec.inspect}"
+      end
+    end
+
+    # Parse a scorer spec into a scorer instance. Same shape as build_generator.
+    def self.build_scorer(spec)
+      case spec
+      when nil, "classic", "rarest"
+        RarestWordScorer.new
+      when /\Abm25(?::(\d+))?\z/
+        top_k = $1 ? $1.to_i : BM25Scorer::DEFAULT_TOP_K
+        BM25Scorer.new(top_k: top_k)
+      else
+        raise ArgumentError, "unknown scorer spec: #{spec.inspect}"
       end
     end
   end

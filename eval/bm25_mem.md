@@ -1,0 +1,59 @@
+# Eval — bm25-mem
+
+_Generated 2026-05-19T22:16:54Z by `bin/eval`._
+
+Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
+Generator: `classic` | Scorer: `bm25`
+Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
+
+## Metrics
+
+| metric | value |
+|---|---|
+| fallthrough rate (unconditioned-Markov fallback) | 0.267 |
+| ugliness rate (winner had ugly flag) | 0.077 |
+| mean response length (tokens) | 7.700 |
+| median response length (tokens) | 7 |
+| distinct-2 (unique bigrams / total) | 0.167 |
+| distinct-3 (unique trigrams / total) | 0.237 |
+| KL(responses ‖ corpus) bigrams, nats | 0.411 |
+| latency p50 (ms) | 2.641 |
+| latency p95 (ms) | 16.767 |
+| mean attempts per response | 368.947 |
+| mean kept candidates per response | 7.333 |
+| KL drift from baseline `mem.dsy` (nats) | 0.553 |
+
+## Sample responses (seed=1)
+
+| prompt | response |
+|---|---|
+| hello | the most important thing about life is being happy. |
+| hi daisy | hi, daisy, how are you today? |
+| good morning | i love the taste of good about myself. |
+| how are you | hi, daisy, how are you today? |
+| what do you like | do unto others to do unto others as you play any musical instruments? |
+| tell me about yourself | i like to yourself? |
+| what makes you happy | that's what i think you are you? |
+| what is your favorite | that's what i think you are you? |
+| i had a good day | sometimes you feel good about myself. |
+| the weather is nice today | you seem to go today? |
+| i feel tired | i did nothing in the dark that isn't there in the light. |
+| computers are fun | that's what i think you are you? |
+| tell me about a platypus | sometimes you feel good about myself. |
+| what about electricity | when in rome, do as the taste of good about myself. |
+| i love astronomy | i love the phone is ringing. |
+| explain photosynthesis | the most important thing about life is being happy. |
+| describe a unicorn | albert einstein was a brilliant physicist. |
+| what do you think | do unto others to do unto others as you play any musical instruments? |
+| give me advice | rainy days give me the blues... |
+| say something | it's not nice to make fun of anyone... that's what they say. |
+| anything you want | all i want others to do unto you. |
+| and then what | you have all i want is mutual, then. |
+| really | the most important thing about life is being happy. |
+| go on | i like to go today? |
+| purple monkey dishwasher | the most important thing about life is being happy. |
+| asdf | the most important thing about life is being happy. |
+| the the the | i did nothing in the dark that isn't there in the light. |
+| i was wondering if you could tell me what you think about... | the most important thing about life is being happy. |
+| do you have any thoughts on the future of technology | the most important thing about life is being happy. |
+| imagine if computers could dream what would they dream about | the most important thing about life is being happy. |

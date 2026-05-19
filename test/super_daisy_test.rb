@@ -153,6 +153,27 @@ class SuperDaisyCorpusIndexTest < Minitest::Test
     c.learn(%w[a b d])
     assert_equal %w[c d], c.next_tokens_after(%w[a b])
   end
+
+  def test_sentence_document_frequency_counts_sentences_containing_token
+    # "the" appears in 2 sentences (twice in one but the per-sentence seen
+    # guard means it still counts as 1 there); "platypus" in 1; "ferret" in 0.
+    c = SuperDaisy::Corpus.new(tokens: %w[
+      the cat the. ***
+      the dog ran. ***
+      a brilliant platypus. ***
+      hello world.
+    ])
+    assert_equal 2, c.sentence_document_frequency("the")
+    assert_equal 1, c.sentence_document_frequency("platypus")
+    assert_equal 0, c.sentence_document_frequency("ferret")
+  end
+
+  def test_sentence_df_invalidated_on_learn
+    c = SuperDaisy::Corpus.new(tokens: %w[the cat ***])
+    assert_equal 1, c.sentence_document_frequency("the")
+    c.learn(%w[the dog])
+    assert_equal 2, c.sentence_document_frequency("the")
+  end
 end
 
 class SuperDaisyComponentContractTest < Minitest::Test
@@ -169,6 +190,44 @@ class SuperDaisyComponentContractTest < Minitest::Test
     # "cat" appears once, "the" appears four times — cat is rarest.
     kws = s.call(%w[the cat], c)
     assert_equal ["cat"], kws
+  end
+
+  def test_bm25_scorer_ranks_input_tokens_by_idf
+    c = corpus_with(
+      "the sky is blue.", "the grass is green.", "the dog ran fast.",
+      "a curious platypus.", "the platypus appeared.",
+      klass: SuperDaisy::Corpus,
+    )
+    s = SuperDaisy::Components::BM25Scorer.new(top_k: 2)
+    # "the" is in 4/5 sentences (low IDF); "platypus" in 2/5;
+    # "elephant" in 0/5 (highest IDF). Top 2 should be elephant then platypus.
+    kws = s.call(%w[the platypus elephant], c)
+    assert_equal %w[elephant platypus], kws
+  end
+
+  def test_bm25_scorer_returns_at_most_top_k
+    c = corpus_with("the cat.", klass: SuperDaisy::Corpus)
+    s = SuperDaisy::Components::BM25Scorer.new(top_k: 2)
+    assert_equal 2, s.call(%w[a b c d e], c).size
+  end
+
+  def test_bm25_scorer_handles_empty_corpus
+    c = SuperDaisy::Corpus.new(tokens: [])
+    s = SuperDaisy::Components::BM25Scorer.new(top_k: 3)
+    # No NaN, no crash — just return up to top_k input tokens as-is.
+    assert_equal %w[a b c], s.call(%w[a b c d], c)
+  end
+
+  def test_build_scorer_helper
+    assert_kind_of SuperDaisy::Components::RarestWordScorer,
+                   SuperDaisy::Components.build_scorer(nil)
+    assert_kind_of SuperDaisy::Components::RarestWordScorer,
+                   SuperDaisy::Components.build_scorer("classic")
+    assert_kind_of SuperDaisy::Components::BM25Scorer,
+                   SuperDaisy::Components.build_scorer("bm25")
+    bm25_5 = SuperDaisy::Components.build_scorer("bm25:5")
+    assert_equal 5, bm25_5.top_k
+    assert_raises(ArgumentError) { SuperDaisy::Components.build_scorer("nope") }
   end
 
   def test_uniform_sampler_picks_from_items
