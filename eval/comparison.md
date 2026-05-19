@@ -3,12 +3,16 @@
 Four configurations, four corpora, 300 trials each. Reference for which
 upgrades to keep and which to drop. Reproduce via `./eval/run_all.sh`.
 
-| corpus | sentences | word tokens | mean tokens/sentence |
-|---|---|---|---|
-| MEM | 92 | 619 | 6.7 |
-| fortune-haiku | 250 | 11,974 | 47.9 |
-| movie-5k | 507 | 5,005 | 9.9 |
-| movie-100k | 10,313 | 100,008 | 9.7 |
+| corpus | sentences | word tokens | mean tokens/sentence | auto max_length (chars) |
+|---|---|---|---|---|
+| MEM | 92 | 619 | 6.7 | 52 |
+| fortune-haiku | 250 | 11,974 | 47.9 | 450 |
+| movie-5k | 507 | 5,005 | 9.9 | 77 |
+| movie-100k | 10,313 | 100,008 | 9.7 | 75 |
+
+`max_length` defaults to `Bot.auto_max_length(corpus)` = `round(mean corpus
+sentence chars × 1.5)`, floored at 40. CLI override available via
+`--max-length N`. The numbers below are with auto.
 
 | name | generator | scorer |
 |---|---|---|
@@ -21,63 +25,87 @@ Per the methodology in `eval/baseline.md`, KL drift from baseline > 0.5 nats
 is a "reconsider" threshold — we look at whether the drift represents
 genuine improvement or regression rather than auto-rejecting.
 
-## Results — MEM.DSY (92 sentences, 619 words)
+## Results — MEM.DSY (92 sentences, max_length=52)
 
 | metric | baseline | +ppm | +bm25 | full |
 |---|---|---|---|---|
 | fallthrough rate | 0.767 | 0.767 | **0.267** | 0.267 |
-| ugliness rate | 0.090 | 0.000 | 0.077 | 0.000 |
-| **recitation rate** (verbatim corpus sentence) | 0.450 | **1.000** ⚠ | 0.360 | **1.000** ⚠ |
+| ugliness rate | 0.113 | 0.157 | 0.110 | 0.067 |
+| **recitation rate** | 0.210 | **1.000** ⚠ | 0.323 | **1.000** ⚠ |
 | acceptance rate | 0.003 | 0.003 | **0.020** | 0.019 |
-| distinct-2, all trials | 0.091 | 0.104 | **0.167** | 0.160 |
-| distinct-2, per-prompt mean | 0.713 | 0.754 | 0.627 | 0.542 |
-| KL(responses ‖ corpus) nats | 0.949 | 0.940 | **0.411** | 0.429 |
-| KL drift from baseline (nats) | — | 1.329 | **0.553** | 1.056 |
-| latency p50 (ms) | 15.8 | 23.1 | **2.6** | 4.3 |
-| latency p95 (ms) | 16.4 | 25.4 | 16.8 | 23.9 |
+| distinct-2, all trials | 0.107 | 0.104 | **0.176** | 0.159 |
+| distinct-2, per-prompt mean | 0.819 | 0.753 | 0.654 | 0.551 |
+| KL drift from baseline (nats) | — | 1.501 | **0.624** | 1.184 |
+| latency p50 (ms) | 15.9 | 23.2 | **2.6** | 4.2 |
 
-## Results — fortune-haiku (250 sentences, 11974 words)
+## Results — fortune-haiku (250 sentences, max_length=450)
 
 | metric | baseline | +ppm | +bm25 | full |
 |---|---|---|---|---|
-| fallthrough rate | 0.810 | 0.890 | **0.330** | 0.320 |
-| ugliness rate | 0.860 | 0.997 | 0.667 | 0.803 |
-| recitation rate (verbatim corpus sentence) | 0.000 | 0.000 | 0.000 | 0.000 |
-| acceptance rate | 0.001 | 0.001 | **0.010** | 0.009 |
-| distinct-2, all trials | 0.145 | 0.077 | **0.374** | 0.237 |
-| distinct-2, per-prompt mean | 0.909 | 0.893 | 0.864 | 0.657 |
-| KL(responses ‖ corpus) nats | 0.559 | 0.627 | **0.278** | 0.380 |
-| KL drift from baseline (nats) | — | 2.223 | **0.389** | 1.369 |
-| latency p50 (ms) | 26.9 | 46.5 | **27.1** | 45.5 |
-| latency p95 (ms) | 27.5 | 48.5 | 28.2 | 47.9 |
+| fallthrough rate | 0.807 | 0.803 | **0.270** | 0.270 |
+| ugliness rate | 0.110 | 0.097 | 0.260 | 0.120 |
+| recitation rate | 0.000 | 0.180 | 0.000 | 0.237 |
+| acceptance rate | 0.002 | 0.002 | **0.013** | 0.013 |
+| distinct-2, all trials | 0.226 | 0.097 | **0.326** | 0.232 |
+| distinct-2, per-prompt mean | 0.923 | 0.839 | 0.893 | 0.709 |
+| KL drift from baseline (nats) | — | 1.583 | **0.429** | 0.909 |
+| latency p50 (ms) | 88.3 | 196.9 | **50.9** | 117.5 |
 
-## Results — movie-5k (507 sentences, 5005 words)
+## Results — movie-5k (507 sentences, max_length=77)
 
 | metric | baseline | +ppm | +bm25 | full |
 |---|---|---|---|---|
 | fallthrough rate | 0.487 | 0.473 | **0.110** | 0.113 |
-| ugliness rate | 0.150 | 0.177 | 0.230 | 0.180 |
-| **recitation rate** | 0.137 | **0.797** ⚠ | 0.107 | **0.827** ⚠ |
+| ugliness rate | 0.143 | 0.180 | 0.220 | 0.183 |
+| **recitation rate** | 0.137 | **0.793** ⚠ | 0.110 | **0.827** ⚠ |
 | acceptance rate | 0.004 | 0.004 | **0.018** | 0.018 |
-| distinct-2, all trials | 0.340 | 0.227 | **0.453** | 0.374 |
-| distinct-2, per-prompt mean | 0.854 | 0.667 | 0.814 | 0.641 |
-| KL drift from baseline (nats) | — | 1.046 | **0.478** | 0.786 |
-| latency p50 (ms) | 21.0 | 33.0 | **4.3** | 6.2 |
-| latency p95 (ms) | 21.7 | 34.5 | 22.9 | 34.8 |
+| distinct-2, all trials | 0.345 | 0.231 | **0.452** | 0.366 |
+| distinct-2, per-prompt mean | 0.855 | 0.661 | 0.812 | 0.633 |
+| KL drift from baseline (nats) | — | 1.057 | **0.483** | 0.789 |
+| latency p50 (ms) | 21.7 | 35.1 | **4.4** | 6.5 |
 
-## Results — movie-100k (10,313 sentences, 100,008 words)
+## Results — movie-100k (10,313 sentences, max_length=75)
 
 | metric | baseline | +ppm | +bm25 | full |
 |---|---|---|---|---|
-| fallthrough rate | 0.443 | 0.470 | **0.103** | 0.103 |
-| ugliness rate | 0.057 | 0.053 | 0.193 | 0.137 |
-| **recitation rate** | 0.007 | **0.800** ⚠ | 0.020 | **0.727** ⚠ |
+| fallthrough rate | 0.443 | 0.467 | **0.103** | 0.103 |
+| ugliness rate | 0.063 | 0.063 | 0.197 | 0.137 |
+| **recitation rate** | 0.007 | **0.800** ⚠ | 0.013 | **0.727** ⚠ |
 | acceptance rate | 0.004 | 0.004 | **0.019** | 0.019 |
-| distinct-2, all trials | 0.536 | 0.477 | **0.668** | 0.660 |
-| distinct-2, per-prompt mean | 0.962 | 0.935 | 0.952 | 0.923 |
-| KL drift from baseline (nats) | — | 0.773 | **0.319** | 0.467 |
-| latency p50 (ms) | 27.3 | 38.6 | **10.4** | 12.7 |
-| latency p95 (ms) | 30.3 | 43.0 | 29.9 | 44.1 |
+| distinct-2, all trials | 0.535 | 0.475 | **0.667** | 0.659 |
+| distinct-2, per-prompt mean | 0.964 | 0.935 | 0.953 | 0.926 |
+| KL drift from baseline (nats) | — | 0.773 | **0.314** | 0.464 |
+| latency p50 (ms) | 27.5 | 40.5 | **10.6** | 13.1 |
+
+## What changed with the auto max_length
+
+Previously `max_length=70` chars hard-coded for every corpus. Now it's
+`mean(corpus sentence chars) × 1.5`. The shift is dramatic on fortune
+(70 → 450) because fortune's natural sentences average ~290 chars; the
+old cap was chopping every output to a quarter of corpus-natural length.
+
+The fortune-side changes are the headline:
+
+| fortune metric | before auto-cap | after auto-cap |
+|---|---|---|
+| baseline ugliness | 0.860 | **0.110** |
+| +ppm ugliness | 0.997 | **0.097** |
+| +bm25 ugliness | 0.667 | 0.260 |
+| baseline mean length (tokens) | 12.2 | **29.9** |
+| baseline latency p50 (ms) | 26.9 | 88.3 |
+
+The ugliness number now reflects actual cyclic content instead of being
+saturated by length-cap firing. Mean response length nearly tripled and
+now sits in fortune's actual style envelope. Latency went up — generating
+longer responses costs more — but stays well under a second.
+
+PPM recitation on fortune ticked *up* from 0.000 → 0.180 as expected: with
+room to walk, PPM occasionally reaches sentence-end before terminator,
+yielding verbatim corpus sentences.
+
+On MEM the auto-cap is *tighter* than 70 (cap=52). Ugliness slightly up
+(0.090 → 0.113); other metrics basically unchanged. The auto rule keeps
+each corpus in its own style.
 
 ## New finding: PPM recitation is driven by sentence length, not corpus size
 

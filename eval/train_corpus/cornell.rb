@@ -19,7 +19,6 @@ DEFAULTS = {
   sentences: nil,
   tokens: nil,
   min_words: 4,
-  max_words: 25,
   bot_name: "Daisy",
   seed: 1,
   preserve_convos: false,
@@ -33,7 +32,6 @@ OptionParser.new do |o|
   o.on("--sentences N", Integer, "Subsample to N sentences (mutually exclusive with --tokens)") { |v| opts[:sentences] = v }
   o.on("--tokens N", Integer, "Subsample until ~N word tokens accumulated") { |v| opts[:tokens] = v }
   o.on("--min-words N", Integer, "Drop sentences with fewer words (default #{DEFAULTS[:min_words]})") { |v| opts[:min_words] = v }
-  o.on("--max-words N", Integer, "Drop sentences with more words (default #{DEFAULTS[:max_words]})") { |v| opts[:max_words] = v }
   o.on("--bot-name NAME", "Bot name in DSY header (default #{DEFAULTS[:bot_name]})") { |v| opts[:bot_name] = v }
   o.on("--seed N", Integer, "RNG seed for subsampling (default #{DEFAULTS[:seed]})") { |v| opts[:seed] = v }
   o.on("--preserve-convos", "Keep utterances in conversation order rather than shuffling") { opts[:preserve_convos] = true }
@@ -58,15 +56,14 @@ JUNK_RE = /\A\s*[\[(]|--\s*\z|\A[A-Z\s\W]{8,}\z/
 # Reject things with obvious transcription noise.
 BAD_CHARS_RE = /[<>{}\[\]\|\\]|\.\.\.\.|--/
 
-def good_sentence?(text, min_words, max_words)
+def good_sentence?(text, min_words)
   return false if text.nil? || text.empty?
   return false if text =~ BAD_CHARS_RE
   return false if text =~ JUNK_RE
   # Reject if more than ~30% of chars are non-word/space/punct.
   word_chars = text.count("A-Za-z0-9 ")
   return false if word_chars.to_f / text.length < 0.7
-  wc = text.split.size
-  wc >= min_words && wc <= max_words
+  text.split.size >= min_words
 end
 
 rng = Random.new(opts[:seed])
@@ -80,7 +77,7 @@ File.foreach(opts[:input]) do |line|
     next
   end
   text = rec["text"].to_s.strip
-  next unless good_sentence?(text, opts[:min_words], opts[:max_words])
+  next unless good_sentence?(text, opts[:min_words])
   candidates << text
 end
 

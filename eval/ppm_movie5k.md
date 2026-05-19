@@ -1,9 +1,9 @@
 # Eval — ppm-movie5k
 
-_Generated 2026-05-19T22:46:47Z by `bin/eval`._
+_Generated 2026-05-19T22:57:49Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 507 sentences, 5005 words
-Generator: `ppm:4` | Scorer: `classic`
+Generator: `ppm:4` | Scorer: `classic` | max_length: `77` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -11,17 +11,17 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.473 |
-| ugliness rate (winner had ugly flag) | 0.177 |
-| recitation rate (response = a corpus sentence verbatim) | 0.797 |
-| acceptance rate (kept / attempted candidates) | 0.004 |
-| distinct-2, across all trials | 0.227 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.667 |
-| KL(responses ‖ corpus) bigrams, nats | 0.423 |
-| latency p50 (ms) | 33.031 |
-| latency p95 (ms) | 34.528 |
-| KL drift from baseline `baseline-movie5k` (nats) | 1.046 |
+| ugliness rate (winner had ugly flag) | 0.180 |
+| recitation rate (response = a corpus sentence verbatim) | 0.790 |
+| acceptance rate (kept / attempted candidates) | 0.005 |
+| distinct-2, across all trials | 0.244 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.676 |
+| KL(responses ‖ corpus) bigrams, nats | 0.418 |
+| latency p50 (ms) | 34.436 |
+| latency p95 (ms) | 36.435 |
+| KL drift from baseline `baseline-movie5k` (nats) | 0.911 |
 
-Diagnostic counts (kept in JSON): mean attempts 849.023, mean kept 3.753, mean length 8.180 tokens, distinct-3 0.242.
+Diagnostic counts (kept in JSON): mean attempts 843.553, mean kept 3.803, mean length 8.423 tokens, distinct-3 0.264.
 
 ## Sample responses (seed=1)
 
@@ -30,12 +30,12 @@ Diagnostic counts (kept in JSON): mean attempts 849.023, mean kept 3.753, mean l
 | hello | hello, sir. it's david. |
 | hi daisy | he's a good man. |
 | good morning | i picked up my ticket. i'm leaving in the morning, jez. |
-| how are you | how about a hippopotamus? |
+| how are you | how close do you have to be? |
 | what do you like | you don't like the way things are, i don't like the way things. |
 | tell me about yourself | i seem to remember that you like to help yourself. |
 | what makes you happy | but you don't look very happy. |
 | what is your favorite | he's a good man. |
-| i had a good day | this is day care. its where babies go when their parents are at work. |
+| i had a good day | well you don't drive around from midnight until noon the next day, benjamin. |
 | the weather is nice today | he's a good man. |
 | i feel tired | miss gibson, i'm tired of resting. |
 | computers are fun | he's a good man. |

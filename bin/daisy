@@ -19,6 +19,7 @@ parser = OptionParser.new do |o|
   o.on("--model NAME", MODELS.keys, "Backend: #{MODELS.keys.join(' | ')} (default daisy)") { |v| options[:model] = v }
   o.on("--generator NAME", "Generator (super_daisy only): classic | ppm | ppm:N") { |v| options[:generator] = v }
   o.on("--scorer NAME",    "Scorer (super_daisy only): classic | bm25 | bm25:K") { |v| options[:scorer] = v }
+  o.on("--max-length N", Integer, "Char cap on responses (default: auto from corpus mean × 1.5)") { |v| options[:max_length] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
@@ -47,6 +48,7 @@ bot_opts = { rng: rng }
 if options.key?(:timeout)
   bot_opts[:timeout] = options[:timeout].zero? ? nil : options[:timeout]
 end
+bot_opts[:max_length] = options[:max_length] if options[:max_length]
 if options[:generator]
   begin
     bot_opts[:generator] = SuperDaisy::Components.build_generator(options[:generator])

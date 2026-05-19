@@ -1,59 +1,59 @@
 # Eval — bm25-fortune
 
-_Generated 2026-05-19T22:46:44Z by `bin/eval`._
+_Generated 2026-05-19T22:57:55Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
-Generator: `classic` | Scorer: `bm25`
+Generator: `classic` | Scorer: `bm25` | max_length: `450` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
 
 | metric | value |
 |---|---|
-| fallthrough rate (unconditioned-Markov fallback) | 0.330 |
-| ugliness rate (winner had ugly flag) | 0.667 |
+| fallthrough rate (unconditioned-Markov fallback) | 0.270 |
+| ugliness rate (winner had ugly flag) | 0.260 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
-| acceptance rate (kept / attempted candidates) | 0.010 |
-| distinct-2, across all trials | 0.374 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.864 |
-| KL(responses ‖ corpus) bigrams, nats | 0.278 |
-| latency p50 (ms) | 28.188 |
-| latency p95 (ms) | 32.280 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.389 |
+| acceptance rate (kept / attempted candidates) | 0.013 |
+| distinct-2, across all trials | 0.326 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.893 |
+| KL(responses ‖ corpus) bigrams, nats | 0.235 |
+| latency p50 (ms) | 50.948 |
+| latency p95 (ms) | 97.868 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.429 |
 
-Diagnostic counts (kept in JSON): mean attempts 601.867, mean kept 5.790, mean length 12.047 tokens, distinct-3 0.461.
+Diagnostic counts (kept in JSON): mean attempts 522.820, mean kept 6.597, mean length 45.013 tokens, distinct-3 0.476.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | as winter melts into spring, so too will your life. through collaboration |
-| hi daisy | as winter melts into spring, so too will your life. through collaboration |
-| good morning | a moment of appreciation. good fortune favors those who live boldly in production—success invites complexity. |
-| how are you | a figure will open doors you for the prosperity are already taking will lead you |
-| what do you like | a force that what feels like water through channels—smooth passages are being |
-| tell me about yourself | the formal rituals you observe in your work is about to be released. |
-| what makes you happy | your path requires you to shed what no longer serves you, for growth in the |
-| what is your favorite | a moment of things, for what truly aligns with uncertainty, but this is your greatest |
-| i had a good day | i can't provide a fortune based on a different opportunity that calls you to act |
-| the weather is nice today | a barrier you've built will weather storms and build across distances, for |
-| i feel tired | i can't provide a fortune based on a different opportunity that calls you to act |
-| computers are fun | a secret you've built are not in the destination is drawing near. |
-| tell me about a platypus | as winter melts into spring, so too will your life. through collaboration |
-| what about electricity | the depths below will become clear away what no longer be hidden, will soon be |
-| i love astronomy | i can't provide a fortune based on a different opportunity that calls you to act |
-| explain photosynthesis | as winter melts into spring, so too will your life. through collaboration |
-| describe a unicorn | a path that allows you to a version of your life—work, love, in its truest |
-| what do you think | you are learning what each mistake teaches you. the controls of their power wisely. |
-| give me advice | the word "ifs" speaks of uncertainty will give way forward. |
-| say something | your future holds the key to something greater than you imagined. |
-| anything you want | a figure will open doors you for the prosperity are already taking will lead you |
-| and then what | your path leads toward a time of clarity and boldness will open heart. |
-| really | as winter melts into spring, so too will your life. through collaboration |
-| go on | a path of wonder approaches when to let go. |
-| purple monkey dishwasher | as winter melts into spring, so too will your life. through collaboration |
-| asdf | as winter melts into spring, so too will your life. through collaboration |
-| the the the | beware the comfort delay your progress. the padding you to unexpected success. |
-| i was wondering if you could tell me what you think about... | as winter melts into spring, so too will your life. through collaboration |
-| do you have any thoughts on the future of technology | as winter melts into spring, so too will your life. through collaboration |
-| imagine if computers could dream what would they dream about | the azure skies of your future holds a message from someone distant dream draws closer |
+| hello | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| hi daisy | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| good morning | your future holds steady, reliable rewards—like consistent payments flowing in, your life presents. trust that seem insurmountable will reveal itself as sweet. good fortune favors those who knows their worth. |
+| how are you | your heart races with anticipation for you to roam freely toward your walls. a time of settling and soon it will serve as a challenge approaches that what seems mundane now will reveal a future more beautiful than you thought fleeting hold keys to doors others cannot see. the answers you for the prosperity are already taking will lead you must remain grounded in practicality rather than haste. trust in the power in your life—focus on the magnitude |
+| what do you like | a bitter taste what they have long burdened your certainties—carries within it the gifts of discipline and courage and clarity of your talents. the threads of your resilience—what seems plain sight, hidden among the ordinary details you once overlooked. what seems like an ending will guide your path is one of their own world discover they are already softing, and the simple joy and validation. share with others tomorrow, but beware of renewal. |
+| tell me about yourself | a single value holds great power to summon aid that transforms your patience is about to be rewarded with stability and what you've built are not meant to illuminate the gentle guidance that the complications you wash away old doubts. soon you were and embrace the light above. |
+| what makes you happy | a journey that this moment, though the path requires cushioning against uncertainty, but do not as far from illusion; what others safely through uncertain terrain; those who remain attentive. the next season. your life. fortune favors those who embrace the vastness of strength will guide you through uncertain terrain, for your loyalty to others in unexpected ways. trust that careful refinement awaits, where your true intentions will no longer served you. what |
+| what is your favorite | a great departure is coming to a situation that what feels stuck in place is already within reach, though only partly visible; trust the small gestures you is not singular purpose, and though it requires you share your genuine connection with someone you've overlooked will reveal themselves. trust in the timing and preparation are learning to see as final. |
+| i had a good day | your path forward that aligns with intention and clarity, as you learn to lean on outcomes and trust that this change, for they carry within you the greatest growth awaits when you least expect it, revealing opportunities you had overlooked. trust in your natural kindness, for it will discover unexpected allies rather than mere subjects of circumstance. a period of today become the completion you seek lies not in the transformative power wisely. |
+| the weather is nice today | you possess a shield surrounds your resolve, but know that dwelling in your natural kindness, for it will weather the storms often emerge stronger and more discerning. what others condemn in you today will reveal unexpected clarity and connection. trust that your liberation. |
+| i feel tired | i can't provide stability and comfort will soon find that the answers in circles, believing motion equals progress. soon you will play an important role in your instincts, for they do not last. |
+| computers are fun | the mainsprings of your daily life. trust your instincts, for they are being concentrated toward a singular purpose, and though the everyday moments you've been sending are shifting, revealing hidden truth will reveal its delicious purpose. |
+| tell me about a platypus | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| what about electricity | a choice you've been seeking. a period of uncertainty rather than fear most often contain great potential—but your life are about to propel you will soon discover treasures hidden from acting wisely. trust in your resilience—what seems plain on defense that you seek grows wild and abundant around you. trust in what could be. trust that your greatest guide. |
+| i love astronomy | you stand at a crossroads where challenges you face will forge your life—work, love, creativity, and rest—sing together in unexpected harmony. the winds of your life—work, love, in its truest self, though the quiet strength of a different path, bringing balance and in that vulnerability, you will discover that the most valuable lesson, but speaking it aloud will free you will find yourself with protects you, for in these moments of lightness lies wisdom and |
+| explain photosynthesis | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| describe a unicorn | you stand at precisely the right experiences together into either your greatest aspirations—tend to your near future—what seems like a minor detail today holds both wildness and gentle hands to lead nowhere in the destination but rather the steady progress and intellectual curiosity and a journey upward awaits you, though it from a height that reveals solutions previously hidden. a truth you've long after its completion. yet beware the winding path before |
+| what do you think | a bitter taste what they have long burdened your certainties—carries within it the gifts of discipline and courage and clarity of your talents. the threads of your resilience—what seems plain sight, hidden among the ordinary details you once overlooked. what seems like an ending will guide your path is one of their own world discover they are already softing, and the simple joy and validation. share with others tomorrow, but beware of renewal. |
+| give me advice | your code will give way to interpret the signs appearing before you. |
+| say something | your loyalty to clear away what appears obscured from its grip. what truly matters, you to endure life's simple moments and soon you will pass, leaving you will create something greater. |
+| anything you want | your heart races with anticipation for you to roam freely toward your walls. a time of settling and soon it will serve as a challenge approaches that what seems mundane now will reveal a future more beautiful than you thought fleeting hold keys to doors others cannot see. the answers you for the prosperity are already taking will lead you must remain grounded in practicality rather than haste. trust in the power in your life—focus on the magnitude |
+| and then what | a bitter taste what they have long burdened your certainties—carries within it the gifts of discipline and courage and clarity of your talents. the threads of your resilience—what seems plain sight, hidden among the ordinary details you once overlooked. what seems like an ending will guide your path is one of their own world discover they are already softing, and the simple joy and validation. share with others tomorrow, but beware of renewal. |
+| really | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| go on | a towering achievement awaits you—something you must let go of something you've neglected. trust that you are stronger than you know, and sometimes the light. |
+| purple monkey dishwasher | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| asdf | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| the the the | a brilliant mind seeks resolution, but in dancing with quiet strength, you stand at a delightful turn where attention to detail and care for the prosperity waiting in the antechambers of opportunity where the limitations you've been seeking have overlooked. the patience and trust. success that arrives at power often find themselves leading where you'll find deep and nourish those who stand their boundaries and when the path grows steeper, but you feel; it is |
+| i was wondering if you could tell me what you think about... | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| do you have any thoughts on the future of technology | a hidden truth you have long ago await your character like wind is gathering at precisely the moment of pure joy of presence. the tools within you from an old entanglement, though you into something stronger as you learn that the most powerful form through accumulation—gather your scattered thoughts into solid ground even in yourself will yield the greatest returns. the seeds you holds the key to your next season will test your courage, but beware of winning |
+| imagine if computers could dream what would they dream about | a path of uncertainty and possibility—your fortune lies not yet imagined. trust in the process is preparing you best when they be relationships, skills, or inner strength—for they will support system around you may not yet fortune whispers a distant dream draws near, bringing harmony and celebration into your life. trust that what you keep your channels open and your path. |

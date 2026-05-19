@@ -112,6 +112,36 @@ class SuperDaisyInstrumentationTest < Minitest::Test
   end
 end
 
+class SuperDaisyAutoMaxLengthTest < Minitest::Test
+  def test_auto_scales_to_mean_sentence_chars
+    # Long sentences so the result clears the 40-char floor.
+    c = SuperDaisy::Corpus.new(tokens:
+      ("aaaaaaaa " * 8 + "***").split + ("bbbbbbbb " * 12 + "***").split)
+    cap = SuperDaisy::Bot.auto_max_length(c)
+    sents = c.sentences
+    mean = sents.sum { |s| s.join(" ").length }.to_f / sents.size
+    assert_equal (mean * 1.5).round, cap
+    assert_operator cap, :>, 40, "test corpus chosen to exceed the floor"
+  end
+
+  def test_auto_uses_floor_on_empty_corpus
+    c = SuperDaisy::Corpus.new(tokens: [])
+    assert_equal 40, SuperDaisy::Bot.auto_max_length(c)
+  end
+
+  def test_bot_picks_auto_when_max_length_omitted
+    c = SuperDaisy::Corpus.new(tokens: %w[one two three four five six. ***])
+    bot = SuperDaisy::Bot.new(c)
+    assert_equal SuperDaisy::Bot.auto_max_length(c), bot.max_length
+  end
+
+  def test_bot_respects_explicit_max_length
+    c = SuperDaisy::Corpus.new(tokens: %w[one two three four five six. ***])
+    bot = SuperDaisy::Bot.new(c, max_length: 999)
+    assert_equal 999, bot.max_length
+  end
+end
+
 class SuperDaisyUglyTest < Minitest::Test
   def test_cyclic_detects_aba_pattern
     assert SuperDaisy::Ugly.cyclic?(%w[the cat the])

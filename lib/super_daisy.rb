@@ -239,6 +239,10 @@ module SuperDaisy
     attr_reader :corpus, :last_stats
     attr_reader :tokenizer, :scorer, :generator, :filter, :reranker, :memory, :sampler
 
+    # max_length: char cap on generated sentences. Pass nil (default) to
+    # auto-scale from the corpus's mean sentence length × 1.5 — keeps her
+    # response shape proportional to her training-data shape. Pass an
+    # integer to override (the original DAISY used 70).
     def initialize(corpus,
                    tokenizer: Components::WhitespaceTokenizer.new,
                    scorer:    Components::RarestWordScorer.new,
@@ -248,7 +252,7 @@ module SuperDaisy
                    memory:    Components::LastTurnMemory.new,
                    sampler:   Components::UniformSampler.new,
                    max_candidates: 1000, timeout: 0.5, pool_size: 10,
-                   max_length: 70, rng: Random.new)
+                   max_length: nil, rng: Random.new)
       @corpus = corpus
       @tokenizer = tokenizer
       @scorer = scorer
@@ -260,9 +264,20 @@ module SuperDaisy
       @max_candidates = max_candidates
       @timeout = timeout
       @pool_size = pool_size
-      @max_length = max_length
+      @max_length = max_length || Bot.auto_max_length(corpus)
       @rng = rng
       @last_stats = nil
+    end
+
+    # Derive a sentence-character cap from the corpus's own mean sentence
+    # length. 1.5x leaves room to occasionally exceed mean without
+    # truncating most natural outputs. Floor of 40 chars so an empty or
+    # tiny corpus has a sane cap.
+    def self.auto_max_length(corpus, factor: 1.5, floor: 40)
+      sents = corpus.sentences
+      return floor if sents.empty?
+      mean_chars = sents.sum { |s| s.join(" ").length }.to_f / sents.size
+      [(mean_chars * factor).round, floor].max
     end
 
     def respond(input, learn: false)
