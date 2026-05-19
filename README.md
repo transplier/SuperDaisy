@@ -133,13 +133,23 @@ See `DAISY.md` for the original's design.
   `term.bfb` (terminator n-grams) are in-memory and rebuilt as needed.
 - **No buffer pre-warm.** The original generated 50 sentences at startup to
   hide Markov-scan latency on 2000-era hardware; modern CPUs don't need it.
-- **Iteration cap instead of wall-clock budget.** The original's "max thinking
-  time" (3 s default) is replaced by a `max_candidates` cap (default 1000) on
-  the rejection sampler — deterministic across machines and seeds.
-- **Cached corpus-wide frequency table.** `token_frequency` was an O(N) scan
-  per call in the original; now a `Hash<cleaned_lowercase_word, count>` is
-  built once and invalidated on `learn()`, making `keywords()` effectively
-  free.
+- **Both an iteration cap and a wall-clock cap.** The original used only a
+  wall-clock timeout (3 s default, "max thinking time"). The port keeps a
+  wall-clock cap (default 0.5 s; `--timeout` on the CLI, `0` to disable) but
+  also adds a `max_candidates` cap (default 1000) — the rejection loop exits
+  on whichever fires first. Same "give up gracefully" semantics, just snappier
+  on modern hardware and deterministic when the wall-clock is disabled.
+- **Cached, character-preserving speedups.** Same outputs as the original
+  algorithm, but the inner loops avoid repeated O(N) scans:
+  - `token_frequency` is backed by a `Hash<cleaned_lowercase_word, count>`
+    built once and invalidated on `learn()`.
+  - The Markov inner loop uses an inverted index `Hash<token, [positions]>`
+    instead of scanning the token list for every step.
+  - `sentences` and `terminator_bigrams` are cached on the corpus,
+    invalidated on `learn()`.
+  - Keyword cleaning is hoisted out of the candidate-rerank loop.
+  Combined effect: `respond()` median goes from ~3 s to ~30 ms on a
+  12K-token corpus (see `benchmark/respond.rb`).
 - **Seedable RNG.** `--seed N` flag on the CLI and `rng:` keyword on
   `Daisy::Bot.new` for deterministic output (helpful for tests and
   benchmarks). The original used Pascal's global `random()`.

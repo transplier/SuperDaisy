@@ -11,6 +11,7 @@ parser = OptionParser.new do |o|
   o.on("-p", "--prompt PROMPT", "One-shot: respond to PROMPT and exit") { |v| options[:prompt] = v }
   o.on("--learn", "Learn from input; save corpus on exit") { options[:learn] = true }
   o.on("--seed N", Integer, "Seed the RNG (for deterministic output)") { |v| options[:seed] = v }
+  o.on("--timeout SECS", Float, "Wall-clock cap on response generation (default 0.5; 0 to disable)") { |v| options[:timeout] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
@@ -27,7 +28,11 @@ end
 
 corpus = Daisy::Corpus.load(options[:personality])
 rng = options[:seed] ? Random.new(options[:seed]) : Random.new
-bot = Daisy::Bot.new(corpus, rng: rng)
+bot_opts = { rng: rng }
+if options.key?(:timeout)
+  bot_opts[:timeout] = options[:timeout].zero? ? nil : options[:timeout]
+end
+bot = Daisy::Bot.new(corpus, **bot_opts)
 
 save_if_learning = -> {
   corpus.save(options[:personality]) if options[:learn]

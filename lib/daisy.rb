@@ -19,7 +19,7 @@ module Daisy
       @bot_name = bot_name
       @learn_mode = learn_mode
       @tokens = tokens
-      @frequency_cache = nil
+      invalidate_caches!
     end
 
     def self.load(path)
@@ -43,7 +43,7 @@ module Daisy
       return if new_tokens.empty?
       @tokens.concat(new_tokens)
       @tokens << SENTINEL
-      @frequency_cache = nil
+      invalidate_caches!
     end
 
     # Case-insensitive, punctuation-stripped occurrence count.
@@ -88,24 +88,70 @@ module Daisy
     end
 
     def sentences
-      result = []
-      each_sentence { |s| result << s }
-      result
+      @sentences_cache ||= begin
+        result = []
+        each_sentence { |s| result << s }
+        result
+      end
+    end
+
+    # Inverted index: raw-token → sorted array of positions in @tokens.
+    # Used by the Markov inner loop to skip O(N) scans.
+    def positions_of(token)
+      positions_index[token] || EMPTY
+    end
+
+    # Set-of-bigrams ending every memorized sentence (the original's term.bfb).
+    def terminator_bigrams
+      @terminator_cache ||= begin
+        set = {}
+        sentences.each do |s|
+          next if s.size < 2
+          set[[s[-2], s[-1]]] = true
+        end
+        set
+      end
     end
 
     def self.clean(s)
       s.gsub(PUNCTUATION, "")
     end
+
+    private
+
+    EMPTY = [].freeze
+
+    def positions_index
+      @positions_cache ||= begin
+        h = {}
+        @tokens.each_with_index do |t, i|
+          next if t == SENTINEL
+          (h[t] ||= []) << i
+        end
+        h
+      end
+    end
+
+    def invalidate_caches!
+      @frequency_cache = nil
+      @sentences_cache = nil
+      @positions_cache = nil
+      @terminator_cache = nil
+    end
   end
 
   class Bot
-    attr_accessor :max_candidates, :pool_size, :max_length
+    attr_accessor :max_candidates, :timeout, :pool_size, :max_length
     attr_reader :corpus, :last_keywords
 
-    def initialize(corpus, max_candidates: 1000, pool_size: 10, max_length: 70,
-                   rng: Random.new)
+    # timeout: wall-clock cap in seconds (nil disables); the rejection loop
+    # also exits when either max_candidates attempts or pool_size hits are
+    # reached, matching the original's "give up gracefully" design.
+    def initialize(corpus, max_candidates: 1000, timeout: 0.5, pool_size: 10,
+                   max_length: 70, rng: Random.new)
       @corpus = corpus
       @max_candidates = max_candidates
+      @timeout = timeout
       @pool_size = pool_size
       @max_length = max_length
       @rng = rng
@@ -121,15 +167,10 @@ module Daisy
       text.split(/\s+/)
     end
 
-    # Set of two-token tails of every memorized sentence. Computed once per
-    # response call; replaces the on-disk term.bfb the original wrote each turn.
+    # Delegates to the corpus so callers can pass it explicitly to skip
+    # repeated lookups inside the rejection loop.
     def terminator_bigrams
-      set = {}
-      @corpus.each_sentence do |s|
-        next if s.size < 2
-        set[[s[-2], s[-1]]] = true
-      end
-      set
+      @corpus.terminator_bigrams
     end
 
     # 1st-order Markov walk with stride-3 emission. Returns [sentence, ugly].
@@ -143,10 +184,7 @@ module Daisy
 
       loop do
         last = words.last
-        positions = []
-        @corpus.tokens.each_with_index do |t, i|
-          positions << i if t == last
-        end
+        positions = @corpus.positions_of(last)
         break if positions.empty?
 
         idx = positions[@rng.rand(positions.size)]
@@ -205,19 +243,24 @@ module Daisy
       @last_keywords = keywords(input_tokens)
 
       terminators = terminator_bigrams
+      kw_set = kws.each_with_object({}) { |k, h| h[Corpus.clean(k).downcase] = true }
       candidates = []
       attempts = 0
+      deadline = @timeout ? monotime + @timeout : nil
 
       while candidates.size < @pool_size && attempts < @max_candidates
         attempts += 1
         sentence, ugly = generate_sentence(terminators)
-        next if sentence.empty?
-        overlap = keyword_overlap(sentence, kws)
-        next if !kws.empty? && overlap.zero?
-        candidates << [sentence, ugly, overlap]
+        if !sentence.empty?
+          overlap = keyword_overlap(sentence, kw_set)
+          if kw_set.empty? || overlap > 0
+            candidates << [sentence, ugly, overlap]
+          end
+        end
+        break if deadline && monotime >= deadline
       end
 
-      # Fallback: no keyword-bearing candidate found within attempt cap.
+      # Fallback: no keyword-bearing candidate found within budget.
       if candidates.empty?
         sentence, _ugly = generate_sentence(terminators)
         return sentence
@@ -229,11 +272,18 @@ module Daisy
 
     private
 
-    def keyword_overlap(sentence, kws)
-      return 0 if kws.empty?
-      sentence_tokens = sentence.split(/\s+/).map { |t| Corpus.clean(t).downcase }
-      kw_clean = kws.map { |k| Corpus.clean(k).downcase }
-      sentence_tokens.count { |t| kw_clean.include?(t) }
+    # kw_set: Hash<cleaned_lowercase_keyword, true> built once per response.
+    def keyword_overlap(sentence, kw_set)
+      return 0 if kw_set.empty?
+      count = 0
+      sentence.split(/\s+/).each do |t|
+        count += 1 if kw_set[Corpus.clean(t).downcase]
+      end
+      count
+    end
+
+    def monotime
+      Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
   end
 end

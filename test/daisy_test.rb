@@ -58,6 +58,24 @@ class CorpusTest < Minitest::Test
     c = Daisy::Corpus.new(tokens: %w[a b *** c d e ***])
     assert_equal [%w[a b], %w[c d e]], c.sentences
   end
+
+  def test_positions_of_returns_indices_of_raw_token
+    c = Daisy::Corpus.new(tokens: %w[hello world *** hello there *** hello])
+    # 'hello' appears at indices 0, 3, 6.
+    assert_equal [0, 3, 6], c.positions_of("hello")
+    assert_equal [], c.positions_of("missing")
+    # Sentinel is not indexed.
+    assert_equal [], c.positions_of(Daisy::SENTINEL)
+  end
+
+  def test_learn_invalidates_caches
+    c = Daisy::Corpus.new(tokens: %w[hello world ***])
+    assert_equal 1, c.token_frequency("hello")
+    assert_equal [0], c.positions_of("hello")
+    c.learn(%w[hello again])
+    assert_equal 2, c.token_frequency("hello")
+    assert_equal [0, 3], c.positions_of("hello")
+  end
 end
 
 class BotTest < Minitest::Test
@@ -105,6 +123,17 @@ class BotTest < Minitest::Test
     bot = Daisy::Bot.new(c, max_candidates: 1, rng: Random.new(7))
     reply = bot.respond("hello.", learn: false)
     assert_kind_of String, reply
+  end
+
+  def test_best_response_honors_wall_clock_timeout
+    c = corpus_with("hello world.", "goodbye world.")
+    bot = Daisy::Bot.new(c, max_candidates: 10_000_000, timeout: 0.01,
+                        rng: Random.new(7))
+    t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    reply = bot.respond("nonsense", learn: false)
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+    assert_kind_of String, reply
+    assert_operator elapsed, :<, 0.5, "should bail out long before max_candidates"
   end
 
   def test_empty_corpus_does_not_crash
