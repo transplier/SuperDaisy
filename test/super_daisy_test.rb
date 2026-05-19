@@ -112,6 +112,28 @@ class SuperDaisyInstrumentationTest < Minitest::Test
   end
 end
 
+class SuperDaisyUglyTest < Minitest::Test
+  def test_cyclic_detects_aba_pattern
+    assert SuperDaisy::Ugly.cyclic?(%w[the cat the])
+    assert SuperDaisy::Ugly.cyclic?(%w[foo bar baz bar baz])  # ABA at i=4 with B-A-B
+    refute SuperDaisy::Ugly.cyclic?(%w[the quick brown fox])
+    refute SuperDaisy::Ugly.cyclic?(%w[a b])               # too short
+    refute SuperDaisy::Ugly.cyclic?([])
+  end
+
+  def test_over_length_uses_string_length
+    assert SuperDaisy::Ugly.over_length?("x" * 71, 70)
+    refute SuperDaisy::Ugly.over_length?("x" * 70, 70)
+  end
+
+  def test_judge_combines_length_and_cycle
+    assert SuperDaisy::Ugly.judge("the cat the dog", max_length: 70)  # ABA
+    assert SuperDaisy::Ugly.judge("x" * 80, max_length: 70)            # too long
+    refute SuperDaisy::Ugly.judge("a clean short response.", max_length: 70)
+    refute SuperDaisy::Ugly.judge("", max_length: 70)                  # empty
+  end
+end
+
 class SuperDaisyCorpusIndexTest < Minitest::Test
   def test_next_tokens_after_returns_continuations_within_sentence
     c = SuperDaisy::Corpus.new(tokens: %w[a b c *** a b d *** a b])
@@ -155,66 +177,60 @@ class SuperDaisyComponentContractTest < Minitest::Test
     assert_includes [10, 20, 30], picked
   end
 
-  def test_stride_three_markov_generator_returns_pair
+  def test_stride_three_markov_generator_returns_string
     c = corpus_with("hello world.", "hello there.", klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::StrideThreeMarkovGenerator.new
-    sentence, ugly = g.call(corpus: c,
-                            sampler: SuperDaisy::Components::UniformSampler.new,
-                            rng: Random.new(0),
-                            terminators: c.terminator_bigrams,
-                            max_length: 70)
+    sentence = g.call(corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(0),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70)
     assert_kind_of String, sentence
     refute_empty sentence
-    assert_includes [true, false], ugly
   end
 
-  def test_ppm_generator_returns_pair_and_emits_corpus_tokens
+  def test_ppm_generator_returns_string_and_emits_corpus_tokens
     c = corpus_with("hello world today.",
                     "hello there friend.",
                     "the quick brown fox.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 3)
-    sentence, ugly = g.call(corpus: c,
-                            sampler: SuperDaisy::Components::UniformSampler.new,
-                            rng: Random.new(0),
-                            terminators: c.terminator_bigrams,
-                            max_length: 70)
+    sentence = g.call(corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(0),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70)
     assert_kind_of String, sentence
     refute_empty sentence
     sentence.split.each do |t|
       assert_includes c.tokens, t, "PPM emitted non-corpus token: #{t.inspect}"
     end
-    assert_includes [true, false], ugly
   end
 
   def test_ppm_high_order_recites_from_corpus
-    # Single sentence corpus; order-5 PPM has nowhere to go but recite it.
     c = corpus_with("the only sentence she has ever seen.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 5)
-    sentence, _ = g.call(corpus: c,
-                         sampler: SuperDaisy::Components::UniformSampler.new,
-                         rng: Random.new(1),
-                         terminators: c.terminator_bigrams,
-                         max_length: 70)
+    sentence = g.call(corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(1),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70)
     assert_equal "the only sentence she has ever seen.", sentence
   end
 
   def test_ppm_backs_off_when_high_order_context_is_missing
-    # A corpus where 3-gram "hello world today" is unique but the bigram
-    # "world today" doesn't appear elsewhere — order=4 backs off through 3, 2, 1.
     c = corpus_with("hello world today is good.",
                     "today brings new beginnings.",
                     "hello friend.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 4)
-    # Run a few times; if backoff is broken we'd see empty sentences or crashes.
     5.times do |i|
-      sentence, _ = g.call(corpus: c,
-                           sampler: SuperDaisy::Components::UniformSampler.new,
-                           rng: Random.new(i),
-                           terminators: c.terminator_bigrams,
-                           max_length: 70)
+      sentence = g.call(corpus: c,
+                        sampler: SuperDaisy::Components::UniformSampler.new,
+                        rng: Random.new(i),
+                        terminators: c.terminator_bigrams,
+                        max_length: 70)
       refute_empty sentence
     end
   end

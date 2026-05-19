@@ -103,6 +103,8 @@ gnuplot eval/baseline.gp
 
 See [`eval/baseline.md`](eval/baseline.md) for the classic SuperDaisy
 reference numbers and the stop conditions for evaluating future swaps.
+Re-run the whole eval matrix (baselines + PPM:3/4/5 on both corpora + charts)
+with `./eval/run_all.sh`.
 
 ## Layout
 

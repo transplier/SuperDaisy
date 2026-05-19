@@ -5,11 +5,14 @@ First real Super-DAISY component swap: replacing the classic stride-3
 PPM-style walker with backoff (`PpmMarkovGenerator`). All other components
 unchanged. Evaluated against `eval/baseline.md`.
 
-> **Update note:** numbers below are from the K-gram-indexed PPM (latency-bound
-> by `max_candidates`, not by wall clock). An earlier draft of this report had
-> numbers from the slower position-scan implementation where every fortune
-> call hit the 500 ms timeout — that truncated iteration and *flattered*
-> PPM's diversity. The numbers here are the honest ones.
+> **Update note:** numbers below are from the K-gram-indexed PPM with
+> orchestrator-side ugly detection (`SuperDaisy::Ugly`). Two intermediate
+> drafts of this report had different numbers — first when PPM was bound
+> by the 500 ms wall-clock cap (flattered diversity), then briefly after
+> the K-gram index landed but before the ugly-flag refactor (asymmetric
+> metric). The numbers here are the honest, comparable ones.
+>
+> Reproducible via `./eval/run_all.sh`.
 
 ## What changed
 
@@ -37,14 +40,13 @@ both `MEM.DSY` (92 sentences) and `fortune-haiku-3-5-250.DSY` (250 sentences).
 | metric | classic | PPM:3 | PPM:4 | PPM:5 |
 |---|---|---|---|---|
 | fallthrough rate | 0.767 | 0.767 | 0.767 | 0.767 |
-| ugliness rate | 0.087 | 0.000 | 0.000 | 0.000 |
-| mean length (tokens) | 8.0 | 8.5 | 8.6 | 8.6 |
-| distinct-2 | 0.091 | 0.090 | 0.107 | 0.106 |
-| distinct-3 | 0.120 | 0.097 | 0.116 | 0.116 |
-| KL(responses ‖ corpus) nats | 0.951 | 0.873 | 0.932 | 0.849 |
-| **KL drift from baseline (nats)** | — | **1.632** | **1.321** | **1.842** |
-| latency p50 (ms) | 16.0 | 37.5 | 40.4 | 42.5 |
-| latency p95 (ms) | 16.7 | 39.3 | 42.4 | 44.5 |
+| ugliness rate | 0.090 | 0.000 | 0.000 | 0.000 |
+| distinct-2 | 0.091 | 0.090 | 0.104 | 0.100 |
+| distinct-3 | 0.119 | 0.097 | 0.113 | 0.109 |
+| KL(responses ‖ corpus) nats | 0.949 | 0.873 | 0.940 | 0.857 |
+| **KL drift from baseline (nats)** | — | **1.637** | **1.329** | **1.849** |
+| latency p50 (ms) | 15.8 | 21.5 | 22.4 | 22.7 |
+| latency p95 (ms) | 16.5 | 22.4 | 23.4 | 23.9 |
 | mean attempts | 858 | 858 | 859 | 859 |
 | mean kept | 2.26 | 2.24 | 2.23 | 2.23 |
 
@@ -53,19 +55,33 @@ both `MEM.DSY` (92 sentences) and `fortune-haiku-3-5-250.DSY` (250 sentences).
 | metric | classic | PPM:3 | PPM:4 | PPM:5 |
 |---|---|---|---|---|
 | fallthrough rate | 0.810 | 0.867 | 0.890 | 0.897 |
-| ugliness rate | 0.840 | 0.893 | 0.987 | 0.987 |
-| mean length (tokens) | 12.2 | ~12 | ~12 | ~12 |
-| distinct-2 | **0.146** | 0.079 | 0.080 | 0.066 |
-| distinct-3 | **0.169** | 0.082 | 0.084 | 0.069 |
-| KL(responses ‖ corpus) nats | 0.558 | 0.627 | 0.624 | 0.662 |
-| **KL drift from baseline (nats)** | — | **2.130** | **2.214** | **2.235** |
-| latency p50 (ms) | 27.3 | 43.3 | 46.4 | 47.0 |
-| latency p95 (ms) | 28.0 | 45.2 | 48.9 | 48.2 |
+| ugliness rate | 0.860 | 0.990 | 0.997 | 0.997 |
+| distinct-2 | **0.145** | 0.079 | 0.077 | 0.064 |
+| distinct-3 | **0.166** | 0.082 | 0.080 | 0.066 |
+| KL(responses ‖ corpus) nats | 0.559 | 0.629 | 0.627 | 0.666 |
+| **KL drift from baseline (nats)** | — | **2.134** | **2.223** | **2.245** |
+| latency p50 (ms) | 27.3 | 42.6 | 46.1 | 46.6 |
+| latency p95 (ms) | 28.1 | 44.0 | 47.2 | 47.8 |
 | mean attempts | 966 | 968 | 966 | 966 |
 | mean kept | 0.83 | 0.66 | 0.66 | 0.69 |
 
 After the K-gram index landed, PPM no longer hits the wall-clock cap (latency
 ~46 ms vs. 500 ms before). All variants now run the full 1000-attempt budget.
+
+### What the unified ugly detector revealed
+
+The new `SuperDaisy::Ugly` runs the same sliding-ABA check on every
+generator's output, plus a length-cap check. Numbers worth noting:
+
+- **Classic on MEM stayed at 0.090 ugliness** — basically unchanged from the
+  Pascal-faithful detector. The unified check confirms classic's mild cycling.
+- **PPM on MEM is genuinely 0% ugly** — stride-1 emission with backoff
+  doesn't produce ABA patterns when there's any choice. Real algorithmic
+  difference, not a measurement artifact.
+- **Fortune ugliness is dominated by the length cap.** Mean fortune
+  responses are ~12 tokens × ~6 chars = right at the 70-char threshold.
+  Classic hits the cap 86% of the time; PPM hits it 99% (its higher-order
+  coherence produces longer runs before terminators fire).
 
 ## Stop-condition check (per `eval/baseline.md`)
 
@@ -140,13 +156,11 @@ strictly better. Worth exposing as a knob.
 
 ## Followups
 
-- **Fix the ugly-flag measurement asymmetry.** Either port the
-  3-token-chunk cycle check to PPM's stride-1 form, or rewrite the classic
-  generator's check to be stride-1-equivalent. Currently the metric is
-  apples-to-oranges across generators. *(In progress.)*
+- ~~**Fix the ugly-flag measurement asymmetry.**~~ *(Done — orchestrator-side
+  `SuperDaisy::Ugly` runs the same heuristic on every generator's output.
+  Metric is now apples-to-apples.)*
 - ~~**Add a K-gram index to Corpus.**~~ *(Done — 10× latency improvement on
-  the fortune corpus; PPM now bounded by `max_candidates` instead of the
-  wall-clock cap.)*
+  the fortune corpus.)*
 - ~~**Expose PPM via `bin/daisy --generator`.**~~ *(Done.)*
 - **Investigate why fallthrough rate *went up* on fortune** under PPM.
   Probably the same dynamic as the diversity drop — PPM's stronger
@@ -154,6 +168,10 @@ strictly better. Worth exposing as a knob.
   rejection sampler tries to find keyword-bearing candidates, it sees a
   smaller distribution and exhausts the budget more often. Worth a closer
   look in `eval/ppm4_fortune.json`.
+- **Length cap shouldn't auto-mark as ugly on long-sentence corpora.**
+  Fortune-style corpora trigger the cap on ~99% of PPM outputs, saturating
+  the metric. Consider making the cap a soft penalty (counts toward ugly
+  only if combined with cycling), or per-corpus tuning.
 
 ## Files
 

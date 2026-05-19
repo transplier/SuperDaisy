@@ -1,6 +1,6 @@
 # Eval — ppm-4-mem
 
-_Generated 2026-05-19T21:47:00Z by `bin/eval`._
+_Generated 2026-05-19T22:01:54Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `ppm:4`
@@ -12,16 +12,16 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.767 |
 | ugliness rate (winner had ugly flag) | 0.000 |
-| mean response length (tokens) | 6.523 |
+| mean response length (tokens) | 6.500 |
 | median response length (tokens) | 7 |
-| distinct-2 (unique bigrams / total) | 0.107 |
-| distinct-3 (unique trigrams / total) | 0.116 |
-| KL(responses ‖ corpus) bigrams, nats | 0.932 |
-| latency p50 (ms) | 22.708 |
-| latency p95 (ms) | 24.305 |
+| distinct-2 (unique bigrams / total) | 0.104 |
+| distinct-3 (unique trigrams / total) | 0.113 |
+| KL(responses ‖ corpus) bigrams, nats | 0.940 |
+| latency p50 (ms) | 22.368 |
+| latency p95 (ms) | 23.424 |
 | mean attempts per response | 859.213 |
 | mean kept candidates per response | 2.233 |
-| KL drift from baseline `mem.dsy` (nats) | 1.321 |
+| KL drift from baseline `mem.dsy` (nats) | 1.329 |
 
 ## Sample responses (seed=1)
 
@@ -44,7 +44,7 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | i love astronomy | have you ever traveled the world, daisy? |
 | explain photosynthesis | have you ever traveled the world, daisy? |
 | describe a unicorn | have you ever traveled the world, daisy? |
-| what do you think | actually, i think i'm the only one in this conversation that is making sense! |
+| what do you think | what kind of foods do you eat? |
 | give me advice | have you ever traveled the world, daisy? |
 | say something | have you ever traveled the world, daisy? |
 | anything you want | have you ever traveled the world, daisy? |

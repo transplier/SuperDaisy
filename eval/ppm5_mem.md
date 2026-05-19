@@ -1,6 +1,6 @@
 # Eval — ppm-5-mem
 
-_Generated 2026-05-19T21:47:06Z by `bin/eval`._
+_Generated 2026-05-19T22:02:13Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `ppm:5`
@@ -12,16 +12,16 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.767 |
 | ugliness rate (winner had ugly flag) | 0.000 |
-| mean response length (tokens) | 6.630 |
+| mean response length (tokens) | 6.607 |
 | median response length (tokens) | 6 |
-| distinct-2 (unique bigrams / total) | 0.106 |
-| distinct-3 (unique trigrams / total) | 0.116 |
-| KL(responses ‖ corpus) bigrams, nats | 0.849 |
-| latency p50 (ms) | 22.752 |
-| latency p95 (ms) | 23.791 |
+| distinct-2 (unique bigrams / total) | 0.100 |
+| distinct-3 (unique trigrams / total) | 0.109 |
+| KL(responses ‖ corpus) bigrams, nats | 0.857 |
+| latency p50 (ms) | 22.744 |
+| latency p95 (ms) | 23.925 |
 | mean attempts per response | 859.370 |
 | mean kept candidates per response | 2.233 |
-| KL drift from baseline `mem.dsy` (nats) | 1.842 |
+| KL drift from baseline `mem.dsy` (nats) | 1.849 |
 
 ## Sample responses (seed=1)
 
@@ -44,7 +44,7 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | i love astronomy | daisy, are you in love? |
 | explain photosynthesis | daisy, are you in love? |
 | describe a unicorn | daisy, are you in love? |
-| what do you think | actually, i think i'm the only one in this conversation that is making sense! |
+| what do you think | what kind of foods do you eat? |
 | give me advice | daisy, are you in love? |
 | say something | daisy, are you in love? |
 | anything you want | daisy, are you in love? |

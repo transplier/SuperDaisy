@@ -175,6 +175,7 @@ require_relative "super_daisy/components/ppm_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
 require_relative "super_daisy/components/overlap_reranker"
 require_relative "super_daisy/components/last_turn_memory"
+require_relative "super_daisy/ugly"
 
 module SuperDaisy
   module Components
@@ -250,10 +251,11 @@ module SuperDaisy
 
       while candidates.size < @pool_size && attempts < @max_candidates
         attempts += 1
-        sentence, ugly = generate(terminators)
+        sentence = generate(terminators)
         if !sentence.empty?
           overlap = @filter.call(sentence, kw_set)
           if kw_set.empty? || overlap > 0
+            ugly = Ugly.judge(sentence, max_length: @max_length)
             candidates << [sentence, ugly, overlap]
           end
         end
@@ -263,8 +265,11 @@ module SuperDaisy
       # Fallback: no keyword-bearing candidate found within budget. Emit one
       # unfiltered Markov sentence — DAISY's classic "give up gracefully."
       if candidates.empty?
-        sentence, ugly = generate(terminators)
-        @last_stats = { attempts: attempts, kept: 0, fallthrough: true, ugly: ugly }
+        sentence = generate(terminators)
+        @last_stats = {
+          attempts: attempts, kept: 0, fallthrough: true,
+          ugly: Ugly.judge(sentence, max_length: @max_length),
+        }
         return sentence
       end
 

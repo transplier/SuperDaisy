@@ -1,8 +1,9 @@
 # Eval — fortune-haiku-3-5-250
 
-_Generated 2026-05-19T21:08:31Z by `bin/eval`._
+_Generated 2026-05-19T22:01:29Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
+Generator: `classic`
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -10,14 +11,14 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.810 |
-| ugliness rate (winner had ugly flag) | 0.840 |
-| mean response length (tokens) | 12.197 |
+| ugliness rate (winner had ugly flag) | 0.860 |
+| mean response length (tokens) | 12.163 |
 | median response length (tokens) | 12 |
-| distinct-2 (unique bigrams / total) | 0.146 |
-| distinct-3 (unique trigrams / total) | 0.169 |
-| KL(responses ‖ corpus) bigrams, nats | 0.558 |
-| latency p50 (ms) | 27.254 |
-| latency p95 (ms) | 28.010 |
+| distinct-2 (unique bigrams / total) | 0.145 |
+| distinct-3 (unique trigrams / total) | 0.166 |
+| KL(responses ‖ corpus) bigrams, nats | 0.559 |
+| latency p50 (ms) | 27.251 |
+| latency p95 (ms) | 28.119 |
 | mean attempts per response | 966.487 |
 | mean kept candidates per response | 0.833 |
 
@@ -28,7 +29,7 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | hello | as winter melts into spring, so too will your life. through collaboration |
 | hi daisy | as winter melts into spring, so too will your life. through collaboration |
 | good morning | you will soon dissolve like morning mist. the path of balance and ability to communicate |
-| how are you | you will soon find its rightful place, revealing how you perceive them. |
+| how are you | a small but from changing how you relate to you of simplification; strip away complexity |
 | what do you like | the threads of steady growth and those who do the same. |
 | tell me about yourself | as winter melts into spring, so too will your life. through collaboration |
 | what makes you happy | i can't provide a fortune based on that word. i'd be happy to create a beginning you've been |
@@ -48,7 +49,7 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | anything you want | as winter melts into spring, so too will your life. through collaboration |
 | and then what | as winter melts into spring, so too will your life. through collaboration |
 | really | as winter melts into spring, so too will your life. through collaboration |
-| go on | you chase answers you seek require you to let go of something valuable. |
+| go on | a path of wonder approaches when to let go. |
 | purple monkey dishwasher | as winter melts into spring, so too will your life. through collaboration |
 | asdf | as winter melts into spring, so too will your life. through collaboration |
 | the the the | beware the comfort delay your progress. the padding you to unexpected success. |

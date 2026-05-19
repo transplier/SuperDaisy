@@ -1,6 +1,6 @@
 # Eval — ppm-5-fortune
 
-_Generated 2026-05-19T21:47:46Z by `bin/eval`._
+_Generated 2026-05-19T22:02:27Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:5`
@@ -11,17 +11,17 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.897 |
-| ugliness rate (winner had ugly flag) | 0.987 |
-| mean response length (tokens) | 12.490 |
-| median response length (tokens) | 13 |
-| distinct-2 (unique bigrams / total) | 0.066 |
-| distinct-3 (unique trigrams / total) | 0.069 |
-| KL(responses ‖ corpus) bigrams, nats | 0.662 |
-| latency p50 (ms) | 47.029 |
-| latency p95 (ms) | 48.159 |
+| ugliness rate (winner had ugly flag) | 0.997 |
+| mean response length (tokens) | 12.477 |
+| median response length (tokens) | 12 |
+| distinct-2 (unique bigrams / total) | 0.064 |
+| distinct-3 (unique trigrams / total) | 0.066 |
+| KL(responses ‖ corpus) bigrams, nats | 0.666 |
+| latency p50 (ms) | 46.592 |
+| latency p95 (ms) | 47.767 |
 | mean attempts per response | 966.047 |
 | mean kept candidates per response | 0.693 |
-| KL drift from baseline `fortune-haiku-3-5-250` (nats) | 2.235 |
+| KL drift from baseline `fortune-haiku-3-5-250` (nats) | 2.245 |
 
 ## Sample responses (seed=1)
 

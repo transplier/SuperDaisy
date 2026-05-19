@@ -1,7 +1,7 @@
 # Stage 3 alternative — variable-order Markov generator (PPM-style).
 #
 # Interface: #call(corpus:, sampler:, rng:, terminators:, max_length:)
-#            -> [sentence_string, ugly_flag]
+#            -> sentence_string
 #
 # Behavior: try to condition on the last `order` tokens of generated words.
 # If that K-gram never appears in the corpus, back off to K-1 tokens, then
@@ -32,33 +32,22 @@ module SuperDaisy
 
       def call(corpus:, sampler:, rng:, terminators:, max_length:)
         sents = corpus.sentences
-        return ["", false] if sents.empty?
+        return "" if sents.empty?
 
         seed = sampler.call(sents, rng)
         words = seed.first(3).dup
-        ugly = false
 
         loop do
           nxt = sample_next(corpus, sampler, rng, words)
           break if nxt.nil?
 
-          # Local-cycle detection (A-B-A): mirrors the classic generator's
-          # equivalent ugly-flag check, adapted for stride-1 emission.
-          ugly ||= words.size >= 2 && nxt == words[-2]
-
           words << nxt
 
-          if words.size >= 2 && terminators[[words[-2], words[-1]]]
-            break
-          end
-
-          if words.join(" ").length > max_length
-            ugly = true
-            break
-          end
+          break if words.size >= 2 && terminators[[words[-2], words[-1]]]
+          break if words.join(" ").length > max_length
         end
 
-        [words.join(" "), ugly]
+        words.join(" ")
       end
 
       private
@@ -69,16 +58,10 @@ module SuperDaisy
         max_k = [@order, words.size].min
         max_k.downto(1) do |k|
           context = words.last(k)
-          candidates = next_token_candidates(corpus, context)
+          candidates = corpus.next_tokens_after(context)
           return sampler.call(candidates, rng) unless candidates.empty?
         end
         nil
-      end
-
-      # Every token that immediately follows `context` somewhere in the
-      # corpus, with multiplicity. Delegates to the corpus's K-gram index.
-      def next_token_candidates(corpus, context)
-        corpus.next_tokens_after(context)
       end
     end
   end
