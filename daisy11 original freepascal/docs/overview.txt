@@ -1,0 +1,11 @@
+Overview
+
+Even though Daisy is a chatbot you can download and have fun with, the real intention with Daisy is for her to be a testbed for various technologies relating purely to language learning and generation. Once these techniques have been tested and refined within Daisy, many will get incorporated into the main Billy project.
+
+What separates Daisy from Billy (and most other chatbots) is that Daisy has no pre-programmed (or hard coded) language of any kind. She starts with no knowledge of anything, but then is able to gain knowledge as she observes what humans say. From this, she is able to remember patterns of words, and the probability of these patterns occurring. Using this data, Daisy is able to actually generate her own, original, sentences. She also figures out how to respond to users input by analyzing what she has seen before she weeds out the unimportant words, and builds her response on the important ones. Since she has no pre-programmed responses, she can seem quite dumb when you talk to her after creating an empty memory file. It can take a little while before Daisy has gained enough knowledge to be able to create her own sentences. To get you started, the Daisy distribution file contains one memory file, which was built by having Daisy talk to me. However, you are always able to create a new file and start from scratch.
+Highlights
+
+For the latest version of Daisy, go to the Download section!
+Who Created Daisy?
+
+Daisy has been actively developed since 2000, entirely by Gregory G. Leedberg. 

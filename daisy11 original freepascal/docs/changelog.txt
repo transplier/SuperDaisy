@@ -1,0 +1,15 @@
+Revision History
+DAISY v1.1 - (6/25/2000)
+
+    Daisy now uses extended memory! In 1.0, she only could access 640K of DOS memory, and since this is where the DSY files are stored during chat, the size of those files were severely limited. Daisy now allocates 2Mb at start-up, but if she uses up all of that (which is unlikely), she is able to continue to allocate more.
+    Daisy is now able to look back to previous statements when building her responses. In addition to pulling keywords from the last thing you said to her, she looks back to the user's statements before that for more keywords, which helps to tie her responses into the conversation more.
+    There is now a spell-corrector in the options menu, which allows you to correct any typos you might accidentally make, so that Daisy doesn't repeat those typos.
+    In an attempt to solve one of Daisy's biggest problems (seemingly never ending run-on sentences which make no sense), Daisy now gives priority to sentences she generates which are less than 70 characters. I know this is just masking the problem rather than actually fixing it, but for now... it works.
+    Daisy no longer crashes if the default memory file is deleted from DOS/Windows (instead of within Daisy). Now, you will be given an error and assisted in correcting the problem. Still, even though Daisy can handle missing files, you still should only delete files from the Files Menu, as it will check for these problems before they happen, and help save some frustration.
+    Now has the capability to support plug-in programs, which can run within Daisy. As of right now, I haven't created any, and this is why the feature does not appear in any menus. However, if I ever do make some plug-ins, the feature is already programmed into Daisy, and will enable itself if it detects plug-ins in the current directory. The plug-ins could be anything from utilities for Daisy, to just fun little "toys". This feature is like an expansion slot in Daisy for future use.
+    Added some stuff to the included MEM.DSY, now has 255 words.
+    Now comes with version 1.01 of the UDLP2 Shell. This version fixes one bug which caused quite a lot of "file not found" errors: the paths to the chat bots were truncated at 25 characters! Now the paths can be up to 255 characters long. 
+
+DAISY v1.0 - (5/10/2000)
+
+    The Daisy technology is based around a central concept of learning. Daisy has no hard coded language of any kind. She starts with no knowledge of anything, but then is able to gain knowledge as she observes what humans say. From this, she is able to remember patterns of words, and the probability of these patterns occurring. Using this data, Daisy is able to actually generate her own, original, sentences. She also figures out how to respond to user's input by analyzing what she has seen before -- she weeds out the unimportant words, and builds her response on the important ones. Daisy also features an improved interface, which makes it easy to adjust options and manage memory files. 
