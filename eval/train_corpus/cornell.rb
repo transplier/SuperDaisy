@@ -102,13 +102,15 @@ target_sentences = opts[:sentences]
 target_tokens = opts[:tokens]
 
 kept = 0
+token_count = 0
 candidates.each do |text|
   break if target_sentences && kept >= target_sentences
-  break if target_tokens && corpus.total_word_tokens >= target_tokens
+  break if target_tokens && token_count >= target_tokens
   tokens = bot.tokenize(text)
   next if tokens.empty?
   corpus.learn(tokens)
   kept += 1
+  token_count += tokens.size
 end
 
 corpus.save(opts[:out])
