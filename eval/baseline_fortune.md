@@ -1,6 +1,6 @@
 # Eval — fortune-haiku-3-5-250
 
-_Generated 2026-05-19T22:16:52Z by `bin/eval`._
+_Generated 2026-05-19T22:32:44Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `classic`
@@ -12,15 +12,15 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.810 |
 | ugliness rate (winner had ugly flag) | 0.860 |
-| mean response length (tokens) | 12.163 |
-| median response length (tokens) | 12 |
-| distinct-2 (unique bigrams / total) | 0.145 |
-| distinct-3 (unique trigrams / total) | 0.166 |
+| recitation rate (response = a corpus sentence verbatim) | 0.000 |
+| acceptance rate (kept / attempted candidates) | 0.001 |
+| distinct-2, across all trials | 0.145 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.909 |
 | KL(responses ‖ corpus) bigrams, nats | 0.559 |
-| latency p50 (ms) | 26.881 |
-| latency p95 (ms) | 27.536 |
-| mean attempts per response | 966.487 |
-| mean kept candidates per response | 0.833 |
+| latency p50 (ms) | 27.339 |
+| latency p95 (ms) | 28.609 |
+
+Diagnostic counts (kept in JSON): mean attempts 966.487, mean kept 0.833, mean length 12.163 tokens, distinct-3 0.166.
 
 ## Sample responses (seed=1)
 

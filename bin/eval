@@ -12,6 +12,7 @@
 
 require "optparse"
 require "json"
+require "set"
 require_relative "../lib/super_daisy"
 
 options = {
@@ -171,6 +172,27 @@ response_bigrams = bigram_counts(reply_tokens)
 corpus_bigrams = bigram_counts(corpus_tokens_per_sentence)
 kl_resp_corpus = kl_smoothed(response_bigrams, corpus_bigrams)
 
+# Per-prompt distinct-2: for each prompt, distinct-2 across just that
+# prompt's seeds. Tells us how varied responses are *given a fixed prompt*
+# (chat-UX-relevant), as opposed to total diversity across all trials.
+per_prompt_distinct_2 = prompts.each_with_index.map do |_pr, i|
+  trial_replies = records.select { |r| r[:prompt_idx] == i }
+                         .map { |r| r[:reply] }.reject(&:empty?)
+  distinct_n(trial_replies, 2)
+end
+mean_per_prompt_distinct_2 = mean.call(per_prompt_distinct_2)
+
+# Recitation rate: % of responses that exactly match a corpus sentence
+# verbatim. Detects the "she's just regurgitating" failure mode (notably
+# expected to be high for high-order PPM on small corpora).
+corpus_sentence_strings = corpus.sentences.map { |s| s.join(" ") }.to_set
+recitation_rate = nonempty.count { |r| corpus_sentence_strings.include?(r) }.to_f / [nonempty.size, 1].max
+
+# Acceptance rate: candidates kept / candidates attempted (across all trials).
+total_attempts = records.sum { |r| r[:attempts] }
+total_kept     = records.sum { |r| r[:kept] }
+acceptance_rate = total_attempts.zero? ? 0.0 : total_kept.to_f / total_attempts
+
 # Optional: drift KL against a previously-saved baseline.
 kl_drift = nil
 baseline_label = nil
@@ -199,10 +221,13 @@ aggregate = {
   metrics: {
     fallthrough_rate: fallthrough_rate,
     ugly_rate: ugly_rate,
-    mean_length_tokens: mean.call(lengths),
-    median_length_tokens: percentile(lengths.sort, 0.5),
+    recitation_rate: recitation_rate,
+    acceptance_rate: acceptance_rate,
     distinct_2: distinct_n(nonempty, 2),
-    distinct_3: distinct_n(nonempty, 3),
+    distinct_2_per_prompt_mean: mean_per_prompt_distinct_2,
+    distinct_3: distinct_n(nonempty, 3),  # kept in data, not in headline
+    mean_length_tokens: mean.call(lengths),  # kept in data, not in headline
+    median_length_tokens: percentile(lengths.sort, 0.5),
     kl_response_vs_corpus_bigrams_nats: kl_resp_corpus,
     latency_p50_ms: (percentile(latencies, 0.5) || 0) * 1000,
     latency_p95_ms: (percentile(latencies, 0.95) || 0) * 1000,
@@ -235,18 +260,18 @@ begin
   m = aggregate[:metrics]
   io.puts "| fallthrough rate (unconditioned-Markov fallback) | #{fmt(m[:fallthrough_rate])} |"
   io.puts "| ugliness rate (winner had ugly flag) | #{fmt(m[:ugly_rate])} |"
-  io.puts "| mean response length (tokens) | #{fmt(m[:mean_length_tokens])} |"
-  io.puts "| median response length (tokens) | #{fmt(m[:median_length_tokens])} |"
-  io.puts "| distinct-2 (unique bigrams / total) | #{fmt(m[:distinct_2])} |"
-  io.puts "| distinct-3 (unique trigrams / total) | #{fmt(m[:distinct_3])} |"
+  io.puts "| recitation rate (response = a corpus sentence verbatim) | #{fmt(m[:recitation_rate])} |"
+  io.puts "| acceptance rate (kept / attempted candidates) | #{fmt(m[:acceptance_rate])} |"
+  io.puts "| distinct-2, across all trials | #{fmt(m[:distinct_2])} |"
+  io.puts "| distinct-2, per-prompt mean (variation within a prompt) | #{fmt(m[:distinct_2_per_prompt_mean])} |"
   io.puts "| KL(responses ‖ corpus) bigrams, nats | #{fmt(m[:kl_response_vs_corpus_bigrams_nats])} |"
   io.puts "| latency p50 (ms) | #{fmt(m[:latency_p50_ms])} |"
   io.puts "| latency p95 (ms) | #{fmt(m[:latency_p95_ms])} |"
-  io.puts "| mean attempts per response | #{fmt(m[:mean_attempts])} |"
-  io.puts "| mean kept candidates per response | #{fmt(m[:mean_kept])} |"
   if m[:kl_drift_from_baseline_bigrams_nats]
     io.puts "| KL drift from baseline `#{m[:baseline_label]}` (nats) | #{fmt(m[:kl_drift_from_baseline_bigrams_nats])} |"
   end
+  io.puts
+  io.puts "Diagnostic counts (kept in JSON): mean attempts #{fmt(m[:mean_attempts])}, mean kept #{fmt(m[:mean_kept])}, mean length #{fmt(m[:mean_length_tokens])} tokens, distinct-3 #{fmt(m[:distinct_3])}."
   io.puts
   io.puts "## Sample responses (seed=1)"
   io.puts

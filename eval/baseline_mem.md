@@ -1,6 +1,6 @@
 # Eval — mem.dsy
 
-_Generated 2026-05-19T22:16:48Z by `bin/eval`._
+_Generated 2026-05-19T22:32:40Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `classic` | Scorer: `classic`
@@ -12,15 +12,15 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.767 |
 | ugliness rate (winner had ugly flag) | 0.090 |
-| mean response length (tokens) | 7.980 |
-| median response length (tokens) | 9 |
-| distinct-2 (unique bigrams / total) | 0.091 |
-| distinct-3 (unique trigrams / total) | 0.119 |
+| recitation rate (response = a corpus sentence verbatim) | 0.450 |
+| acceptance rate (kept / attempted candidates) | 0.003 |
+| distinct-2, across all trials | 0.091 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.713 |
 | KL(responses ‖ corpus) bigrams, nats | 0.949 |
-| latency p50 (ms) | 15.780 |
-| latency p95 (ms) | 16.419 |
-| mean attempts per response | 857.797 |
-| mean kept candidates per response | 2.263 |
+| latency p50 (ms) | 15.889 |
+| latency p95 (ms) | 16.594 |
+
+Diagnostic counts (kept in JSON): mean attempts 857.797, mean kept 2.263, mean length 7.980 tokens, distinct-3 0.119.
 
 ## Sample responses (seed=1)
 
