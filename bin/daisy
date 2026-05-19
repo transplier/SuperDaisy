@@ -10,6 +10,7 @@ parser = OptionParser.new do |o|
   o.on("--personality FILE", "Path to .DSY memory file (required)") { |v| options[:personality] = v }
   o.on("-p", "--prompt PROMPT", "One-shot: respond to PROMPT and exit") { |v| options[:prompt] = v }
   o.on("--learn", "Learn from input; save corpus on exit") { options[:learn] = true }
+  o.on("--seed N", Integer, "Seed the RNG (for deterministic output)") { |v| options[:seed] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
@@ -25,7 +26,8 @@ unless File.exist?(options[:personality])
 end
 
 corpus = Daisy::Corpus.load(options[:personality])
-bot = Daisy::Bot.new(corpus)
+rng = options[:seed] ? Random.new(options[:seed]) : Random.new
+bot = Daisy::Bot.new(corpus, rng: rng)
 
 save_if_learning = -> {
   corpus.save(options[:personality]) if options[:learn]
