@@ -150,7 +150,7 @@ require_relative "super_daisy/components/last_turn_memory"
 module SuperDaisy
   class Bot
     attr_accessor :max_candidates, :timeout, :pool_size, :max_length
-    attr_reader :corpus
+    attr_reader :corpus, :last_stats
     attr_reader :tokenizer, :scorer, :generator, :filter, :reranker, :memory, :sampler
 
     def initialize(corpus,
@@ -176,6 +176,7 @@ module SuperDaisy
       @pool_size = pool_size
       @max_length = max_length
       @rng = rng
+      @last_stats = nil
     end
 
     def respond(input, learn: false)
@@ -185,7 +186,10 @@ module SuperDaisy
     end
 
     def best_response(input_tokens)
-      return "" if @corpus.empty?
+      if @corpus.empty?
+        @last_stats = { attempts: 0, kept: 0, fallthrough: false, ugly: false }
+        return ""
+      end
 
       fresh = @scorer.call(input_tokens, @corpus)
       kws = (fresh + @memory.carry).uniq
@@ -212,11 +216,20 @@ module SuperDaisy
       # Fallback: no keyword-bearing candidate found within budget. Emit one
       # unfiltered Markov sentence — DAISY's classic "give up gracefully."
       if candidates.empty?
-        sentence, _ugly = generate(terminators)
+        sentence, ugly = generate(terminators)
+        @last_stats = { attempts: attempts, kept: 0, fallthrough: true, ugly: ugly }
         return sentence
       end
 
-      @reranker.call(candidates)
+      winner = @reranker.call(candidates)
+      winner_entry = candidates.find { |s, _u, _o| s == winner }
+      @last_stats = {
+        attempts: attempts,
+        kept: candidates.size,
+        fallthrough: false,
+        ugly: winner_entry ? winner_entry[1] : false,
+      }
+      winner
     end
 
     private

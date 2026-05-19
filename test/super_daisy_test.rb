@@ -90,6 +90,28 @@ class SuperDaisyComponentSwapTest < Minitest::Test
   end
 end
 
+class SuperDaisyInstrumentationTest < Minitest::Test
+  def test_last_stats_populated_after_respond
+    c = corpus_with("hello world.", "hello there.", klass: SuperDaisy::Corpus)
+    bot = SuperDaisy::Bot.new(c, rng: Random.new(0))
+    bot.respond("hello", learn: false)
+    stats = bot.last_stats
+    assert_kind_of Hash, stats
+    %i[attempts kept fallthrough ugly].each { |k| assert stats.key?(k), "missing :#{k}" }
+    assert_operator stats[:attempts], :>=, 1
+  end
+
+  def test_last_stats_records_fallthrough_when_no_match
+    # Empty corpus → empty response, no candidates, no real fallthrough either
+    # since corpus.empty? short-circuits — record that explicit shape.
+    c = SuperDaisy::Corpus.new(tokens: [])
+    bot = SuperDaisy::Bot.new(c)
+    bot.respond("anything", learn: false)
+    assert_equal false, bot.last_stats[:fallthrough]
+    assert_equal 0, bot.last_stats[:kept]
+  end
+end
+
 class SuperDaisyComponentContractTest < Minitest::Test
   def test_whitespace_tokenizer
     t = SuperDaisy::Components::WhitespaceTokenizer.new

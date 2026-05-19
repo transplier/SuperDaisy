@@ -90,15 +90,35 @@ ruby -Ilib test/daisy_test.rb
 it in interactive mode with `--learn`, and cleans up on exit — so you can chat
 without dirtying the shipped corpus.
 
+## Evaluation
+
+`bin/eval` runs a fixed prompt set against a corpus and reports fallthrough
+rate, ugliness rate, distinct-N, bigram KL vs. corpus, latency percentiles,
+plus a JSON data dump for future drift comparisons. Charts via gnuplot.
+
+```
+bin/eval --personality MEM.DSY --report eval/run.md --data eval/run.json
+gnuplot eval/baseline.gp
+```
+
+See [`eval/baseline.md`](eval/baseline.md) for the classic SuperDaisy
+reference numbers and the stop conditions for evaluating future swaps.
+
 ## Layout
 
 ```
-lib/daisy.rb         # Corpus + Bot
-bin/daisy            # CLI entry point
-bin/fortune-train    # generate a .DSY from Haiku-written fortunes
-test/daisy_test.rb   # minitest suite
-benchmark/respond.rb # timing harness
-DAISY.md             # technical write-up of the original
+lib/daisy.rb              # original-faithful port: Corpus + Bot
+lib/super_daisy.rb        # orchestrator over swappable components
+lib/super_daisy/components/  # one file per pipeline stage
+bin/daisy                 # CLI (--model daisy | super_daisy)
+bin/eval                  # eval harness
+bin/fortune-train         # generate a .DSY from Haiku-written fortunes
+test/daisy_test.rb        # minitest, original Daisy
+test/super_daisy_test.rb  # minitest, SuperDaisy + components
+benchmark/respond.rb      # timing harness
+eval/                     # prompt set, baseline numbers, charts
+DAISY.md                  # technical write-up of the original
+SUPER_DAISY.md            # design doc for the modern-LM exploration
 ```
 
 ## Changes relative to the original

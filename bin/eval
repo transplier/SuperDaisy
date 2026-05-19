@@ -1,0 +1,269 @@
+#!/usr/bin/env ruby
+# Eval harness for SuperDaisy. Runs a prompt set against a corpus at multiple
+# seeds, collects per-response stats, and writes a markdown report plus a
+# JSON data dump that future runs can compare against.
+#
+# Usage:
+#   bin/eval --personality MEM.DSY [--prompts eval/prompts.txt]
+#            [--seeds 10] [--report eval/baseline.md] [--data eval/baseline_data.json]
+#
+# Stdlib only. See eval/baseline.md for sample output and SUPER_DAISY.md for
+# the design rationale behind the chosen metrics.
+
+require "optparse"
+require "json"
+require_relative "../lib/super_daisy"
+
+options = {
+  prompts: "eval/prompts.txt",
+  seeds: 10,
+  report: nil,    # stdout if nil
+  data: nil,      # skip if nil
+  label: nil,
+}
+OptionParser.new do |o|
+  o.banner = "Usage: bin/eval --personality FILE [opts]"
+  o.on("--personality FILE") { |v| options[:personality] = v }
+  o.on("--prompts FILE")     { |v| options[:prompts] = v }
+  o.on("--seeds N", Integer) { |v| options[:seeds] = v }
+  o.on("--report FILE", "Markdown report output (default stdout)") { |v| options[:report] = v }
+  o.on("--data FILE", "Write raw stats JSON for future drift comparison") { |v| options[:data] = v }
+  o.on("--label NAME", "Variant label in the report (default: corpus basename)") { |v| options[:label] = v }
+  o.on("-h", "--help") { puts o; exit 0 }
+end.parse!
+
+abort "missing --personality" unless options[:personality]
+abort "personality file not found: #{options[:personality]}" unless File.exist?(options[:personality])
+abort "prompts file not found: #{options[:prompts]}" unless File.exist?(options[:prompts])
+
+prompts = File.readlines(options[:prompts], chomp: true).reject(&:empty?)
+corpus = SuperDaisy::Corpus.load(options[:personality])
+label = options[:label] || File.basename(options[:personality])
+
+# ----- helpers ---------------------------------------------------------------
+
+def monotime
+  Process.clock_gettime(Process::CLOCK_MONOTONIC)
+end
+
+def percentile(sorted, p)
+  return nil if sorted.empty?
+  idx = ((sorted.size - 1) * p).round
+  sorted[idx]
+end
+
+# Distinct-N: unique n-grams / total n-grams across an Array<String> of
+# responses. Higher = more diversity, lower = more mode collapse.
+def distinct_n(responses, n)
+  total = 0
+  uniq = {}
+  responses.each do |r|
+    toks = r.split(/\s+/)
+    (toks.size - n + 1).times do |i|
+      gram = toks[i, n]
+      next if gram.size < n
+      total += 1
+      uniq[gram] = true
+    end
+  end
+  return 0.0 if total.zero?
+  uniq.size.to_f / total
+end
+
+# Bigram counts (Hash<[w1,w2], Integer>) over a list of token strings, cleaned
+# and lowercased per Corpus.clean — same normalization the filter uses.
+def bigram_counts(token_lists)
+  counts = Hash.new(0)
+  token_lists.each do |toks|
+    toks.each_cons(2) { |a, b| counts[[a, b]] += 1 }
+  end
+  counts
+end
+
+def normalize(counts)
+  total = counts.values.sum.to_f
+  return {} if total.zero?
+  counts.transform_values { |c| c / total }
+end
+
+# KL(P || Q) over bigrams with Laplace smoothing on the union vocabulary —
+# avoids divide-by-zero when P has mass where Q doesn't. Returns nats.
+def kl_smoothed(p_counts, q_counts)
+  vocab = p_counts.keys | q_counts.keys
+  return 0.0 if vocab.empty?
+  alpha = 1.0
+  p_total = p_counts.values.sum + alpha * vocab.size
+  q_total = q_counts.values.sum + alpha * vocab.size
+  kl = 0.0
+  vocab.each do |bg|
+    p = (p_counts[bg] + alpha) / p_total
+    q = (q_counts[bg] + alpha) / q_total
+    kl += p * Math.log(p / q)
+  end
+  kl
+end
+
+def clean(t)
+  SuperDaisy::Corpus.clean(t).downcase
+end
+
+# ----- run -------------------------------------------------------------------
+
+warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]}"
+warn "[eval] tokens=#{corpus.tokens.size} sentences=#{corpus.sentences.size}"
+
+records = []  # one entry per (prompt, seed) trial
+prompts.each_with_index do |prompt, pi|
+  (1..options[:seeds]).each do |seed|
+    bot = SuperDaisy::Bot.new(corpus, rng: Random.new(seed))
+    t0 = monotime
+    reply = bot.respond(prompt, learn: false)
+    elapsed = monotime - t0
+    stats = bot.last_stats || {}
+    records << {
+      prompt: prompt,
+      prompt_idx: pi,
+      seed: seed,
+      reply: reply,
+      latency_s: elapsed,
+      attempts: stats[:attempts] || 0,
+      kept: stats[:kept] || 0,
+      fallthrough: stats[:fallthrough] || false,
+      ugly: stats[:ugly] || false,
+    }
+  end
+  warn "[eval]   prompt #{pi + 1}/#{prompts.size} done"
+end
+
+# ----- aggregate -------------------------------------------------------------
+
+replies = records.map { |r| r[:reply] }
+nonempty = replies.reject(&:empty?)
+reply_tokens = nonempty.map { |r| r.split(/\s+/).map { |t| clean(t) } }
+corpus_tokens_per_sentence = corpus.sentences.map { |s| s.map { |t| clean(t) } }
+
+latencies = records.map { |r| r[:latency_s] }.sort
+lengths = nonempty.map { |r| r.split(/\s+/).size }
+fallthrough_rate = records.count { |r| r[:fallthrough] }.to_f / records.size
+ugly_rate = records.count { |r| r[:ugly] }.to_f / records.size
+mean = ->(xs) { xs.empty? ? 0.0 : xs.sum.to_f / xs.size }
+
+response_bigrams = bigram_counts(reply_tokens)
+corpus_bigrams = bigram_counts(corpus_tokens_per_sentence)
+kl_resp_corpus = kl_smoothed(response_bigrams, corpus_bigrams)
+
+aggregate = {
+  label: label,
+  corpus: {
+    path: options[:personality],
+    tokens: corpus.tokens.size,
+    sentences: corpus.sentences.size,
+    word_tokens: corpus.total_word_tokens,
+  },
+  config: { prompts: prompts.size, seeds: options[:seeds], trials: records.size },
+  metrics: {
+    fallthrough_rate: fallthrough_rate,
+    ugly_rate: ugly_rate,
+    mean_length_tokens: mean.call(lengths),
+    median_length_tokens: percentile(lengths.sort, 0.5),
+    distinct_2: distinct_n(nonempty, 2),
+    distinct_3: distinct_n(nonempty, 3),
+    kl_response_vs_corpus_bigrams_nats: kl_resp_corpus,
+    latency_p50_ms: (percentile(latencies, 0.5) || 0) * 1000,
+    latency_p95_ms: (percentile(latencies, 0.95) || 0) * 1000,
+    mean_attempts: mean.call(records.map { |r| r[:attempts] }),
+    mean_kept: mean.call(records.map { |r| r[:kept] }),
+  },
+}
+
+# ----- report ----------------------------------------------------------------
+
+def fmt(x); x.is_a?(Float) ? format("%.3f", x) : x.to_s; end
+
+io = options[:report] ? File.open(options[:report], "w") : $stdout
+begin
+  io.puts "# Eval — #{label}"
+  io.puts
+  io.puts "_Generated #{Time.now.utc.iso8601} by `bin/eval`._"
+  io.puts
+  c = aggregate[:corpus]
+  io.puts "Corpus: `#{c[:path]}` — #{c[:sentences]} sentences, #{c[:word_tokens]} words"
+  io.puts "Prompts: #{aggregate[:config][:prompts]} (`#{options[:prompts]}`), #{aggregate[:config][:seeds]} seeds each, #{aggregate[:config][:trials]} trials"
+  io.puts
+  io.puts "## Metrics"
+  io.puts
+  io.puts "| metric | value |"
+  io.puts "|---|---|"
+  m = aggregate[:metrics]
+  io.puts "| fallthrough rate (unconditioned-Markov fallback) | #{fmt(m[:fallthrough_rate])} |"
+  io.puts "| ugliness rate (winner had ugly flag) | #{fmt(m[:ugly_rate])} |"
+  io.puts "| mean response length (tokens) | #{fmt(m[:mean_length_tokens])} |"
+  io.puts "| median response length (tokens) | #{fmt(m[:median_length_tokens])} |"
+  io.puts "| distinct-2 (unique bigrams / total) | #{fmt(m[:distinct_2])} |"
+  io.puts "| distinct-3 (unique trigrams / total) | #{fmt(m[:distinct_3])} |"
+  io.puts "| KL(responses ‖ corpus) bigrams, nats | #{fmt(m[:kl_response_vs_corpus_bigrams_nats])} |"
+  io.puts "| latency p50 (ms) | #{fmt(m[:latency_p50_ms])} |"
+  io.puts "| latency p95 (ms) | #{fmt(m[:latency_p95_ms])} |"
+  io.puts "| mean attempts per response | #{fmt(m[:mean_attempts])} |"
+  io.puts "| mean kept candidates per response | #{fmt(m[:mean_kept])} |"
+  io.puts
+  io.puts "## Sample responses (seed=1)"
+  io.puts
+  io.puts "| prompt | response |"
+  io.puts "|---|---|"
+  records.select { |r| r[:seed] == 1 }.each do |r|
+    p = r[:prompt].length > 60 ? r[:prompt][0, 57] + "..." : r[:prompt]
+    rep = r[:reply].empty? ? "_(empty)_" : r[:reply]
+    io.puts "| #{p} | #{rep} |"
+  end
+ensure
+  io.close if io != $stdout
+end
+
+# ----- raw data dump ---------------------------------------------------------
+
+if options[:data]
+  File.write(options[:data], JSON.pretty_generate({
+    aggregate: aggregate,
+    records: records,
+    response_bigrams: response_bigrams.map { |k, v| [k.join(" "), v] }.to_h,
+  }))
+  warn "[eval] wrote raw data: #{options[:data]}"
+end
+
+# ----- gnuplot data files (sidecar for charts) -------------------------------
+
+if options[:report]
+  base = options[:report].sub(/\.md\z/, "")
+
+  # Latency-per-trial, one row per record: idx latency_ms
+  File.open("#{base}_latency.dat", "w") do |f|
+    f.puts "# idx latency_ms"
+    records.sort_by { |r| r[:latency_s] }.each_with_index do |r, i|
+      f.puts "#{i} #{r[:latency_s] * 1000}"
+    end
+  end
+
+  # Length histogram: length count
+  hist = Hash.new(0)
+  lengths.each { |l| hist[l] += 1 }
+  File.open("#{base}_lengths.dat", "w") do |f|
+    f.puts "# length count"
+    hist.keys.sort.each { |l| f.puts "#{l} #{hist[l]}" }
+  end
+
+  # Per-prompt fallthrough/ugly rates: idx fallthrough_rate ugly_rate prompt
+  File.open("#{base}_per_prompt.dat", "w") do |f|
+    f.puts "# prompt_idx fallthrough_rate ugly_rate"
+    prompts.each_with_index do |_pr, i|
+      trials = records.select { |r| r[:prompt_idx] == i }
+      fr = trials.count { |r| r[:fallthrough] }.to_f / trials.size
+      ur = trials.count { |r| r[:ugly] }.to_f / trials.size
+      f.puts "#{i} #{fr} #{ur}"
+    end
+  end
+
+  warn "[eval] wrote gnuplot data: #{base}_latency.dat, #{base}_lengths.dat, #{base}_per_prompt.dat"
+end
+
+warn "[eval] done"
