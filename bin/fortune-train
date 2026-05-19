@@ -1,0 +1,155 @@
+#!/usr/bin/env ruby
+# Generate a DAISY personality file by asking Haiku for fortunes
+# seeded on random dictionary words.
+
+require "optparse"
+require "json"
+require "net/http"
+require "uri"
+require_relative "../lib/daisy"
+
+DEFAULTS = {
+  dict: "/usr/share/dict/words",
+  out: "fortune.DSY",
+  count: 250,
+  model: "claude-haiku-4-5",
+  bot_name: "Daisy",
+  max_tokens: 256,
+}
+
+opts = DEFAULTS.dup
+OptionParser.new do |o|
+  o.banner = "Usage: fortune-train [--dict FILE] [--out FILE] [--count N] [--model NAME] [--bot-name NAME]"
+  o.on("--dict FILE", "Word list (default #{DEFAULTS[:dict]})") { |v| opts[:dict] = v }
+  o.on("--out FILE", "Output .DSY (default #{DEFAULTS[:out]})") { |v| opts[:out] = v }
+  o.on("--count N", Integer, "Number of fortunes (default #{DEFAULTS[:count]})") { |v| opts[:count] = v }
+  o.on("--model NAME", "Anthropic model (default #{DEFAULTS[:model]})") { |v| opts[:model] = v }
+  o.on("--bot-name NAME", "Bot name in DSY header (default #{DEFAULTS[:bot_name]})") { |v| opts[:bot_name] = v }
+  o.on("-h", "--help") { puts o; exit 0 }
+end.parse!
+
+api_key = ENV["ANTHROPIC_API_KEY"]
+if api_key.nil? || api_key.empty?
+  warn "ANTHROPIC_API_KEY not set"
+  exit 1
+end
+
+unless File.exist?(opts[:dict])
+  warn "dictionary not found: #{opts[:dict]}"
+  exit 1
+end
+
+# Load dictionary, keep alphabetic words only (skip apostrophes, etc.).
+words = File.foreach(opts[:dict]).map(&:chomp).select { |w| w =~ /\A[A-Za-z]{3,}\z/ }
+if words.empty?
+  warn "no usable words in #{opts[:dict]}"
+  exit 1
+end
+
+uri = URI("https://api.anthropic.com/v1/messages")
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = true
+http.read_timeout = 60
+
+RETRY_CODES = %w[408 429 500 502 503 504 529].freeze
+MAX_RETRIES = 4
+
+def ask_fortune(http, uri, api_key, model, max_tokens, word, status:)
+  body = JSON.dump(
+    model: model,
+    max_tokens: max_tokens,
+    messages: [
+      { role: "user",
+        content: "Tell me my fortune based on the word: #{word}. " \
+                 "Reply with just the fortune itself, 1-3 sentences, no preamble." },
+    ],
+  )
+
+  attempt = 0
+  loop do
+    req = Net::HTTP::Post.new(uri)
+    req["x-api-key"] = api_key
+    req["anthropic-version"] = "2023-06-01"
+    req["content-type"] = "application/json"
+    req.body = body
+    res = http.request(req)
+
+    if res.is_a?(Net::HTTPSuccess)
+      data = JSON.parse(res.body)
+      parts = data["content"] || []
+      return parts.map { |p| p["text"] }.compact.join(" ").strip
+    end
+
+    # 4xx (except retry-eligible) won't recover — abort immediately.
+    if res.code.start_with?("4") && !RETRY_CODES.include?(res.code)
+      raise "API #{res.code}: #{res.body.to_s[0, 300]}"
+    end
+
+    if RETRY_CODES.include?(res.code) && attempt < MAX_RETRIES
+      retry_after = res["retry-after"]&.to_f
+      delay = retry_after && retry_after > 0 ? retry_after : (2.0 ** attempt) + rand
+      delay = [delay, 15].min
+      status.call("retry #{attempt + 1}/#{MAX_RETRIES} after #{delay.round(1)}s (HTTP #{res.code})")
+      sleep delay
+      attempt += 1
+      next
+    end
+
+    raise "API #{res.code}: #{res.body.to_s[0, 200]}"
+  end
+end
+
+corpus = Daisy::Corpus.new(bot_name: opts[:bot_name], learn_mode: true)
+bot = Daisy::Bot.new(corpus)
+
+# Save partial progress on Ctrl-C.
+interrupted = false
+trap("INT") do
+  # Second Ctrl-C: hard exit.
+  exit!(130) if interrupted
+  interrupted = true
+  raise Interrupt
+end
+
+rng = Random.new
+total = opts[:count]
+errors = 0
+
+show = lambda do |done, word, note|
+  pct = (done * 100.0 / total).round(1)
+  line = "[#{done}/#{total}] #{pct}%  errors=#{errors}  word=#{word.to_s.ljust(16)[0, 16]}  #{note}"
+  $stderr.print "\r\e[K#{line}"
+  $stderr.flush
+end
+
+begin
+  total.times do |i|
+    word = words[rng.rand(words.size)]
+    show.call(i, word, "requesting...")
+    status = ->(note) { show.call(i, word, note) }
+    begin
+      fortune = ask_fortune(http, uri, api_key, opts[:model], opts[:max_tokens], word, status: status)
+      tokens = bot.tokenize(fortune)
+      corpus.learn(tokens)
+    rescue Interrupt
+      raise
+    rescue => e
+      errors += 1
+      $stderr.print "\r\e[K"
+      warn "[#{i + 1}/#{total}] '#{word}' failed: #{e.message}"
+      # If the first handful all fail, the config is probably wrong (bad model,
+      # bad key). Don't burn 250 calls — bail.
+      if i < 3 && errors == i + 1
+        warn "aborting: first #{errors} request(s) all failed — check --model / API key"
+        break
+      end
+    end
+    show.call(i + 1, word, "ok")
+  end
+rescue Interrupt
+  $stderr.puts "\ninterrupted — saving partial corpus"
+end
+$stderr.puts
+
+corpus.save(opts[:out])
+puts "wrote #{opts[:out]} (#{corpus.total_word_tokens} tokens, #{corpus.sentences.size} sentences)"

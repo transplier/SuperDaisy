@@ -60,6 +60,24 @@ DAISY uses the original `.DSY` plaintext format:
 (under `daisy11 original freepascal/`) works as-is. To start fresh, create a
 file with just the two header lines.
 
+## Generating a personality with `fortune-train`
+
+`bin/fortune-train` builds a fresh `.DSY` by asking Claude Haiku for fortunes
+seeded on random dictionary words. Requires `ANTHROPIC_API_KEY`; stdlib only.
+
+```
+export ANTHROPIC_API_KEY=sk-ant-...
+./bin/fortune-train --out fortune.DSY                 # 250 fortunes, /usr/share/dict/words
+./bin/fortune-train --count 50 --out tiny.DSY         # smaller run
+./bin/fortune-train --dict /usr/share/dict/american-english --out fortune.DSY
+./bin/daisy --personality fortune.DSY                 # chat with the result
+```
+
+Flags: `--dict FILE` (default `/usr/share/dict/words`), `--out FILE` (default
+`fortune.DSY`), `--count N` (default 250), `--model NAME` (default
+`claude-haiku-4-5-20251001`), `--bot-name NAME` (default `Daisy`). Progress
+prints on stderr; Ctrl-C saves whatever has been collected so far.
+
 ## Tests
 
 ```
@@ -77,6 +95,7 @@ without dirtying the shipped corpus.
 ```
 lib/daisy.rb        # Corpus + Bot
 bin/daisy           # CLI entry point
+bin/fortune-train   # generate a .DSY from Haiku-written fortunes
 test/daisy_test.rb  # minitest suite
 DAISY.md            # technical write-up of the original
 ```
