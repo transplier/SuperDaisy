@@ -2,9 +2,13 @@
 # DAISY CLI: one-shot (-p) or interactive REPL.
 
 require "optparse"
-require_relative "../lib/daisy"
 
-options = { learn: false }
+MODELS = {
+  "daisy" => { require: "daisy", module: :Daisy },
+  "super_daisy" => { require: "super_daisy", module: :SuperDaisy },
+}.freeze
+
+options = { learn: false, model: "daisy" }
 parser = OptionParser.new do |o|
   o.banner = "Usage: daisy --personality FILE [-p PROMPT] [--learn]"
   o.on("--personality FILE", "Path to .DSY memory file (required)") { |v| options[:personality] = v }
@@ -12,9 +16,14 @@ parser = OptionParser.new do |o|
   o.on("--learn", "Learn from input; save corpus on exit") { options[:learn] = true }
   o.on("--seed N", Integer, "Seed the RNG (for deterministic output)") { |v| options[:seed] = v }
   o.on("--timeout SECS", Float, "Wall-clock cap on response generation (default 0.5; 0 to disable)") { |v| options[:timeout] = v }
+  o.on("--model NAME", MODELS.keys, "Backend: #{MODELS.keys.join(' | ')} (default daisy)") { |v| options[:model] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
+
+model = MODELS.fetch(options[:model])
+require_relative "../lib/#{model[:require]}"
+mod = Object.const_get(model[:module])
 
 unless options[:personality]
   warn parser.help
@@ -26,13 +35,13 @@ unless File.exist?(options[:personality])
   exit 1
 end
 
-corpus = Daisy::Corpus.load(options[:personality])
+corpus = mod::Corpus.load(options[:personality])
 rng = options[:seed] ? Random.new(options[:seed]) : Random.new
 bot_opts = { rng: rng }
 if options.key?(:timeout)
   bot_opts[:timeout] = options[:timeout].zero? ? nil : options[:timeout]
 end
-bot = Daisy::Bot.new(corpus, **bot_opts)
+bot = mod::Bot.new(corpus, **bot_opts)
 
 save_if_learning = -> {
   corpus.save(options[:personality]) if options[:learn]

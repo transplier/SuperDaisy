@@ -14,7 +14,7 @@ architecture, without erasing what makes her DAISY.
   often fails and she falls through to unconditioned Markov — those
   non-sequiturs are her signature.
 
-Anything that violates one of those is a different bot wearing her name.
+Anything that violates one of those is a different bot wearing her name. Preserving compatibility with .DSY "personality files" is a goal, although not a hard constraint (particularly if we can "upgrade" older files).
 
 ## Pipeline stage walkthrough
 
@@ -132,6 +132,7 @@ onward, instead of jumping straight to LLMs.
 - Is "she can only say what she's seen" really the kernel, or is it
   specifically "she only says what *some human* has said to her"? Affects
   whether RAG over external corpora (Wikipedia, books) is in-character.
+  Gia: Part of Daisy's charm is that her entire existence is "in a bottle" - that being, a plaintext .DSY file. So, no RAG or the like.
 - Where on the temperature dial is canonical DAISY? Probably hot — but
   worth measuring on the existing corpus before defining a default.
 - For preference learning: do we want explicit user signals during
