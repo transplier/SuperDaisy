@@ -147,6 +147,57 @@ class SuperDaisyComponentContractTest < Minitest::Test
     assert_includes [true, false], ugly
   end
 
+  def test_ppm_generator_returns_pair_and_emits_corpus_tokens
+    c = corpus_with("hello world today.",
+                    "hello there friend.",
+                    "the quick brown fox.",
+                    klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 3)
+    sentence, ugly = g.call(corpus: c,
+                            sampler: SuperDaisy::Components::UniformSampler.new,
+                            rng: Random.new(0),
+                            terminators: c.terminator_bigrams,
+                            max_length: 70)
+    assert_kind_of String, sentence
+    refute_empty sentence
+    sentence.split.each do |t|
+      assert_includes c.tokens, t, "PPM emitted non-corpus token: #{t.inspect}"
+    end
+    assert_includes [true, false], ugly
+  end
+
+  def test_ppm_high_order_recites_from_corpus
+    # Single sentence corpus; order-5 PPM has nowhere to go but recite it.
+    c = corpus_with("the only sentence she has ever seen.",
+                    klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 5)
+    sentence, _ = g.call(corpus: c,
+                         sampler: SuperDaisy::Components::UniformSampler.new,
+                         rng: Random.new(1),
+                         terminators: c.terminator_bigrams,
+                         max_length: 70)
+    assert_equal "the only sentence she has ever seen.", sentence
+  end
+
+  def test_ppm_backs_off_when_high_order_context_is_missing
+    # A corpus where 3-gram "hello world today" is unique but the bigram
+    # "world today" doesn't appear elsewhere — order=4 backs off through 3, 2, 1.
+    c = corpus_with("hello world today is good.",
+                    "today brings new beginnings.",
+                    "hello friend.",
+                    klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 4)
+    # Run a few times; if backoff is broken we'd see empty sentences or crashes.
+    5.times do |i|
+      sentence, _ = g.call(corpus: c,
+                           sampler: SuperDaisy::Components::UniformSampler.new,
+                           rng: Random.new(i),
+                           terminators: c.terminator_bigrams,
+                           max_length: 70)
+      refute_empty sentence
+    end
+  end
+
   def test_keyword_presence_filter_returns_count
     f = SuperDaisy::Components::KeywordPresenceFilter.new
     kw_set = { "cat" => true, "dog" => true }

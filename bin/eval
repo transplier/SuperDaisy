@@ -20,6 +20,8 @@ options = {
   report: nil,    # stdout if nil
   data: nil,      # skip if nil
   label: nil,
+  generator: "classic",
+  baseline: nil,
 }
 OptionParser.new do |o|
   o.banner = "Usage: bin/eval --personality FILE [opts]"
@@ -29,6 +31,8 @@ OptionParser.new do |o|
   o.on("--report FILE", "Markdown report output (default stdout)") { |v| options[:report] = v }
   o.on("--data FILE", "Write raw stats JSON for future drift comparison") { |v| options[:data] = v }
   o.on("--label NAME", "Variant label in the report (default: corpus basename)") { |v| options[:label] = v }
+  o.on("--generator NAME", "Generator: classic | ppm | ppm:N (default classic)") { |v| options[:generator] = v }
+  o.on("--baseline FILE", "Baseline data JSON; report KL drift from its response_bigrams") { |v| options[:baseline] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end.parse!
 
@@ -39,6 +43,20 @@ abort "prompts file not found: #{options[:prompts]}" unless File.exist?(options[
 prompts = File.readlines(options[:prompts], chomp: true).reject(&:empty?)
 corpus = SuperDaisy::Corpus.load(options[:personality])
 label = options[:label] || File.basename(options[:personality])
+
+def build_generator(spec)
+  case spec
+  when "classic"
+    SuperDaisy::Components::StrideThreeMarkovGenerator.new
+  when /\Appm(?::(\d+))?\z/
+    order = $1 ? $1.to_i : SuperDaisy::Components::PpmMarkovGenerator::DEFAULT_ORDER
+    SuperDaisy::Components::PpmMarkovGenerator.new(order: order)
+  else
+    abort "unknown --generator: #{spec.inspect}"
+  end
+end
+
+generator = build_generator(options[:generator])
 
 # ----- helpers ---------------------------------------------------------------
 
@@ -109,13 +127,13 @@ end
 
 # ----- run -------------------------------------------------------------------
 
-warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]}"
+warn "[eval] corpus=#{label} prompts=#{prompts.size} seeds=#{options[:seeds]} generator=#{options[:generator]}"
 warn "[eval] tokens=#{corpus.tokens.size} sentences=#{corpus.sentences.size}"
 
 records = []  # one entry per (prompt, seed) trial
 prompts.each_with_index do |prompt, pi|
   (1..options[:seeds]).each do |seed|
-    bot = SuperDaisy::Bot.new(corpus, rng: Random.new(seed))
+    bot = SuperDaisy::Bot.new(corpus, generator: generator, rng: Random.new(seed))
     t0 = monotime
     reply = bot.respond(prompt, learn: false)
     elapsed = monotime - t0
@@ -152,8 +170,23 @@ response_bigrams = bigram_counts(reply_tokens)
 corpus_bigrams = bigram_counts(corpus_tokens_per_sentence)
 kl_resp_corpus = kl_smoothed(response_bigrams, corpus_bigrams)
 
+# Optional: drift KL against a previously-saved baseline.
+kl_drift = nil
+baseline_label = nil
+if options[:baseline]
+  abort "baseline file not found: #{options[:baseline]}" unless File.exist?(options[:baseline])
+  baseline = JSON.parse(File.read(options[:baseline]))
+  baseline_bigrams = (baseline["response_bigrams"] || {}).each_with_object(Hash.new(0)) do |(k, v), h|
+    a, b = k.split(" ", 2)
+    h[[a, b]] = v
+  end
+  baseline_label = baseline.dig("aggregate", "label") || File.basename(options[:baseline])
+  kl_drift = kl_smoothed(response_bigrams, baseline_bigrams)
+end
+
 aggregate = {
   label: label,
+  generator: options[:generator],
   corpus: {
     path: options[:personality],
     tokens: corpus.tokens.size,
@@ -173,6 +206,8 @@ aggregate = {
     latency_p95_ms: (percentile(latencies, 0.95) || 0) * 1000,
     mean_attempts: mean.call(records.map { |r| r[:attempts] }),
     mean_kept: mean.call(records.map { |r| r[:kept] }),
+    kl_drift_from_baseline_bigrams_nats: kl_drift,
+    baseline_label: baseline_label,
   },
 }
 
@@ -188,6 +223,7 @@ begin
   io.puts
   c = aggregate[:corpus]
   io.puts "Corpus: `#{c[:path]}` — #{c[:sentences]} sentences, #{c[:word_tokens]} words"
+  io.puts "Generator: `#{aggregate[:generator]}`"
   io.puts "Prompts: #{aggregate[:config][:prompts]} (`#{options[:prompts]}`), #{aggregate[:config][:seeds]} seeds each, #{aggregate[:config][:trials]} trials"
   io.puts
   io.puts "## Metrics"
@@ -206,6 +242,9 @@ begin
   io.puts "| latency p95 (ms) | #{fmt(m[:latency_p95_ms])} |"
   io.puts "| mean attempts per response | #{fmt(m[:mean_attempts])} |"
   io.puts "| mean kept candidates per response | #{fmt(m[:mean_kept])} |"
+  if m[:kl_drift_from_baseline_bigrams_nats]
+    io.puts "| KL drift from baseline `#{m[:baseline_label]}` (nats) | #{fmt(m[:kl_drift_from_baseline_bigrams_nats])} |"
+  end
   io.puts
   io.puts "## Sample responses (seed=1)"
   io.puts
