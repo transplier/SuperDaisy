@@ -1,9 +1,12 @@
-# Super-DAISY: exploratory port of DAISY where we let modern LM ideas in
-# without breaking her kernel (she only says what she's seen, learning is
+# Super-DAISY: exploratory port of DAISY where modern LM ideas can be plugged
+# in without breaking her kernel (she only says what she's seen, learning is
 # corpus append, generation is a walk through memory). See SUPER_DAISY.md
-# for the design discussion.
+# for the design discussion and lib/super_daisy/components/ for the parts.
 #
-# Starts as a verbatim copy of lib/daisy.rb; diverges from here.
+# The Bot is now a thin orchestrator over seven swappable components:
+# Tokenizer, Scorer, Generator, Filter, Reranker, Memory, Sampler. With all
+# defaults wired in, output is bit-for-bit identical to DAISY for a given
+# seed.
 
 module SuperDaisy
   SENTINEL = "***"
@@ -47,14 +50,10 @@ module SuperDaisy
       invalidate_caches!
     end
 
-    # Case-insensitive, punctuation-stripped occurrence count.
-    # Backs the original "Percent" IDF surrogate. O(1) after a one-time
-    # corpus-wide scan; cache is invalidated on learn().
     def token_frequency(word)
       frequency_table[Corpus.clean(word).downcase] || 0
     end
 
-    # Hash<cleaned_lowercase_word, count> over all non-sentinel tokens.
     def frequency_table
       @frequency_cache ||= begin
         table = Hash.new(0)
@@ -74,7 +73,6 @@ module SuperDaisy
       total_word_tokens.zero?
     end
 
-    # Yields each sentence as an Array<String> of tokens (no sentinel).
     def each_sentence
       buf = []
       @tokens.each do |t|
@@ -96,13 +94,10 @@ module SuperDaisy
       end
     end
 
-    # Inverted index: raw-token → sorted array of positions in @tokens.
-    # Used by the Markov inner loop to skip O(N) scans.
     def positions_of(token)
       positions_index[token] || EMPTY
     end
 
-    # Set-of-bigrams ending every memorized sentence (the original's term.bfb).
     def terminator_bigrams
       @terminator_cache ||= begin
         set = {}
@@ -140,98 +135,51 @@ module SuperDaisy
       @terminator_cache = nil
     end
   end
+end
 
+# Components must load after Corpus / module constants exist — they reference
+# SuperDaisy::SENTINEL and SuperDaisy::Corpus.clean.
+require_relative "super_daisy/components/whitespace_tokenizer"
+require_relative "super_daisy/components/rarest_word_scorer"
+require_relative "super_daisy/components/uniform_sampler"
+require_relative "super_daisy/components/stride_three_markov_generator"
+require_relative "super_daisy/components/keyword_presence_filter"
+require_relative "super_daisy/components/overlap_reranker"
+require_relative "super_daisy/components/last_turn_memory"
+
+module SuperDaisy
   class Bot
     attr_accessor :max_candidates, :timeout, :pool_size, :max_length
-    attr_reader :corpus, :last_keywords
+    attr_reader :corpus
+    attr_reader :tokenizer, :scorer, :generator, :filter, :reranker, :memory, :sampler
 
-    # timeout: wall-clock cap in seconds (nil disables); the rejection loop
-    # also exits when either max_candidates attempts or pool_size hits are
-    # reached, matching the original's "give up gracefully" design.
-    def initialize(corpus, max_candidates: 1000, timeout: 0.5, pool_size: 10,
+    def initialize(corpus,
+                   tokenizer: Components::WhitespaceTokenizer.new,
+                   scorer:    Components::RarestWordScorer.new,
+                   generator: Components::StrideThreeMarkovGenerator.new,
+                   filter:    Components::KeywordPresenceFilter.new,
+                   reranker:  Components::OverlapReranker.new,
+                   memory:    Components::LastTurnMemory.new,
+                   sampler:   Components::UniformSampler.new,
+                   max_candidates: 1000, timeout: 0.5, pool_size: 10,
                    max_length: 70, rng: Random.new)
       @corpus = corpus
+      @tokenizer = tokenizer
+      @scorer = scorer
+      @generator = generator
+      @filter = filter
+      @reranker = reranker
+      @memory = memory
+      @sampler = sampler
       @max_candidates = max_candidates
       @timeout = timeout
       @pool_size = pool_size
       @max_length = max_length
       @rng = rng
-      @last_keywords = []
     end
 
-    # Lowercase, whitespace-split. Ensures the final token carries terminal
-    # punctuation (matches the pre-parse normalization in the original).
-    def tokenize(text)
-      text = text.to_s.downcase.strip
-      return [] if text.empty?
-      text += "." unless text =~ TERMINAL_PUNCT
-      text.split(/\s+/)
-    end
-
-    # Delegates to the corpus so callers can pass it explicitly to skip
-    # repeated lookups inside the rejection loop.
-    def terminator_bigrams
-      @corpus.terminator_bigrams
-    end
-
-    # 1st-order Markov walk with stride-3 emission. Returns [sentence, ugly].
-    def generate_sentence(terminators = terminator_bigrams)
-      sents = @corpus.sentences
-      return ["", false] if sents.empty?
-
-      seed = sents[@rng.rand(sents.size)]
-      words = seed.first(3).dup
-      ugly = false
-
-      loop do
-        last = words.last
-        positions = @corpus.positions_of(last)
-        break if positions.empty?
-
-        idx = positions[@rng.rand(positions.size)]
-        chunk = []
-        (1..3).each do |k|
-          nxt = @corpus.tokens[idx + k]
-          break if nxt.nil? || nxt == SENTINEL
-          chunk << nxt
-        end
-        break if chunk.empty?
-
-        # Local-cycle detection (matches the original's #14 sentinel triggers).
-        if words.size >= 3 && chunk.size >= 1
-          ugly ||= chunk[0] == words[-2]
-          ugly ||= chunk.size >= 2 && chunk[1] == words[-1]
-          ugly ||= chunk.size >= 3 && chunk[2] == chunk[0]
-        end
-
-        words.concat(chunk)
-
-        # Terminate when the trailing bigram matches a learned sentence ending.
-        if words.size >= 2 && terminators[[words[-2], words[-1]]]
-          break
-        end
-
-        if words.join(" ").length > @max_length
-          ugly = true
-          break
-        end
-      end
-
-      [words.join(" "), ugly]
-    end
-
-    # Rarest-word keyword extraction. All input tokens tied at the minimum
-    # corpus frequency are returned (matches BestResponse, daisy.pas:1655).
-    def keywords(input_tokens)
-      return [] if input_tokens.empty?
-      freqs = input_tokens.map { |t| [t, @corpus.token_frequency(t)] }
-      min_freq = freqs.map(&:last).min
-      freqs.select { |_, f| f == min_freq }.map(&:first)
-    end
-
-    # Top-level: optionally learn, then pick the best candidate response.
     def respond(input, learn: false)
-      tokens = tokenize(input)
+      tokens = @tokenizer.call(input)
       @corpus.learn(tokens) if learn && !tokens.empty?
       best_response(tokens)
     end
@@ -239,11 +187,11 @@ module SuperDaisy
     def best_response(input_tokens)
       return "" if @corpus.empty?
 
-      kws = keywords(input_tokens) + @last_keywords
-      kws.uniq!
-      @last_keywords = keywords(input_tokens)
+      fresh = @scorer.call(input_tokens, @corpus)
+      kws = (fresh + @memory.carry).uniq
+      @memory.record(fresh)
 
-      terminators = terminator_bigrams
+      terminators = @corpus.terminator_bigrams
       kw_set = kws.each_with_object({}) { |k, h| h[Corpus.clean(k).downcase] = true }
       candidates = []
       attempts = 0
@@ -251,9 +199,9 @@ module SuperDaisy
 
       while candidates.size < @pool_size && attempts < @max_candidates
         attempts += 1
-        sentence, ugly = generate_sentence(terminators)
+        sentence, ugly = generate(terminators)
         if !sentence.empty?
-          overlap = keyword_overlap(sentence, kw_set)
+          overlap = @filter.call(sentence, kw_set)
           if kw_set.empty? || overlap > 0
             candidates << [sentence, ugly, overlap]
           end
@@ -261,26 +209,21 @@ module SuperDaisy
         break if deadline && monotime >= deadline
       end
 
-      # Fallback: no keyword-bearing candidate found within budget.
+      # Fallback: no keyword-bearing candidate found within budget. Emit one
+      # unfiltered Markov sentence — DAISY's classic "give up gracefully."
       if candidates.empty?
-        sentence, _ugly = generate_sentence(terminators)
+        sentence, _ugly = generate(terminators)
         return sentence
       end
 
-      # Highest overlap wins; on ties, prefer non-ugly.
-      candidates.max_by.with_index { |(_s, ugly, ov), i| [ov, ugly ? 0 : 1, i] }[0]
+      @reranker.call(candidates)
     end
 
     private
 
-    # kw_set: Hash<cleaned_lowercase_keyword, true> built once per response.
-    def keyword_overlap(sentence, kw_set)
-      return 0 if kw_set.empty?
-      count = 0
-      sentence.split(/\s+/).each do |t|
-        count += 1 if kw_set[Corpus.clean(t).downcase]
-      end
-      count
+    def generate(terminators)
+      @generator.call(corpus: @corpus, sampler: @sampler, rng: @rng,
+                      terminators: terminators, max_length: @max_length)
     end
 
     def monotime
