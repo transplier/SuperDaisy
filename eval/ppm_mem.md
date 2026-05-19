@@ -1,6 +1,6 @@
 # Eval — ppm-mem
 
-_Generated 2026-05-19T22:32:50Z by `bin/eval`._
+_Generated 2026-05-19T22:46:45Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `ppm:4` | Scorer: `classic`
@@ -17,9 +17,9 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.104 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.754 |
 | KL(responses ‖ corpus) bigrams, nats | 0.940 |
-| latency p50 (ms) | 22.949 |
-| latency p95 (ms) | 24.155 |
-| KL drift from baseline `mem.dsy` (nats) | 1.329 |
+| latency p50 (ms) | 23.618 |
+| latency p95 (ms) | 24.698 |
+| KL drift from baseline `baseline-mem` (nats) | 1.329 |
 
 Diagnostic counts (kept in JSON): mean attempts 859.213, mean kept 2.233, mean length 6.500 tokens, distinct-3 0.113.
 

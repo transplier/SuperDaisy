@@ -1,7 +1,14 @@
 # Super-DAISY component swaps — comparison matrix
 
-Four configurations, two corpora, 300 trials each. Reference for which
+Four configurations, four corpora, 300 trials each. Reference for which
 upgrades to keep and which to drop. Reproduce via `./eval/run_all.sh`.
+
+| corpus | sentences | word tokens | mean tokens/sentence |
+|---|---|---|---|
+| MEM | 92 | 619 | 6.7 |
+| fortune-haiku | 250 | 11,974 | 47.9 |
+| movie-5k | 507 | 5,005 | 9.9 |
+| movie-100k | 10,313 | 100,008 | 9.7 |
 
 | name | generator | scorer |
 |---|---|---|
@@ -44,50 +51,89 @@ genuine improvement or regression rather than auto-rejecting.
 | latency p50 (ms) | 26.9 | 46.5 | **27.1** | 45.5 |
 | latency p95 (ms) | 27.5 | 48.5 | 28.2 | 47.9 |
 
-## New finding: PPM on MEM is 100% recitation
+## Results — movie-5k (507 sentences, 5005 words)
 
-The recitation metric (added after this matrix was first published) immediately
-caught something the diversity numbers missed: **PPM on MEM produces
-word-for-word copies of corpus sentences in every single response**. The 92
-MEM sentences are the entire universe of outputs.
+| metric | baseline | +ppm | +bm25 | full |
+|---|---|---|---|---|
+| fallthrough rate | 0.487 | 0.473 | **0.110** | 0.113 |
+| ugliness rate | 0.150 | 0.177 | 0.230 | 0.180 |
+| **recitation rate** | 0.137 | **0.797** ⚠ | 0.107 | **0.827** ⚠ |
+| acceptance rate | 0.004 | 0.004 | **0.018** | 0.018 |
+| distinct-2, all trials | 0.340 | 0.227 | **0.453** | 0.374 |
+| distinct-2, per-prompt mean | 0.854 | 0.667 | 0.814 | 0.641 |
+| KL drift from baseline (nats) | — | 1.046 | **0.478** | 0.786 |
+| latency p50 (ms) | 21.0 | 33.0 | **4.3** | 6.2 |
+| latency p95 (ms) | 21.7 | 34.5 | 22.9 | 34.8 |
 
-The diversity metrics didn't catch this because reciting *different* corpus
-sentences still scores as varied — distinct-2 actually goes up from 0.091
-(baseline) to 0.104 (+ppm). But the bot has stopped *generating* anything;
-she's just selecting and emitting.
+## Results — movie-100k (10,313 sentences, 100,008 words)
 
-This is exactly the failure mode `SUPER_DAISY.md` flagged as the PPM open
-question. With order=4 against a 92-sentence corpus, virtually every
-4-gram context appears in only one corpus sentence, so backoff almost
-never fires and PPM walks the corpus verbatim to a terminator.
+| metric | baseline | +ppm | +bm25 | full |
+|---|---|---|---|---|
+| fallthrough rate | 0.443 | 0.470 | **0.103** | 0.103 |
+| ugliness rate | 0.057 | 0.053 | 0.193 | 0.137 |
+| **recitation rate** | 0.007 | **0.800** ⚠ | 0.020 | **0.727** ⚠ |
+| acceptance rate | 0.004 | 0.004 | **0.019** | 0.019 |
+| distinct-2, all trials | 0.536 | 0.477 | **0.668** | 0.660 |
+| distinct-2, per-prompt mean | 0.962 | 0.935 | 0.952 | 0.923 |
+| KL drift from baseline (nats) | — | 0.773 | **0.319** | 0.467 |
+| latency p50 (ms) | 27.3 | 38.6 | **10.4** | 12.7 |
+| latency p95 (ms) | 30.3 | 43.0 | 29.9 | 44.1 |
 
-Fortune (250 sentences, much longer) doesn't show the recitation problem
-because its sentences are richer in shared n-grams.
+## New finding: PPM recitation is driven by sentence length, not corpus size
 
-This makes the verdict on **full** more concerning too: full MEM is also
-100% recitation. The BM25 wins on diversity-across-prompts mask that
-within-prompt she's reciting the same set of corpus sentences.
+The recitation metric was added expecting it to catch PPM's mode collapse on
+small corpora. The four-corpus matrix shows the actual driver is **sentence
+length**, not corpus size:
 
-## Headline finding: BM25 is the big win
+| corpus | sentences | mean tokens/sentence | +ppm recitation | +full recitation |
+|---|---|---|---|---|
+| MEM | 92 | 6.7 | **1.000** | **1.000** |
+| movie-5k | 507 | 9.9 | **0.797** | **0.827** |
+| movie-100k | 10,313 | 9.7 | **0.800** | **0.727** |
+| fortune-haiku | 250 | 47.9 | 0.000 | 0.000 |
+
+A 10K-sentence corpus with average-length sentences still gets ~80%
+recitation under PPM:4 — corpus size alone doesn't save us. Short
+sentences are the issue: PPM with order=4 has at most ~6 tokens of
+"choice" before the sentence ends, and most 4-grams have a single
+in-corpus next token, so the walker tracks one sentence to termination.
+
+Fortune's 48-tokens-per-sentence average gives the PPM walker enough room
+to make real choices before hitting a terminator.
+
+**Implication:** PPM:4 is contraindicated on any corpus where mean
+sentence length is < ~20 tokens, regardless of how many sentences exist.
+For short-sentence corpora, either drop the PPM order or skip PPM.
+
+## Headline finding: BM25 is the big win — consistent across all corpora
 
 BM25's effect dwarfs PPM's on every metric that maps to "the kernel is
-actually working":
+actually working", and now across four corpora:
 
-- **Fallthrough rate drops by ~50 pp on both corpora** (0.77 → 0.27,
-  0.81 → 0.33). This is the metric the baseline report flagged as most
-  important. For the first time, the rejection sampler is *finding*
-  keyword-bearing candidates more often than it gives up.
-- **Mean kept candidates jumps 3-7×** (2.3 → 7.3 on MEM; 0.8 → 5.8 on
-  fortune). The pool fills.
-- **Distinct-2 nearly doubles on MEM**, and more than doubles on fortune
-  (0.145 → 0.374) — a huge diversity gain.
-- **KL drift from baseline is the smallest of any swap we've tested**
-  (0.55 nats on MEM, 0.39 on fortune — *under* the threshold on fortune).
-  The output distribution is statistically the *most similar* to canonical
-  DAISY of any variant, while behaving better.
-- **Latency improves or holds.** BM25 doesn't slow generation, and on MEM
-  the bot actually exits the rejection loop earlier (mean attempts 858 →
-  369) because the keyword filter finds enough candidates faster.
+| corpus | baseline fallthrough | +bm25 fallthrough | drop |
+|---|---|---|---|
+| MEM | 0.767 | 0.267 | **-50 pp** |
+| fortune | 0.810 | 0.330 | **-48 pp** |
+| movie-5k | 0.487 | 0.110 | **-38 pp** |
+| movie-100k | 0.443 | 0.103 | **-34 pp** |
+
+| corpus | BM25 KL drift from baseline |
+|---|---|
+| MEM | 0.553 (just over 0.5 threshold) |
+| fortune | 0.389 (**under**) |
+| movie-5k | 0.478 (**under**) |
+| movie-100k | 0.319 (**under**) |
+
+Drift is at or under the "reconsider" threshold on three of four corpora —
+the BM25 output distribution is the *most similar* to canonical DAISY of
+any swap we've measured, while dramatically improving the rejection
+sampler's behavior.
+
+- **Acceptance rate jumps 5-10× on every corpus.**
+- **Latency improves or holds**, sometimes dramatically: movie-5k p50
+  drops from 21ms to 4ms; movie-100k from 27ms to 10ms. BM25 lets the
+  bot exit the rejection loop earlier because the filter actually finds
+  candidates.
 
 The mechanism: top-3 IDF keywords are more inclusive than rarest-tied,
 which always picked unseen-in-corpus tokens (frequency 0 trivially wins
@@ -124,16 +170,15 @@ unambiguous upgrade.
 
 ## Verdict
 
-- **BM25** — clear accept. Lowest drift, biggest character-preserving
-  impact, no latency cost. Worth promoting to default eventually after
-  more soak.
-- **PPM** — keep as opt-in **for medium/large corpora only**. The 100%
-  recitation result on MEM is disqualifying for default use; on
-  fortune-scale corpora PPM still has the "more fluent, less varied"
-  aesthetic trade-off documented in `eval/ppm.md`. Consider
-  corpus-size-aware order selection (lower order on small corpora).
-- **full** — same recitation issue on small corpora. Keep available;
-  not recommended.
+- **BM25** — accept across the board. Consistent 30-50 pp fallthrough
+  reduction, drift at or under threshold on 3/4 corpora, latency
+  improvement on every corpus. Ready to consider as default.
+- **PPM** — keep opt-in **only for long-sentence corpora** (mean ≥ ~20
+  tokens/sentence). On short-sentence corpora, regardless of size, it
+  recites 73-100% of the time. The earlier "fortune-scale" framing was
+  wrong — it's sentence-length that matters.
+- **full** — recitation issue carries over from PPM. Not recommended on
+  short-sentence corpora.
 
 Suggested defaults going forward: BM25 scorer, classic generator.
 

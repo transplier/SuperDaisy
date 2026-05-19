@@ -1,6 +1,6 @@
-# Eval — fortune-haiku-3-5-250
+# Eval — baseline-fortune
 
-_Generated 2026-05-19T22:32:44Z by `bin/eval`._
+_Generated 2026-05-19T22:46:38Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `classic`
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.145 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.909 |
 | KL(responses ‖ corpus) bigrams, nats | 0.559 |
-| latency p50 (ms) | 27.339 |
-| latency p95 (ms) | 28.609 |
+| latency p50 (ms) | 27.789 |
+| latency p95 (ms) | 28.697 |
 
 Diagnostic counts (kept in JSON): mean attempts 966.487, mean kept 0.833, mean length 12.163 tokens, distinct-3 0.166.
 

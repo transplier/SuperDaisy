@@ -1,6 +1,6 @@
 # Eval — ppm-fortune
 
-_Generated 2026-05-19T22:32:58Z by `bin/eval`._
+_Generated 2026-05-19T22:46:54Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:4` | Scorer: `classic`
@@ -17,9 +17,9 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.077 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.893 |
 | KL(responses ‖ corpus) bigrams, nats | 0.627 |
-| latency p50 (ms) | 46.721 |
-| latency p95 (ms) | 49.008 |
-| KL drift from baseline `fortune-haiku-3-5-250` (nats) | 2.223 |
+| latency p50 (ms) | 47.596 |
+| latency p95 (ms) | 79.586 |
+| KL drift from baseline `baseline-fortune` (nats) | 2.223 |
 
 Diagnostic counts (kept in JSON): mean attempts 965.683, mean kept 0.660, mean length 12.040 tokens, distinct-3 0.080.
 

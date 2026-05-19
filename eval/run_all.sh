@@ -21,46 +21,45 @@ cd "$(dirname "$0")/.."
 
 MEM='daisy11 original freepascal/MEM.DSY'
 FORTUNE='fortune-haiku-3-5-250.DSY'
+MOVIE5K='pretrained/movie-5k.DSY'
+MOVIE100K='pretrained/movie-100k.DSY'
+
+# Corpora as label:path pairs. Add a new corpus here and it joins the matrix.
+CORPORA=(
+  "mem:$MEM"
+  "fortune:$FORTUNE"
+  "movie5k:$MOVIE5K"
+  "movie100k:$MOVIE100K"
+)
 
 echo "[run_all] tests"
 ruby -Ilib test/daisy_test.rb >/dev/null
 ruby -Ilib test/super_daisy_test.rb >/dev/null
 
 echo "[run_all] baselines (parallel)"
-bin/eval --personality "$MEM" \
-         --label mem.dsy \
-         --report eval/baseline_mem.md --data eval/baseline_mem.json &
-bin/eval --personality "$FORTUNE" \
-         --label fortune-haiku-3-5-250 \
-         --report eval/baseline_fortune.md --data eval/baseline_fortune.json &
+for spec in "${CORPORA[@]}"; do
+  tag="${spec%%:*}"; path="${spec#*:}"
+  bin/eval --personality "$path" --label "baseline-$tag" \
+           --report "eval/baseline_${tag}.md" --data "eval/baseline_${tag}.json" &
+done
 wait
 
-echo "[run_all] +ppm, +bm25, full × {mem,fortune} (parallel)"
+echo "[run_all] +ppm, +bm25, full × all corpora (parallel)"
+for spec in "${CORPORA[@]}"; do
+  tag="${spec%%:*}"; path="${spec#*:}"
 
-# +ppm
-bin/eval --personality "$MEM" --label ppm-mem --generator ppm:4 \
-         --baseline eval/baseline_mem.json \
-         --report eval/ppm_mem.md --data eval/ppm_mem.json &
-bin/eval --personality "$FORTUNE" --label ppm-fortune --generator ppm:4 \
-         --baseline eval/baseline_fortune.json \
-         --report eval/ppm_fortune.md --data eval/ppm_fortune.json &
+  bin/eval --personality "$path" --label "ppm-$tag" --generator ppm:4 \
+           --baseline "eval/baseline_${tag}.json" \
+           --report "eval/ppm_${tag}.md" --data "eval/ppm_${tag}.json" &
 
-# +bm25
-bin/eval --personality "$MEM" --label bm25-mem --scorer bm25 \
-         --baseline eval/baseline_mem.json \
-         --report eval/bm25_mem.md --data eval/bm25_mem.json &
-bin/eval --personality "$FORTUNE" --label bm25-fortune --scorer bm25 \
-         --baseline eval/baseline_fortune.json \
-         --report eval/bm25_fortune.md --data eval/bm25_fortune.json &
+  bin/eval --personality "$path" --label "bm25-$tag" --scorer bm25 \
+           --baseline "eval/baseline_${tag}.json" \
+           --report "eval/bm25_${tag}.md" --data "eval/bm25_${tag}.json" &
 
-# full
-bin/eval --personality "$MEM" --label full-mem --generator ppm:4 --scorer bm25 \
-         --baseline eval/baseline_mem.json \
-         --report eval/full_mem.md --data eval/full_mem.json &
-bin/eval --personality "$FORTUNE" --label full-fortune --generator ppm:4 --scorer bm25 \
-         --baseline eval/baseline_fortune.json \
-         --report eval/full_fortune.md --data eval/full_fortune.json &
-
+  bin/eval --personality "$path" --label "full-$tag" --generator ppm:4 --scorer bm25 \
+           --baseline "eval/baseline_${tag}.json" \
+           --report "eval/full_${tag}.md" --data "eval/full_${tag}.json" &
+done
 wait
 
 if command -v gnuplot >/dev/null 2>&1; then
