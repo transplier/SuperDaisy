@@ -112,6 +112,27 @@ class SuperDaisyInstrumentationTest < Minitest::Test
   end
 end
 
+class SuperDaisyCorpusIndexTest < Minitest::Test
+  def test_next_tokens_after_returns_continuations_within_sentence
+    c = SuperDaisy::Corpus.new(tokens: %w[a b c *** a b d *** a b])
+    assert_equal %w[c d], c.next_tokens_after(%w[a b])
+    assert_equal %w[b b b], c.next_tokens_after(%w[a])
+    # 'b' at the end of a sentence has no in-sentence successor.
+    assert_equal %w[c d], c.next_tokens_after(%w[b])
+    # Empty context returns empty.
+    assert_equal [], c.next_tokens_after([])
+    # Unseen context returns empty.
+    assert_equal [], c.next_tokens_after(%w[x y])
+  end
+
+  def test_ngram_index_invalidated_on_learn
+    c = SuperDaisy::Corpus.new(tokens: %w[a b c ***])
+    assert_equal %w[c], c.next_tokens_after(%w[a b])
+    c.learn(%w[a b d])
+    assert_equal %w[c d], c.next_tokens_after(%w[a b])
+  end
+end
+
 class SuperDaisyComponentContractTest < Minitest::Test
   def test_whitespace_tokenizer
     t = SuperDaisy::Components::WhitespaceTokenizer.new

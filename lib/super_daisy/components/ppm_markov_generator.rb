@@ -14,10 +14,9 @@
 # Backoff is data-driven, not generative. No probability smoothing — we
 # treat the corpus as the ground-truth distribution.
 #
-# Performance note: each step does `corpus.positions_of(context.first)` and
-# verifies the full context match per position. For typical corpora and
-# orders 3-5 this is cheap; if it becomes a bottleneck we can add a K-gram
-# index to the corpus.
+# Performance note: K-gram lookups are O(1) hash lookups via the corpus's
+# `next_tokens_after` index, lazily built per order and invalidated on
+# learn(). Per-step cost is independent of corpus size.
 
 module SuperDaisy
   module Components
@@ -77,29 +76,9 @@ module SuperDaisy
       end
 
       # Every token that immediately follows `context` somewhere in the
-      # corpus, with multiplicity — so uniform sampling already weights by
-      # empirical frequency.
+      # corpus, with multiplicity. Delegates to the corpus's K-gram index.
       def next_token_candidates(corpus, context)
-        return [] if context.empty?
-        anchor = context.first
-        k = context.size
-        results = []
-        corpus.positions_of(anchor).each do |pos|
-          next if pos + k > corpus.tokens.size
-          match = true
-          (1...k).each do |i|
-            tok = corpus.tokens[pos + i]
-            if tok == SuperDaisy::SENTINEL || tok != context[i]
-              match = false
-              break
-            end
-          end
-          next unless match
-          nxt = corpus.tokens[pos + k]
-          next if nxt.nil? || nxt == SuperDaisy::SENTINEL
-          results << nxt
-        end
-        results
+        corpus.next_tokens_after(context)
       end
     end
   end

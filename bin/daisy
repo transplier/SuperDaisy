@@ -17,9 +17,14 @@ parser = OptionParser.new do |o|
   o.on("--seed N", Integer, "Seed the RNG (for deterministic output)") { |v| options[:seed] = v }
   o.on("--timeout SECS", Float, "Wall-clock cap on response generation (default 0.5; 0 to disable)") { |v| options[:timeout] = v }
   o.on("--model NAME", MODELS.keys, "Backend: #{MODELS.keys.join(' | ')} (default daisy)") { |v| options[:model] = v }
+  o.on("--generator NAME", "Generator (super_daisy only): classic | ppm | ppm:N") { |v| options[:generator] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
+
+if options[:generator] && options[:model] != "super_daisy"
+  abort "--generator requires --model super_daisy"
+end
 
 model = MODELS.fetch(options[:model])
 require_relative "../lib/#{model[:require]}"
@@ -40,6 +45,13 @@ rng = options[:seed] ? Random.new(options[:seed]) : Random.new
 bot_opts = { rng: rng }
 if options.key?(:timeout)
   bot_opts[:timeout] = options[:timeout].zero? ? nil : options[:timeout]
+end
+if options[:generator]
+  begin
+    bot_opts[:generator] = SuperDaisy::Components.build_generator(options[:generator])
+  rescue ArgumentError => e
+    abort "--generator: #{e.message}"
+  end
 end
 bot = mod::Bot.new(corpus, **bot_opts)
 

@@ -98,6 +98,18 @@ module SuperDaisy
       positions_index[token] || EMPTY
     end
 
+    # All tokens that immediately follow `context` somewhere in the corpus,
+    # with multiplicity (so uniform sampling already weights by empirical
+    # frequency). Backed by a lazily-built K-gram index keyed by the size of
+    # `context`. Cache is invalidated on learn().
+    #
+    # Contexts and their following tokens are restricted to within-sentence:
+    # we never return a token across a SENTINEL boundary.
+    def next_tokens_after(context)
+      return EMPTY if context.empty?
+      ngram_index(context.size)[context] || EMPTY
+    end
+
     def terminator_bigrams
       @terminator_cache ||= begin
         set = {}
@@ -128,11 +140,27 @@ module SuperDaisy
       end
     end
 
+    def ngram_index(k)
+      @ngram_cache ||= {}
+      @ngram_cache[k] ||= begin
+        h = {}
+        sentences.each do |sent|
+          next if sent.size <= k
+          (0..sent.size - k - 1).each do |i|
+            key = sent[i, k]
+            (h[key] ||= []) << sent[i + k]
+          end
+        end
+        h
+      end
+    end
+
     def invalidate_caches!
       @frequency_cache = nil
       @sentences_cache = nil
       @positions_cache = nil
       @terminator_cache = nil
+      @ngram_cache = nil
     end
   end
 end
@@ -147,6 +175,24 @@ require_relative "super_daisy/components/ppm_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
 require_relative "super_daisy/components/overlap_reranker"
 require_relative "super_daisy/components/last_turn_memory"
+
+module SuperDaisy
+  module Components
+    # Parse a string like "classic", "ppm", "ppm:4" into a generator instance.
+    # Used by bin/eval and bin/daisy so the CLI surface stays consistent.
+    def self.build_generator(spec)
+      case spec
+      when nil, "classic"
+        StrideThreeMarkovGenerator.new
+      when /\Appm(?::(\d+))?\z/
+        order = $1 ? $1.to_i : PpmMarkovGenerator::DEFAULT_ORDER
+        PpmMarkovGenerator.new(order: order)
+      else
+        raise ArgumentError, "unknown generator spec: #{spec.inspect}"
+      end
+    end
+  end
+end
 
 module SuperDaisy
   class Bot

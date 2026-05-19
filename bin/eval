@@ -44,19 +44,12 @@ prompts = File.readlines(options[:prompts], chomp: true).reject(&:empty?)
 corpus = SuperDaisy::Corpus.load(options[:personality])
 label = options[:label] || File.basename(options[:personality])
 
-def build_generator(spec)
-  case spec
-  when "classic"
-    SuperDaisy::Components::StrideThreeMarkovGenerator.new
-  when /\Appm(?::(\d+))?\z/
-    order = $1 ? $1.to_i : SuperDaisy::Components::PpmMarkovGenerator::DEFAULT_ORDER
-    SuperDaisy::Components::PpmMarkovGenerator.new(order: order)
-  else
-    abort "unknown --generator: #{spec.inspect}"
+generator =
+  begin
+    SuperDaisy::Components.build_generator(options[:generator])
+  rescue ArgumentError => e
+    abort "--generator: #{e.message}"
   end
-end
-
-generator = build_generator(options[:generator])
 
 # ----- helpers ---------------------------------------------------------------
 

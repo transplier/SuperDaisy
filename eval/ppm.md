@@ -5,6 +5,12 @@ First real Super-DAISY component swap: replacing the classic stride-3
 PPM-style walker with backoff (`PpmMarkovGenerator`). All other components
 unchanged. Evaluated against `eval/baseline.md`.
 
+> **Update note:** numbers below are from the K-gram-indexed PPM (latency-bound
+> by `max_candidates`, not by wall clock). An earlier draft of this report had
+> numbers from the slower position-scan implementation where every fortune
+> call hit the 500 ms timeout — that truncated iteration and *flattered*
+> PPM's diversity. The numbers here are the honest ones.
+
 ## What changed
 
 PPM tries to match the last `K` tokens of generated context against the
@@ -46,20 +52,20 @@ both `MEM.DSY` (92 sentences) and `fortune-haiku-3-5-250.DSY` (250 sentences).
 
 | metric | classic | PPM:3 | PPM:4 | PPM:5 |
 |---|---|---|---|---|
-| fallthrough rate | 0.810 | 0.873 | 0.900 | 0.907 |
-| ugliness rate | 0.840 | 0.900 | 0.983 | 0.963 |
-| mean length (tokens) | 12.2 | 12.2 | 12.4 | 12.4 |
-| distinct-2 | 0.146 | **0.456** | 0.388 | 0.334 |
-| distinct-3 | 0.169 | **0.528** | 0.455 | 0.380 |
-| KL(responses ‖ corpus) nats | 0.558 | **0.197** | 0.211 | 0.238 |
-| **KL drift from baseline (nats)** | — | **0.776** | **0.869** | **0.985** |
-| latency p50 (ms) | 27.3 | 501.6 | 501.8 | 502.0 |
-| latency p95 (ms) | 28.0 | 502.1 | 502.4 | 502.6 |
-| mean attempts | 966 | 832 | 687 | 592 |
-| mean kept | 0.83 | 0.61 | 0.58 | 0.55 |
+| fallthrough rate | 0.810 | 0.867 | 0.890 | 0.897 |
+| ugliness rate | 0.840 | 0.893 | 0.987 | 0.987 |
+| mean length (tokens) | 12.2 | ~12 | ~12 | ~12 |
+| distinct-2 | **0.146** | 0.079 | 0.080 | 0.066 |
+| distinct-3 | **0.169** | 0.082 | 0.084 | 0.069 |
+| KL(responses ‖ corpus) nats | 0.558 | 0.627 | 0.624 | 0.662 |
+| **KL drift from baseline (nats)** | — | **2.130** | **2.214** | **2.235** |
+| latency p50 (ms) | 27.3 | 43.3 | 46.4 | 47.0 |
+| latency p95 (ms) | 28.0 | 45.2 | 48.9 | 48.2 |
+| mean attempts | 966 | 968 | 966 | 966 |
+| mean kept | 0.83 | 0.66 | 0.66 | 0.69 |
 
-(`Bot#timeout` defaults to 0.5 s — PPM hits the wall-clock cap on fortune
-*every call*. The flat ~502 ms is the cap, not the cost of work.)
+After the K-gram index landed, PPM no longer hits the wall-clock cap (latency
+~46 ms vs. 500 ms before). All variants now run the full 1000-attempt budget.
 
 ## Stop-condition check (per `eval/baseline.md`)
 
@@ -100,50 +106,54 @@ points before exhausting matches.
 
 ## Verdict
 
-**Accept PPM as an opt-in alternative, do not change the default yet.**
+**Accept PPM as opt-in (`--generator ppm[:N]`), do not change the default.**
 
-Reasoning:
+The picture sharpened once the K-gram index made the eval timeout-independent:
 
-1. **KL drift exceeds the "reconsider" threshold but in the right direction.**
-   KL(responses ‖ corpus) actually *drops* under PPM (0.558 → ~0.2 on
-   fortune) — outputs are statistically closer to the corpus's own style.
-   The drift from baseline measures change-from-classic, not deterioration.
-2. **Diversity dramatically improves** on the corpus where classic was
-   visibly broken. 3× distinct-2 on fortune is a real qualitative win.
-3. **Character is intact.** Fallthrough rate is preserved or higher, kernel
-   invariants hold (every token from corpus, no smoothing), the famous
-   off-topic fallback is unchanged.
-4. **Latency is a real concern on big corpora.** PPM hits the wall-clock
-   cap on every fortune call. Acceptable for chat (still <1s) but the cap is
-   doing all the work; raise the cap or add a K-gram index before promoting
-   to default.
-5. **The MEM corpus has too much fallthrough for any generator change to
-   help much.** Both classic and PPM are dominated by the deterministic
-   fallback path. PPM's improvements show up when the rejection sampler
-   actually succeeds, which on MEM is rare (~23% of trials).
+1. **Latency is no longer a blocker.** Fortune p50 went from 502 ms (cap)
+   to 46 ms with the K-gram index. Both corpora well under chat-comfortable
+   latency.
+2. **KL drift from baseline is large** (2.1–2.2 nats on fortune; 1.3–1.8
+   on MEM) — far above the 0.5-nat "reconsider" threshold. PPM produces
+   distinctly different responses than classic.
+3. **Diversity is *worse* on fortune** under PPM (distinct-2 0.146 →
+   0.080). The previous draft of this report had the opposite finding;
+   that was an artifact of the wall-clock cap truncating iteration. With
+   the full 1000 attempts, PPM converges on a smaller set of
+   high-keyword-overlap winners that the reranker then picks repeatedly.
+4. **Character is preserved.** Fallthrough rate held (slight increase on
+   fortune); every emitted token still verbatim from the corpus; the
+   famous off-topic fallback path is unchanged.
+5. **The qualitative read is still better** (see sample table below):
+   PPM emits more grammatical, more in-style fortunes than classic, even
+   though the *set* of fortunes is smaller. So character-different in two
+   ways at once — more fluent per response, less varied across responses.
 
-**Recommended order: 4.** Order 3 is too close to classic; order 5 starts
-recitation-collapsing (5-gram contexts have very few matches in either
-corpus, so it backs off to lower order most of the time anyway and the
-extra cost is unjustified).
+**Recommended order: 4.** Orders 4 and 5 perform similarly on outputs;
+order 3 is closer to classic in style but no clear win. Higher orders
+recite more (single sentences as outputs); useful for small corpora
+where there's effectively one "voice" to learn.
+
+Why opt-in and not default: PPM trades classic's chaos-with-variety for
+"more fluent but more repetitive." That's a different aesthetic, not
+strictly better. Worth exposing as a knob.
 
 ## Followups
 
 - **Fix the ugly-flag measurement asymmetry.** Either port the
   3-token-chunk cycle check to PPM's stride-1 form, or rewrite the classic
   generator's check to be stride-1-equivalent. Currently the metric is
-  apples-to-oranges across generators.
-- **Add a K-gram index to Corpus** (`Hash<[t1..tK], Array<Int>>`,
-  lazy-built per K, invalidated on `learn()`) so PPM doesn't pay the
-  positions_of-then-verify cost per step. Should drop fortune latency
-  from 500 ms to tens of ms.
-- **Investigate why fallthrough rate *went up* on fortune** under PPM. My
-  guess: PPM produces longer coherent runs, more often hitting the
-  `max_length` cap before a terminator bigram, returning ugly candidates
-  that the orchestrator's filter then... wait, the filter doesn't look at
-  ugliness; that's the reranker's tiebreaker. So this needs proper
-  investigation. Stats already exist in `eval/ppm4_fortune.json`.
-- **Expose PPM via `bin/daisy --generator`** once latency is addressed.
+  apples-to-oranges across generators. *(In progress.)*
+- ~~**Add a K-gram index to Corpus.**~~ *(Done — 10× latency improvement on
+  the fortune corpus; PPM now bounded by `max_candidates` instead of the
+  wall-clock cap.)*
+- ~~**Expose PPM via `bin/daisy --generator`.**~~ *(Done.)*
+- **Investigate why fallthrough rate *went up* on fortune** under PPM.
+  Probably the same dynamic as the diversity drop — PPM's stronger
+  conditional structure produces a narrower output set, so when the
+  rejection sampler tries to find keyword-bearing candidates, it sees a
+  smaller distribution and exhausts the budget more often. Worth a closer
+  look in `eval/ppm4_fortune.json`.
 
 ## Files
 
