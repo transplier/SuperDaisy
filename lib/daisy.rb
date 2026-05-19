@@ -19,6 +19,7 @@ module Daisy
       @bot_name = bot_name
       @learn_mode = learn_mode
       @tokens = tokens
+      @frequency_cache = nil
     end
 
     def self.load(path)
@@ -42,13 +43,26 @@ module Daisy
       return if new_tokens.empty?
       @tokens.concat(new_tokens)
       @tokens << SENTINEL
+      @frequency_cache = nil
     end
 
     # Case-insensitive, punctuation-stripped occurrence count.
-    # Backs the original "Percent" IDF surrogate.
+    # Backs the original "Percent" IDF surrogate. O(1) after a one-time
+    # corpus-wide scan; cache is invalidated on learn().
     def token_frequency(word)
-      target = Corpus.clean(word).downcase
-      @tokens.count { |t| t != SENTINEL && Corpus.clean(t).downcase == target }
+      frequency_table[Corpus.clean(word).downcase] || 0
+    end
+
+    # Hash<cleaned_lowercase_word, count> over all non-sentinel tokens.
+    def frequency_table
+      @frequency_cache ||= begin
+        table = Hash.new(0)
+        @tokens.each do |t|
+          next if t == SENTINEL
+          table[Corpus.clean(t).downcase] += 1
+        end
+        table
+      end
     end
 
     def total_word_tokens
@@ -85,13 +99,13 @@ module Daisy
   end
 
   class Bot
-    attr_accessor :time_budget, :pool_size, :max_length
+    attr_accessor :max_candidates, :pool_size, :max_length
     attr_reader :corpus, :last_keywords
 
-    def initialize(corpus, time_budget: 3.0, pool_size: 10, max_length: 70,
+    def initialize(corpus, max_candidates: 1000, pool_size: 10, max_length: 70,
                    rng: Random.new)
       @corpus = corpus
-      @time_budget = time_budget
+      @max_candidates = max_candidates
       @pool_size = pool_size
       @max_length = max_length
       @rng = rng
@@ -191,19 +205,19 @@ module Daisy
       @last_keywords = keywords(input_tokens)
 
       terminators = terminator_bigrams
-      deadline = monotime + @time_budget
       candidates = []
+      attempts = 0
 
-      while candidates.size < @pool_size && monotime < deadline
+      while candidates.size < @pool_size && attempts < @max_candidates
+        attempts += 1
         sentence, ugly = generate_sentence(terminators)
         next if sentence.empty?
         overlap = keyword_overlap(sentence, kws)
         next if !kws.empty? && overlap.zero?
         candidates << [sentence, ugly, overlap]
-        break if monotime >= deadline
       end
 
-      # Fallback: no keyword-bearing candidate found within budget.
+      # Fallback: no keyword-bearing candidate found within attempt cap.
       if candidates.empty?
         sentence, _ugly = generate_sentence(terminators)
         return sentence
@@ -220,10 +234,6 @@ module Daisy
       sentence_tokens = sentence.split(/\s+/).map { |t| Corpus.clean(t).downcase }
       kw_clean = kws.map { |k| Corpus.clean(k).downcase }
       sentence_tokens.count { |t| kw_clean.include?(t) }
-    end
-
-    def monotime
-      Process.clock_gettime(Process::CLOCK_MONOTONIC)
     end
   end
 end

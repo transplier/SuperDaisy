@@ -93,9 +93,53 @@ without dirtying the shipped corpus.
 ## Layout
 
 ```
-lib/daisy.rb        # Corpus + Bot
-bin/daisy           # CLI entry point
-bin/fortune-train   # generate a .DSY from Haiku-written fortunes
-test/daisy_test.rb  # minitest suite
-DAISY.md            # technical write-up of the original
+lib/daisy.rb         # Corpus + Bot
+bin/daisy            # CLI entry point
+bin/fortune-train    # generate a .DSY from Haiku-written fortunes
+test/daisy_test.rb   # minitest suite
+benchmark/respond.rb # timing harness
+DAISY.md             # technical write-up of the original
 ```
+
+## Changes relative to the original
+
+Algorithmic behavior matches the original DAISY where it counts; the deltas
+below are either modernizations of the runtime or deliberate simplifications.
+See `DAISY.md` for the original's design.
+
+**Kept the same:**
+- `.DSY` file format (header + one token per line, `***` sentence separators)
+- 1st-order Markov walk with stride-3 emission (`Response` → `generate_sentence`)
+- Rarest-input-word keyword extraction as IDF surrogate (`Percent` → `keywords`)
+- Generate / filter-by-keyword / rerank-by-overlap pipeline (`BestResponse`)
+- Learned terminator bigrams as stop condition (`term.bfb` → `terminator_bigrams`)
+- "Ugly" sentence flag for local cycles and overlong outputs (the original's
+  `#14` sentinel char becomes a plain boolean)
+- Cross-turn keyword carryover (`LastSubs` → `@last_keywords`)
+- Append-only online learning (`Learn`)
+
+**Changed / dropped:**
+- **No DOS TUI.** The Pascal popup-window UI, F-key menus, colors, and the
+  per-character typing animation (`Writer`) are gone in favor of a plain
+  `stdin`/`stdout` CLI plus a REPL.
+- **No UDLP2 link mode or plug-ins.** `LinkMode`, `Expansion`, `PlugIn`,
+  `WRITER.EXE`, and `LINK.EXE` have no Ruby equivalent.
+- **No spell-correction UI.** The interactive corpus-rewrite tool
+  (`CorrectSpell`) is omitted; edit the `.DSY` file directly if you need to.
+- **No name-reflection trick.** The `#3`-sentinel substitution in `parse`/`Okay`
+  that swaps the user's name and the bot's name on echo is dropped — the CLI
+  doesn't have a user-name concept.
+- **No on-disk scratch files.** `buffer.bfb` (pre-warmed candidate pool) and
+  `term.bfb` (terminator n-grams) are in-memory and rebuilt as needed.
+- **No buffer pre-warm.** The original generated 50 sentences at startup to
+  hide Markov-scan latency on 2000-era hardware; modern CPUs don't need it.
+- **Iteration cap instead of wall-clock budget.** The original's "max thinking
+  time" (3 s default) is replaced by a `max_candidates` cap (default 1000) on
+  the rejection sampler — deterministic across machines and seeds.
+- **Cached corpus-wide frequency table.** `token_frequency` was an O(N) scan
+  per call in the original; now a `Hash<cleaned_lowercase_word, count>` is
+  built once and invalidated on `learn()`, making `keywords()` effectively
+  free.
+- **Seedable RNG.** `--seed N` flag on the CLI and `rng:` keyword on
+  `Daisy::Bot.new` for deterministic output (helpful for tests and
+  benchmarks). The original used Pascal's global `random()`.

@@ -74,9 +74,9 @@ class BotTest < Minitest::Test
     assert_equal ["platypus"], bot.keywords(%w[the platypus])
   end
 
-  def test_generate_sentence_terminates_within_budget
+  def test_generate_sentence_terminates
     c = corpus_with("hello world.", "hello there friend.", "world is round.")
-    bot = Daisy::Bot.new(c, time_budget: 1.0, rng: Random.new(0))
+    bot = Daisy::Bot.new(c, rng: Random.new(0))
     sentence, _ugly = bot.generate_sentence
     refute_empty sentence
     # Should consist only of tokens that appeared in the corpus.
@@ -92,7 +92,7 @@ class BotTest < Minitest::Test
       "i love the platypus very much.",
       "platypus is a unique animal."
     )
-    bot = Daisy::Bot.new(c, time_budget: 2.0, pool_size: 20, rng: Random.new(123))
+    bot = Daisy::Bot.new(c, pool_size: 20, rng: Random.new(123))
     # "the" is common, "platypus" is rare — rarest-wins keyword selection picks
     # "platypus", and rejection-sampling should surface a platypus-bearing candidate.
     reply = bot.respond("the platypus.", learn: false)
@@ -100,9 +100,9 @@ class BotTest < Minitest::Test
     assert_includes reply, "platypus"
   end
 
-  def test_best_response_honors_tiny_time_budget
+  def test_best_response_honors_max_candidates_cap
     c = corpus_with("hello world.", "goodbye world.")
-    bot = Daisy::Bot.new(c, time_budget: 0.001, rng: Random.new(7))
+    bot = Daisy::Bot.new(c, max_candidates: 1, rng: Random.new(7))
     reply = bot.respond("hello.", learn: false)
     assert_kind_of String, reply
   end

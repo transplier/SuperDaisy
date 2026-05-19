@@ -23,12 +23,11 @@ PROMPTS = [
   "hello daisy how are you",
   "what is your favorite animal",
   "tell me something interesting",
-  "the quick brown fox jumps",
-  "i love to learn new things",
 ].freeze
 
 SEED = 42
-TRIALS = 5  # repeated full passes through PROMPTS
+TRIALS = 2  # repeated full passes through PROMPTS
+MICRO_ITERS = 10
 
 def stats(times)
   sorted = times.sort
@@ -63,7 +62,7 @@ CORPORA.each do |path|
   puts "=" * 72
   puts "Corpus: #{path}"
   puts "  tokens=#{total_tokens}  words=#{word_tokens}  sentences=#{sentences}"
-  puts "  seed=#{SEED}  trials=#{TRIALS}  prompts=#{PROMPTS.size}  time_budget=3.0s"
+  puts "  seed=#{SEED}  trials=#{TRIALS}  prompts=#{PROMPTS.size}  max_candidates=1000"
   puts
 
   # Pre-warm (load file caches, JIT-ish, allocate constant pools).
@@ -88,20 +87,20 @@ CORPORA.each do |path|
   micro_bot = Daisy::Bot.new(corpus, rng: Random.new(SEED))
   tokens = micro_bot.tokenize(PROMPTS.first)
 
-  50.times do
+  MICRO_ITERS.times do
     t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     micro_bot.terminator_bigrams
     terminator_times << (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0)
   end
 
-  50.times do
+  MICRO_ITERS.times do
     t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     micro_bot.keywords(tokens)
     keywords_times << (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0)
   end
 
   term = micro_bot.terminator_bigrams
-  50.times do
+  MICRO_ITERS.times do
     t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     micro_bot.generate_sentence(term)
     generate_times << (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0)
