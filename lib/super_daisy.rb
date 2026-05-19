@@ -271,9 +271,10 @@ module SuperDaisy
 
     # Derive a sentence-character cap from the corpus's own mean sentence
     # length. 1.5x leaves room to occasionally exceed mean without
-    # truncating most natural outputs. Floor of 40 chars so an empty or
-    # tiny corpus has a sane cap.
-    def self.auto_max_length(corpus, factor: 1.5, floor: 40)
+    # truncating most natural outputs. Floor at 70 chars — the original
+    # DAISY's hard-coded cap. We don't want auto-scaling to make her
+    # *more* terse than canonical DAISY, only more generous.
+    def self.auto_max_length(corpus, factor: 1.5, floor: 70)
       sents = corpus.sentences
       return floor if sents.empty?
       mean_chars = sents.sum { |s| s.join(" ").length }.to_f / sents.size

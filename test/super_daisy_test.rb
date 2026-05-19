@@ -121,12 +121,12 @@ class SuperDaisyAutoMaxLengthTest < Minitest::Test
     sents = c.sentences
     mean = sents.sum { |s| s.join(" ").length }.to_f / sents.size
     assert_equal (mean * 1.5).round, cap
-    assert_operator cap, :>, 40, "test corpus chosen to exceed the floor"
+    assert_operator cap, :>, 70, "test corpus chosen to exceed the floor"
   end
 
   def test_auto_uses_floor_on_empty_corpus
     c = SuperDaisy::Corpus.new(tokens: [])
-    assert_equal 40, SuperDaisy::Bot.auto_max_length(c)
+    assert_equal 70, SuperDaisy::Bot.auto_max_length(c)
   end
 
   def test_bot_picks_auto_when_max_length_omitted
