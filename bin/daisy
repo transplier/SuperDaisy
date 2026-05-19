@@ -1,0 +1,57 @@
+#!/usr/bin/env ruby
+# DAISY CLI: one-shot (-p) or interactive REPL.
+
+require "optparse"
+require_relative "../lib/daisy"
+
+options = { learn: false }
+parser = OptionParser.new do |o|
+  o.banner = "Usage: daisy --personality FILE [-p PROMPT] [--learn]"
+  o.on("--personality FILE", "Path to .DSY memory file (required)") { |v| options[:personality] = v }
+  o.on("-p", "--prompt PROMPT", "One-shot: respond to PROMPT and exit") { |v| options[:prompt] = v }
+  o.on("--learn", "Learn from input; save corpus on exit") { options[:learn] = true }
+  o.on("-h", "--help") { puts o; exit 0 }
+end
+parser.parse!
+
+unless options[:personality]
+  warn parser.help
+  exit 1
+end
+
+unless File.exist?(options[:personality])
+  warn "personality file not found: #{options[:personality]}"
+  exit 1
+end
+
+corpus = Daisy::Corpus.load(options[:personality])
+bot = Daisy::Bot.new(corpus)
+
+save_if_learning = -> {
+  corpus.save(options[:personality]) if options[:learn]
+}
+
+if options[:prompt]
+  puts bot.respond(options[:prompt], learn: options[:learn])
+  save_if_learning.call
+  exit 0
+end
+
+trap("INT") do
+  save_if_learning.call
+  exit 0
+end
+
+loop do
+  print "> "
+  $stdout.flush
+  line = $stdin.gets
+  break if line.nil?
+  line = line.chomp
+  next if line.empty?
+  break if %w[exit quit].include?(line.downcase)
+  reply = bot.respond(line, learn: options[:learn])
+  puts "#{corpus.bot_name}> #{reply}"
+end
+
+save_if_learning.call
