@@ -308,8 +308,10 @@ module SuperDaisy
       _, eigvecs = SVD.call(sparse_rows, k: k, rng: Random.new(seed))
       warn "[super_daisy]   SVD done in #{(Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0).round(2)}s"
 
-      # 5. Re-shape into per-word vectors.
-      embeddings = Array.new(vocab.size) { Array.new(k, 0.0) }
+      # 5. Re-shape into per-word vectors. Size to `dims` (not k) so that
+      # consumers always get `dims`-length vectors, zero-padded if the
+      # corpus vocab was too small to fill all dimensions.
+      embeddings = Array.new(vocab.size) { Array.new(dims, 0.0) }
       eigvecs.each_with_index do |evec, dim|
         evec.each_with_index { |val, i| embeddings[i][dim] = val }
       end
@@ -415,6 +417,7 @@ require_relative "super_daisy/components/uniform_sampler"
 require_relative "super_daisy/components/temperature_sampler"
 require_relative "super_daisy/components/stride_three_markov_generator"
 require_relative "super_daisy/components/ppm_markov_generator"
+require_relative "super_daisy/components/guided_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
 require_relative "super_daisy/components/overlap_reranker"
 require_relative "super_daisy/components/density_reranker"
@@ -435,6 +438,9 @@ module SuperDaisy
       when /\Appm(?::(\d+))?\z/
         order = $1 ? $1.to_i : PpmMarkovGenerator::DEFAULT_ORDER
         PpmMarkovGenerator.new(order: order)
+      when /\Aguided(?::([\d.]+))?\z/
+        alpha = $1 ? $1.to_f : GuidedMarkovGenerator::DEFAULT_ALPHA
+        GuidedMarkovGenerator.new(alpha: alpha)
       else
         raise ArgumentError, "unknown generator spec: #{spec.inspect}"
       end
@@ -612,7 +618,8 @@ module SuperDaisy
     def generate(terminators, keywords)
       seed = @seed_selector.call(@corpus, @sampler, @rng, keywords: keywords)
       @generator.call(seed: seed, corpus: @corpus, sampler: @sampler, rng: @rng,
-                      terminators: terminators, max_length: @max_length)
+                      terminators: terminators, max_length: @max_length,
+                      keywords: keywords)
     end
 
     def monotime

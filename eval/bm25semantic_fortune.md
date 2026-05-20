@@ -1,6 +1,6 @@
 # Eval — bm25semantic-fortune
 
-_Generated 2026-05-20T04:15:50Z by `bin/eval`._
+_Generated 2026-05-20T05:21:37Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `semantic` | Reranker: `overlap` | max_length: `450` chars
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.373 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.883 |
 | KL(responses ‖ corpus) bigrams, nats | 0.180 |
-| latency p50 (ms) | 74.985 |
-| latency p95 (ms) | 160.896 |
+| latency p50 (ms) | 96.945 |
+| latency p95 (ms) | 170.916 |
 | KL drift from baseline `baseline-fortune` (nats) | 0.385 |
 
 Diagnostic counts (kept in JSON): mean attempts 521.987, mean kept 6.257, mean length 45.323 tokens, distinct-3 0.568.

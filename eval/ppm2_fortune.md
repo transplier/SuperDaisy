@@ -1,6 +1,6 @@
 # Eval — ppm2-fortune
 
-_Generated 2026-05-20T04:16:09Z by `bin/eval`._
+_Generated 2026-05-20T05:22:05Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -11,30 +11,30 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.803 |
-| ugliness rate (winner had ugly flag) | 0.120 |
+| ugliness rate (winner had ugly flag) | 0.130 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.238 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.880 |
-| KL(responses ‖ corpus) bigrams, nats | 0.634 |
-| latency p50 (ms) | 183.529 |
-| latency p95 (ms) | 461.697 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.270 |
+| distinct-2, across all trials | 0.274 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.884 |
+| KL(responses ‖ corpus) bigrams, nats | 0.559 |
+| latency p50 (ms) | 295.218 |
+| latency p95 (ms) | 505.922 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.149 |
 
-Diagnostic counts (kept in JSON): mean attempts 919.643, mean kept 1.527, mean length 31.043 tokens, distinct-3 0.282.
+Diagnostic counts (kept in JSON): mean attempts 879.327, mean kept 1.447, mean length 31.827 tokens, distinct-3 0.328.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | your frustration with current circumstances is temporary; soon you will find the clearest answers to their decisions. |
-| hi daisy | a shadow you've been avoiding will soon restore itself, leading to renewed clarity and strength that transforms your work into something resilient and unbreakable. what feels like an ending will reveal opportunities you've long ignored will soon reveal its greater importance—what you've overlooked as ordinary will become clear as you nourish both body and spirit. what you abandoned. |
-| good morning | the paths before you that requires both reverence and release. soon, you will soon step into the light, bringing unexpected relief and clarity. choose connection over conflict, and you will soon dissolve like morning mist. the path forward you've long ignored will soon demand acknowledgment, forcing you to do the same. |
-| how are you | a vision you've long hesitated to ask will soon become your greatest strength lies in how gracefully you move through your mistakes. |
+| hello | i can't provide a fortune based on a truer course. the bean has always been humble nourishment—sometimes we must be released. |
+| hi daisy | you stand at a crossroads where a decision or moment you've long ignored will soon dishevel your carefully laid plans, but from the compounding of small, deliberate steps forward. |
+| good morning | the seeds you plant now will become your greatest power lies in finding balance between two competing desires. what appears to be your greatest asset in overcoming obstacles that lie ahead. trust in the trials ahead. trust in the most rewarding victories are those you hold dear will soon dissolve like morning mist. the path you've long overlooked. what seems uncertain now will become the key to your unwavering belief in what others see as final. |
+| how are you | you will soon find its rightful place, revealing how deeply your concerns are interconnected with those around you, yet the greatest weight. |
 | what do you like | a thread has been pressing against your boundaries will soon demand acknowledgment, forcing you to do the same. |
-| tell me about yourself | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
+| tell me about yourself | your spirit thrives on vitality and passion, drawing others toward your infectious enthusiasm. a season of your life—work, love, creativity, and rest—sing together in perfect accord. your fortune suggests that by anchoring yourself to what your heart soon, illuminating a path of balance awaits you—the clarity you seek is already within reach; stop searching for sharp corners and embrace the smooth journey that has been cut to free you from what has |
 | what makes you happy | i can't provide a fortune based on that word. i'd be happy to create a fortune based on a different opportunity that changes your path. |
-| what is your favorite | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
+| what is your favorite | a new chapter of your heart, though small, carry the power to summon aid from those who find balance between hope and realism, and yours lies in learning when to lead yourself toward a singular purpose, and though the path you seek is already within reach; stop searching so frantically. the foundation for something lasting. your fortune calls you to let the picture develop. |
 | i had a good day | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
 | the weather is nice today | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
 | i feel tired | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |

@@ -560,6 +560,68 @@ class SuperDaisyComponentContractTest < Minitest::Test
     assert_equal "the only sentence she has ever seen.", sentence
   end
 
+  def test_guided_generator_returns_corpus_tokens
+    c = corpus_with("hello world today.",
+                    "hello there friend.",
+                    "the cat sat on the mat.",
+                    "the dog sat on the mat.",
+                    klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::GuidedMarkovGenerator.new(alpha: 1.0, dims: 8, min_count: 1)
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(0),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70,
+                      keywords: %w[cat])
+    refute_empty sentence
+    sentence.split.each do |t|
+      assert_includes c.tokens, t, "guided emitted non-corpus token: #{t.inspect}"
+    end
+  end
+
+  def test_guided_generator_alpha_zero_is_unbiased
+    # At α=0 the weighting reduces to count·exp(0) = count, which is
+    # uniform-over-multiset — same statistical behavior as PPM:1.
+    c = corpus_with("hello world today.",
+                    "hello there friend.",
+                    "the cat sat on the mat.",
+                    klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::GuidedMarkovGenerator.new(alpha: 0.0, dims: 8, min_count: 1)
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(0),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70,
+                      keywords: %w[unused])
+    refute_empty sentence
+  end
+
+  def test_guided_generator_with_no_keywords_falls_through_gracefully
+    c = corpus_with("hello world.", "goodbye world.", klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::GuidedMarkovGenerator.new(alpha: 2.0, dims: 4, min_count: 1)
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
+                      sampler: SuperDaisy::Components::UniformSampler.new,
+                      rng: Random.new(0),
+                      terminators: c.terminator_bigrams,
+                      max_length: 70,
+                      keywords: [])
+    refute_empty sentence
+  end
+
+  def test_build_generator_guided
+    g = SuperDaisy::Components.build_generator("guided")
+    assert_kind_of SuperDaisy::Components::GuidedMarkovGenerator, g
+    assert_in_delta SuperDaisy::Components::GuidedMarkovGenerator::DEFAULT_ALPHA, g.alpha, 1e-9
+
+    g2 = SuperDaisy::Components.build_generator("guided:0.5")
+    assert_in_delta 0.5, g2.alpha, 1e-9
+
+    assert_raises(ArgumentError) { SuperDaisy::Components::GuidedMarkovGenerator.new(alpha: -0.1) }
+  end
+
   def test_ppm_backs_off_when_high_order_context_is_missing
     c = corpus_with("hello world today is good.",
                     "today brings new beginnings.",

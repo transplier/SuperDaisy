@@ -83,6 +83,15 @@ for spec in "${CORPORA[@]}"; do
   # PPMI+SVD semantic seed selection — "peek into the future" closeout.
   bin/eval --personality "$path" --label "bm25semantic-$tag" --scorer bm25 --seed-selector semantic $base \
            --report "eval/bm25semantic_${tag}.md" --data "eval/bm25semantic_${tag}.json" &
+
+  # Semantically-guided Markov walker (growing-centroid bias). α sweep.
+  for alpha in 0.5 1.0 2.0; do
+    safe_alpha="${alpha/./_}"
+    bin/eval --personality "$path" --label "bm25seed-guided${safe_alpha}-$tag" \
+             --scorer bm25 --seed-selector keyword --generator "guided:$alpha" $base \
+             --report "eval/bm25seed_guided${safe_alpha}_${tag}.md" \
+             --data "eval/bm25seed_guided${safe_alpha}_${tag}.json" &
+  done
 done
 wait
 

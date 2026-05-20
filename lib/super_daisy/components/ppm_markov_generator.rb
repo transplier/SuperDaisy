@@ -26,7 +26,7 @@ module SuperDaisy
         @order = order
       end
 
-      def call(seed:, corpus:, sampler:, rng:, terminators:, max_length:)
+      def call(seed:, corpus:, sampler:, rng:, terminators:, max_length:, keywords: nil)
         return "" if seed.nil? || seed.empty?
 
         words = seed.first(3).dup

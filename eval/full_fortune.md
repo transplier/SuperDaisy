@@ -1,6 +1,6 @@
 # Eval — full-fortune
 
-_Generated 2026-05-20T04:15:54Z by `bin/eval`._
+_Generated 2026-05-20T05:21:32Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -11,25 +11,25 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.270 |
-| ugliness rate (winner had ugly flag) | 0.123 |
-| recitation rate (response = a corpus sentence verbatim) | 0.227 |
-| acceptance rate (kept / attempted candidates) | 0.013 |
-| distinct-2, across all trials | 0.246 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.707 |
-| KL(responses ‖ corpus) bigrams, nats | 0.330 |
-| latency p50 (ms) | 212.201 |
-| latency p95 (ms) | 493.422 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.865 |
+| ugliness rate (winner had ugly flag) | 0.117 |
+| recitation rate (response = a corpus sentence verbatim) | 0.217 |
+| acceptance rate (kept / attempted candidates) | 0.014 |
+| distinct-2, across all trials | 0.266 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.709 |
+| KL(responses ‖ corpus) bigrams, nats | 0.301 |
+| latency p50 (ms) | 245.291 |
+| latency p95 (ms) | 505.262 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.821 |
 
-Diagnostic counts (kept in JSON): mean attempts 501.120, mean kept 6.667, mean length 47.970 tokens, distinct-3 0.302.
+Diagnostic counts (kept in JSON): mean attempts 470.157, mean kept 6.587, mean length 47.447 tokens, distinct-3 0.328.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | a cunning mind serves you well in navigating the marketplace of life, but beware those who would exploit your trust for quick gain. your fortune lies not in what is fixed, but in the choices you make today. the seeds you plant today, though tended by your own hands, will bear fruit shared with those around you—remember that the harvest is sweeter when gathered together. your fortune lies not in possession, but in the bonds forged through mutual labor |
-| hi daisy | a natural leader with quiet strength, you possess the ability to weather storms and build lasting legacy. fortune favors those who question assumptions and forge their own understanding. |
-| good morning | the universe whispers that you are learning to step into the light of appreciation. good fortune flows toward those who truly taste what they have been given. |
+| hello | you stand at a crossroads where competing desires demand your attention, but speaking it aloud will free you from a burden you've carried too long. the reconciliation you seek begins not with grand gestures, but with honest words spoken quietly to those who matter most. your path forward opens when you stop defending who you were and embrace who you're becoming. |
+| hi daisy | mirach whispers of transformation through illumination—a star that shines brightest when surrounded by darkness, suggesting your greatest power lies in bringing light to confusion or chaos. this fortune indicates a period where your wisdom and clarity will guide others, and in doing so, you will discover your own path forward. |
+| good morning | a celebration is coming your way—something you've worked toward will finally reach fruition, bringing joy and validation. share this moment with those who supported you, for their presence will make the victory twice as sweet. good fortune favors the bold, and your courage will be rewarded soon. |
 | how are you | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to transform challenges into triumphs, for you possess a rare gift for turning ordinary moments into something truly extraordinary. marvelous fortune awaits those bold enough to take the helm. |
 | what do you like | a sudden impact will redirect your path, but what seems like a setback carries hidden opportunity within it. trust that the collision of plans and reality will ultimately set you on a truer course. the bean has always been humble nourishment—sometimes we must be broken down to become sustenance for something greater. |
 | tell me about yourself | the foundations of your life are about to unwind in unexpected directions—trust that this loosening will reveal opportunities you've long overlooked. what seems like chaos now is merely the mechanism resetting itself for greater momentum ahead. your fortune lies in understanding that sometimes you must let go of tension to truly move forward. |

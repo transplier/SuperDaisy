@@ -151,6 +151,81 @@ overall, but a successful demonstration that a dense-embedding swap
 can be done within the existing kernel-respecting framework if the SVD
 fit step is acceptable.
 
+## Guided Markov walker (growing-centroid bias) — α sweep
+
+A new generator (`GuidedMarkovGenerator`) that biases each Markov branch
+toward candidates which keep the running utterance close to the prompt
+centroid in PPMI+SVD space. Per-step weight:
+
+    weight(w) = count(w) · exp(α · cos(centroid(so_far + w), prompt_centroid))
+
+The "growing centroid" property is the key trick: adding one more token
+to a long so_far barely moves the centroid, so the bias decays naturally
+with sentence length. Early steps carry strong topical commitment; late
+steps are essentially free Markov walks. At α=0 it reduces to uniform-
+over-multiset.
+
+vs `+bm25+seed`:
+
+| corpus | metric | bm25+seed | guided:0.5 | guided:1.0 | guided:2.0 |
+|---|---|---|---|---|---|
+| MEM | recitation | 0.500 | **0.183** | **0.167** | **0.190** |
+| MEM | distinct-2 per-prompt | 0.558 | **0.637** | 0.631 | 0.647 |
+| MEM | KL drift | 0.538 | 1.119 | 1.112 | 1.113 |
+| fortune | distinct-2 | 0.364 | **0.406** | 0.401 | 0.389 |
+| fortune | fallthrough | 0.280 | 0.370 | 0.353 | 0.347 |
+| fortune | KL drift | 0.404 | 0.594 | 0.595 | 0.594 |
+| movie-5k | recitation | 0.040 | **0.013** | 0.017 | 0.013 |
+| movie-5k | distinct-2 | 0.756 | **0.796** | 0.772 | 0.766 |
+| movie-100k | recitation | 0.023 | **0.007** | 0.007 | **0.000** |
+| movie-100k | distinct-2 | 0.787 | **0.803** | 0.785 | 0.777 |
+
+**The genuinely interesting findings:**
+
+1. **Recitation drops sharply.** On MEM, guided cuts recitation from 50%
+   to ~18% — a 3× reduction. On movie-100k it drops from 2.3% to 0%.
+   The growing-centroid bias gives the walker more freedom to deviate
+   from corpus paths because it has an alternative "reward signal"
+   beyond "match what the corpus did next."
+
+2. **Per-prompt diversity goes *up*, not down.** Across every corpus the
+   guided walker explores *more* variety per prompt than the unbiased
+   version. Counterintuitive — we expected the bias to concentrate
+   outputs — but it makes sense in retrospect: the bias is positive
+   pressure toward "the topical neighborhood," not toward "this specific
+   continuation," so the walker explores within that neighborhood freely.
+
+3. **α=0.5 vs α=2.0 barely differ.** The three α values produce very
+   similar metrics. The bias *direction* matters more than the *strength*
+   — even mild α gets the qualitative behavior. Probably the
+   growing-centroid decay flattening the effect.
+
+**The big problem: latency.** Guided variants hit the 500ms wall-clock
+cap on every corpus except MEM. The per-step cost is `O(C · K)` where
+C is candidate count and K is embedding dim, and on the movie corpora
+typical C is hundreds — each Markov step requires hundreds of K=50-dim
+dot products. Times ~10 steps per sentence times ~1000 attempts per
+response = hitting the cap. The latency cuts rejection-sampler attempts
+short, which probably understates the real metric improvement under
+unbounded compute.
+
+**KL drift breaks the threshold on MEM** (~1.1 nats) but stays close to
+acceptable on movie corpora (~0.4). MEM's tiny vocab makes the
+embedding space coarse, so biasing matters more there.
+
+**Verdict:** the architecture works and recitation drops, which is a
+real kernel-preservation win we hadn't seen elsewhere. But the per-step
+compute cost makes this configuration impractical without further
+optimization (cache candidate embeddings as a packed array, precompute
+deltas instead of full centroid recompute, vectorize the cosine). Worth
+keeping as opt-in with a documented performance caveat; not ready for
+default.
+
+The growing-centroid intuition is validated: bias-with-decay produces
+*less* recitation and *more* diversity than the unbiased walker. That's
+the opposite of what canonical guided-decoding usually gives you — and
+it's why this variant deserved the experiment.
+
 ## Density reranker is a length knob
 
 The overlap reranker scores candidates by raw keyword count — `the cat

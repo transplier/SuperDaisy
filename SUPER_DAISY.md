@@ -249,5 +249,12 @@ Plus a few items that emerged during evaluation:
 - ~~auto max_length from corpus~~ (done, accepted)
 - ~~prompt-aware seed selection (Option 1)~~ (done, accepted)
 - ~~keyword-density reranker (Option 4)~~ (done, accepted as opt-in)
-- Options 2-3 above (not yet)
+- ~~goal-biased branch selection with growing-centroid decay~~ (done,
+  see GuidedMarkovGenerator; the kernel-honest variant of Option 3 that
+  uses cos(running-centroid + candidate, prompt) instead of hard
+  per-step pulls. Recitation drops sharply (50% → 18% on MEM), per-
+  prompt diversity rises. Latency hits the wall-clock cap on movie
+  corpora pending per-step optimization; documented as opt-in with
+  caveat.)
+- Option 2 above (bidirectional walk from keyword anchor — not yet)
 - K-turn memory swap (the current LastTurnMemory is the minimal version)

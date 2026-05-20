@@ -1,6 +1,6 @@
 # Eval — ppm-fortune
 
-_Generated 2026-05-20T04:16:20Z by `bin/eval`._
+_Generated 2026-05-20T05:22:16Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -10,33 +10,33 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 | metric | value |
 |---|---|
-| fallthrough rate (unconditioned-Markov fallback) | 0.803 |
-| ugliness rate (winner had ugly flag) | 0.097 |
-| recitation rate (response = a corpus sentence verbatim) | 0.180 |
+| fallthrough rate (unconditioned-Markov fallback) | 0.807 |
+| ugliness rate (winner had ugly flag) | 0.103 |
+| recitation rate (response = a corpus sentence verbatim) | 0.170 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.128 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.839 |
-| KL(responses ‖ corpus) bigrams, nats | 0.787 |
-| latency p50 (ms) | 217.470 |
-| latency p95 (ms) | 501.594 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.459 |
+| distinct-2, across all trials | 0.170 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.845 |
+| KL(responses ‖ corpus) bigrams, nats | 0.674 |
+| latency p50 (ms) | 352.591 |
+| latency p95 (ms) | 507.845 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.298 |
 
-Diagnostic counts (kept in JSON): mean attempts 907.003, mean kept 1.483, mean length 48.207 tokens, distinct-3 0.148.
+Diagnostic counts (kept in JSON): mean attempts 871.277, mean kept 1.377, mean length 47.070 tokens, distinct-3 0.199.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | the grains of your life are about to unwind in unexpected directions—trust that this loosening will reveal opportunities you've long overlooked. what seems like chaos now is merely the mechanism resetting itself for greater momentum ahead. your fortune lies in learning when to speak and when to listen. |
-| hi daisy | a change of perspective will soon elevate your circumstances; what appears obscured from below will become clear when you rise to meet it. fortune favors those who move with grace rather than against resistance. |
+| hello | a truth you've long kept hidden, and in that vulnerability, you will discover an unexpected connection with someone who truly listens. |
+| hi daisy | the letters of your name suggest a path marked by intensity and commanding presence, yet fortune whispers a cautionary tale: those who grasp too tightly at power often find it slips through their fingers like sand. your destiny calls you toward transformation and renewal, but only if you surrender your grip on outcomes and trust in the natural unfolding of your plans, for abundance blooms when you balance patience with action. a name tied to fields |
 | good morning | you stand at the threshold of a profound transformation, where the limitations you've accepted will soon dissolve like morning mist. the path forward demands both humility and courage to try again. |
-| how are you | your path curves gently like a circle, bringing you back to where you began—but wiser. the completion you seek is already within reach, waiting only for you to interpret the signs life presents. trust that transformation comes not from changing circumstances, but from changing how you perceive them. |
+| how are you | your path, like the maple leaf, will turn vibrant colors through seasons of change—each transformation bringing unexpected beauty. the sweetness you seek is already within reach, waiting only for you to interpret the signs life presents. trust that transformation comes not from changing circumstances, but from changing how you perceive them. |
 | what do you like | your path is illuminated by authenticity and courage—those who live boldly in their truth inspire others to do the same. |
-| tell me about yourself | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
-| what makes you happy | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
+| tell me about yourself | a sharp change approaches in your life, cutting away what no longer serves you, you'll ascend to a version of yourself you've only glimpsed in dreams. |
+| what makes you happy | a difficult season you're passing through will teach you resilience you didn't know you possessed, and from this hardship will emerge a compassion that becomes your greatest strength. |
 | what is your favorite | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
 | i had a good day | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
-| the weather is nice today | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
+| the weather is nice today | a gentle transformation awaits you, much like leaves unfolding in warm water—what seems small and humble will reveal unexpected depth and richness when given time and patience. the answer you seek is already within reach; stop searching for sharp corners and embrace the smooth journey that unfolds. fortune favors those who question assumptions and forge their own understanding. |
 | i feel tired | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
 | computers are fun | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
 | tell me about a platypus | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
