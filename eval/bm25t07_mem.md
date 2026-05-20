@@ -1,6 +1,6 @@
 # Eval — bm25t07-mem
 
-_Generated 2026-05-20T03:39:53Z by `bin/eval`._
+_Generated 2026-05-20T04:15:38Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.7` | Seed: `uniform` | Reranker: `overlap` | max_length: `70` chars
@@ -12,22 +12,22 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.267 |
 | ugliness rate (winner had ugly flag) | 0.073 |
-| recitation rate (response = a corpus sentence verbatim) | 0.367 |
+| recitation rate (response = a corpus sentence verbatim) | 0.373 |
 | acceptance rate (kept / attempted candidates) | 0.020 |
-| distinct-2, across all trials | 0.175 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.664 |
-| KL(responses ‖ corpus) bigrams, nats | 0.373 |
-| latency p50 (ms) | 56.048 |
-| latency p95 (ms) | 277.751 |
-| KL drift from baseline `baseline-mem` (nats) | 1.088 |
+| distinct-2, across all trials | 0.180 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.666 |
+| KL(responses ‖ corpus) bigrams, nats | 0.349 |
+| latency p50 (ms) | 61.014 |
+| latency p95 (ms) | 349.530 |
+| KL drift from baseline `baseline-mem` (nats) | 1.069 |
 
-Diagnostic counts (kept in JSON): mean attempts 367.890, mean kept 7.333, mean length 7.747 tokens, distinct-3 0.245.
+Diagnostic counts (kept in JSON): mean attempts 363.767, mean kept 7.333, mean length 7.767 tokens, distinct-3 0.252.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | bill clinton is that too much to expect? |
+| hello | please, stop repeating everything i say! |
 | hi daisy | hi, daisy, how are you today? |
 | good morning | i feel good food. |
 | how are you | daisy, you are you? |

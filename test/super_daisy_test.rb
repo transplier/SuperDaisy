@@ -164,6 +164,116 @@ class SuperDaisyUglyTest < Minitest::Test
   end
 end
 
+class SuperDaisySVDTest < Minitest::Test
+  # Find the top eigenpair of a known symmetric matrix and check the
+  # Rayleigh quotient. Power iteration is iterative; we allow tolerance.
+  def test_truncated_eigh_recovers_top_eigenvector_of_simple_matrix
+    # 2x2: [[2, 1], [1, 2]]. Eigenvalues: 3 and 1.
+    sparse = [
+      [[0, 2.0], [1, 1.0]],
+      [[0, 1.0], [1, 2.0]],
+    ]
+    eigvals, eigvecs = SuperDaisy::SVD.call(sparse, k: 2, iters: 50, rng: Random.new(1))
+    top = eigvals.max
+    assert_in_delta 3.0, top, 0.01
+    # The top eigenvector should be ~[1/√2, 1/√2] (or its negative).
+    top_idx = eigvals.index(top)
+    v = eigvecs[top_idx]
+    assert_in_delta (1.0 / Math.sqrt(2)).abs, v[0].abs, 0.05
+    assert_in_delta (1.0 / Math.sqrt(2)).abs, v[1].abs, 0.05
+  end
+
+  def test_truncated_eigh_handles_empty_matrix
+    eigvals, eigvecs = SuperDaisy::SVD.call([], k: 3, rng: Random.new(0))
+    assert_empty eigvals
+    assert_empty eigvecs
+  end
+end
+
+class SuperDaisySemanticEmbeddingsTest < Minitest::Test
+  # Two related words ("cat" and "dog" appearing in similar contexts)
+  # should have higher cosine similarity than two unrelated ones.
+  def test_embeddings_capture_distributional_similarity
+    # Cat and dog appear in very similar contexts; spaceship in a
+    # disjoint one. With enough sentences PPMI+SVD should reflect that.
+    pet_lines = [
+      "the cat sat on the mat",
+      "the dog sat on the mat",
+      "the cat ate the food",
+      "the dog ate the food",
+      "i love my cat",
+      "i love my dog",
+      "the cat slept on the bed",
+      "the dog slept on the bed",
+      "the cat watched the bird",
+      "the dog watched the bird",
+      "a cat purred quietly",
+      "a dog barked loudly",
+      "a cat chased the ball",
+      "a dog chased the ball",
+    ]
+    ship_lines = [
+      "the spaceship orbited the planet",
+      "the spaceship landed on the moon",
+      "the spaceship traveled through the void",
+      "an alien piloted the spaceship",
+      "the spaceship docked at the station",
+      "a damaged spaceship drifted in space",
+    ]
+    tokens = []
+    (pet_lines + ship_lines).each { |s| tokens.concat(s.split); tokens << "***" }
+    c = SuperDaisy::Corpus.new(tokens: tokens)
+
+    opts = { dims: 16, min_count: 2, seed: 1 }
+    cat = c.word_embedding("cat", **opts)
+    dog = c.word_embedding("dog", **opts)
+    ship = c.word_embedding("spaceship", **opts)
+    refute_nil cat
+    refute_nil dog
+    refute_nil ship
+
+    sim_cat_dog = cosine(cat, dog)
+    sim_cat_ship = cosine(cat, ship)
+    assert_operator sim_cat_dog, :>, sim_cat_ship,
+                    "cat-dog should be more similar than cat-spaceship; " \
+                    "got #{sim_cat_dog.round(3)} vs #{sim_cat_ship.round(3)}"
+  end
+
+  def test_below_min_count_words_have_no_embedding
+    c = SuperDaisy::Corpus.new(tokens: %w[
+      the cat sat. ***
+      the dog sat. ***
+      the cat ran. ***
+      raredog appeared once.
+    ])
+    # "raredog" appears once; with min_count=2 it's excluded.
+    assert_nil c.word_embedding("raredog", dims: 4, min_count: 2, seed: 0)
+    refute_nil c.word_embedding("cat", dims: 4, min_count: 2, seed: 0)
+  end
+
+  def test_sentence_embeddings_returns_vector_per_sentence
+    c = SuperDaisy::Corpus.new(tokens: %w[
+      hello world. ***
+      hello there. ***
+      goodbye world.
+    ])
+    vecs = c.sentence_embeddings(dims: 4, min_count: 1, seed: 0)
+    assert_equal 3, vecs.size
+    vecs.each { |v| assert_equal 4, v.size }
+  end
+
+  private
+
+  def cosine(a, b)
+    na = Math.sqrt(a.sum { |x| x * x })
+    nb = Math.sqrt(b.sum { |x| x * x })
+    return 0 if na < 1e-12 || nb < 1e-12
+    dot = 0.0
+    a.each_with_index { |x, i| dot += x * b[i] }
+    dot / (na * nb)
+  end
+end
+
 class SuperDaisyCorpusIndexTest < Minitest::Test
   def test_next_tokens_after_returns_continuations_within_sentence
     c = SuperDaisy::Corpus.new(tokens: %w[a b c *** a b d *** a b])
@@ -486,7 +596,31 @@ class SuperDaisyComponentContractTest < Minitest::Test
                    SuperDaisy::Components.build_seed_selector(nil)
     assert_kind_of SuperDaisy::Components::KeywordSeedSelector,
                    SuperDaisy::Components.build_seed_selector("keyword")
+    assert_kind_of SuperDaisy::Components::SemanticSeedSelector,
+                   SuperDaisy::Components.build_seed_selector("semantic")
+    semantic32 = SuperDaisy::Components.build_seed_selector("semantic:32")
+    assert_equal 32, semantic32.dims
     assert_raises(ArgumentError) { SuperDaisy::Components.build_seed_selector("nope") }
+  end
+
+  def test_semantic_seed_selector_returns_a_corpus_sentence
+    c = corpus_with(
+      "the cat sat on the mat.",
+      "the dog sat on the mat.",
+      "the spaceship orbited the planet.",
+      "a cat purred quietly.",
+      klass: SuperDaisy::Corpus,
+    )
+    s = SuperDaisy::Components::SemanticSeedSelector.new(dims: 8, min_count: 1, top_n: 3)
+    seed = s.call(c, SuperDaisy::Components::UniformSampler.new, Random.new(0), keywords: %w[cat])
+    assert_includes c.sentences, seed
+  end
+
+  def test_semantic_seed_selector_falls_back_when_keywords_have_no_embeddings
+    c = corpus_with("alpha beta gamma.", klass: SuperDaisy::Corpus)
+    s = SuperDaisy::Components::SemanticSeedSelector.new(dims: 4, min_count: 1)
+    seed = s.call(c, SuperDaisy::Components::UniformSampler.new, Random.new(0), keywords: %w[absent])
+    assert_includes c.sentences, seed
   end
 
   def test_last_turn_memory_carry_and_record

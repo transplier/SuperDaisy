@@ -92,6 +92,65 @@ full data in the per-config `eval/*.{md,json}` files.)
 clean negative result" section. Full data still in `eval/bm25t05_*.json` and
 `eval/bm25t07_*.json`.)
 
+## PPMI+SVD semantic seed selection (peek-into-the-future closeout)
+
+`SemanticSeedSelector` generalizes `KeywordSeedSelector` from
+"sentences containing a literal keyword" to "sentences whose centroid
+is closest to the prompt centroid in a K-dim PPMI+SVD embedding space."
+
+Embeddings are computed once per corpus by:
+1. Building word-word co-occurrence counts within ±5 tokens.
+2. Transforming to positive pointwise mutual information.
+3. Truncated symmetric eigendecomposition via pure-Ruby power iteration
+   with deflation (`lib/super_daisy/svd.rb`).
+
+K=50 by default. No external data; the corpus is the only input.
+
+This is the "peek into the future" closeout — it's the only swap that
+includes an explicit fit step (the SVD), putting it in the kernel gray
+zone per `SUPER_DAISY.md`. Worth running once to see how a dense-
+embedding swap behaves in the architecture.
+
+vs `+bm25+seed`:
+
+| corpus | bm25seed fallthrough | bm25semantic fallthrough | bm25seed distinct-2 | bm25semantic distinct-2 |
+|---|---|---|---|---|
+| MEM | 0.267 | 0.267 | 0.177 | **0.188** |
+| fortune | 0.280 | **0.270** | 0.363 | **0.373** |
+| movie-5k | **0.067** | 0.067 | **0.756** | 0.705 |
+| movie-100k | **0.063** | 0.067 | **0.787** | 0.693 |
+
+KL drift stays in the same band (0.385-0.568 nats). Latency comparable
+(after per-call memoization of the top-N pool — naive scoring at each
+of the 1000 rejection-sampler attempts hits the wall-clock cap).
+
+**Interesting non-obvious result:** semantic seeding gives *less* diverse
+outputs than literal-keyword seeding on the movie corpora. The PPMI+SVD
+embeddings collapse semantically-related sentences into a tighter
+neighborhood than the broader "literally contains keyword" pool — so
+the seed pool is *more* concentrated, not less. On smaller / more
+topical corpora (fortune, MEM) semantic seeding is a slight diversity
+*win* for the opposite reason: there aren't enough literal-keyword
+matches, so the literal version falls back to uniform more often.
+
+**Qualitative on movie-100k seed=42:**
+
+| config | replies |
+|---|---|
+| +bm25+semantic | "you are 'sp fucking' wrong." / "most people are you? are you pay for." / "lucky nothing. i must hasten to be a genetic memory..." |
+| +bm25+semantic+ppm:2+density | "you are 'sp fucking' wrong." / "are you feeling okay?" / "confessed! cluett, in heaven's name, what got into you?" |
+
+Both produce recognizable dialogue. The literal-keyword vs semantic
+difference shows up more in the metrics than in any single chat sample.
+
+**Verdict:** the architecture absorbs PPMI+SVD without strain — the
+existing seed-selector slot fits it cleanly. The metric story is mixed
+(slight diversity bump on small corpora, slight diversity drop on big
+ones) and the KL drift stays acceptable. Not better than `bm25+seed`
+overall, but a successful demonstration that a dense-embedding swap
+can be done within the existing kernel-respecting framework if the SVD
+fit step is acceptable.
+
 ## Density reranker is a length knob
 
 The overlap reranker scores candidates by raw keyword count — `the cat

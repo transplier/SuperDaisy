@@ -1,6 +1,6 @@
 # Eval — ppm-fortune
 
-_Generated 2026-05-20T03:40:37Z by `bin/eval`._
+_Generated 2026-05-20T04:16:20Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -12,23 +12,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.803 |
 | ugliness rate (winner had ugly flag) | 0.097 |
-| recitation rate (response = a corpus sentence verbatim) | 0.177 |
+| recitation rate (response = a corpus sentence verbatim) | 0.180 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.121 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.838 |
-| KL(responses ‖ corpus) bigrams, nats | 0.806 |
-| latency p50 (ms) | 219.062 |
-| latency p95 (ms) | 501.925 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.486 |
+| distinct-2, across all trials | 0.128 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.839 |
+| KL(responses ‖ corpus) bigrams, nats | 0.787 |
+| latency p50 (ms) | 217.470 |
+| latency p95 (ms) | 501.594 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.459 |
 
-Diagnostic counts (kept in JSON): mean attempts 908.257, mean kept 1.483, mean length 48.290 tokens, distinct-3 0.139.
+Diagnostic counts (kept in JSON): mean attempts 907.003, mean kept 1.483, mean length 48.207 tokens, distinct-3 0.148.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | the letters of your name reveal a path of balance awaits you—the clarity you seek lies in the everyday moments you've overlooked, bringing comfort and clarity to your path forward. |
-| hi daisy | the path you've neglected holds unexpected treasure. what once seemed worn and worthless will soon reveal its hidden beauty. trust in the power of refinement, for small improvements compound into magnificent change. the universe rewards those who nurture their potential with grace and intention. |
+| hello | the grains of your life are about to unwind in unexpected directions—trust that this loosening will reveal opportunities you've long overlooked. what seems like chaos now is merely the mechanism resetting itself for greater momentum ahead. your fortune lies in learning when to speak and when to listen. |
+| hi daisy | a change of perspective will soon elevate your circumstances; what appears obscured from below will become clear when you rise to meet it. fortune favors those who move with grace rather than against resistance. |
 | good morning | you stand at the threshold of a profound transformation, where the limitations you've accepted will soon dissolve like morning mist. the path forward demands both humility and courage to try again. |
 | how are you | your path curves gently like a circle, bringing you back to where you began—but wiser. the completion you seek is already within reach, waiting only for you to interpret the signs life presents. trust that transformation comes not from changing circumstances, but from changing how you perceive them. |
 | what do you like | your path is illuminated by authenticity and courage—those who live boldly in their truth inspire others to do the same. |

@@ -1,6 +1,6 @@
 # Eval — baseline-fortune
 
-_Generated 2026-05-20T03:39:23Z by `bin/eval`._
+_Generated 2026-05-20T04:15:03Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.226 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.923 |
 | KL(responses ‖ corpus) bigrams, nats | 0.669 |
-| latency p50 (ms) | 91.078 |
-| latency p95 (ms) | 97.160 |
+| latency p50 (ms) | 90.255 |
+| latency p95 (ms) | 95.207 |
 
 Diagnostic counts (kept in JSON): mean attempts 927.760, mean kept 1.563, mean length 29.893 tokens, distinct-3 0.283.
 

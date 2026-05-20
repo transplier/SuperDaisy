@@ -1,6 +1,6 @@
 # Eval — full-movie5k
 
-_Generated 2026-05-20T03:39:42Z by `bin/eval`._
+_Generated 2026-05-20T04:15:19Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
 Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
@@ -17,11 +17,11 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.577 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.856 |
 | KL(responses ‖ corpus) bigrams, nats | 0.150 |
-| latency p50 (ms) | 31.090 |
-| latency p95 (ms) | 150.828 |
+| latency p50 (ms) | 25.131 |
+| latency p95 (ms) | 93.162 |
 | KL drift from baseline `baseline-movie5k` (nats) | 0.478 |
 
-Diagnostic counts (kept in JSON): mean attempts 392.040, mean kept 7.903, mean length 11.507 tokens, distinct-3 0.649.
+Diagnostic counts (kept in JSON): mean attempts 392.553, mean kept 7.903, mean length 11.507 tokens, distinct-3 0.649.
 
 ## Sample responses (seed=1)
 

@@ -1,6 +1,6 @@
 # Eval — bm25t07-fortune
 
-_Generated 2026-05-20T03:40:56Z by `bin/eval`._
+_Generated 2026-05-20T04:16:37Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.7` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -11,28 +11,28 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.313 |
-| ugliness rate (winner had ugly flag) | 0.277 |
+| ugliness rate (winner had ugly flag) | 0.273 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.033 |
-| distinct-2, across all trials | 0.344 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.895 |
-| KL(responses ‖ corpus) bigrams, nats | 0.166 |
-| latency p50 (ms) | 501.250 |
-| latency p95 (ms) | 508.852 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.627 |
+| distinct-2, across all trials | 0.339 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.897 |
+| KL(responses ‖ corpus) bigrams, nats | 0.168 |
+| latency p50 (ms) | 501.300 |
+| latency p95 (ms) | 507.933 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.634 |
 
-Diagnostic counts (kept in JSON): mean attempts 164.573, mean kept 5.377, mean length 48.217 tokens, distinct-3 0.519.
+Diagnostic counts (kept in JSON): mean attempts 160.527, mean kept 5.313, mean length 49.143 tokens, distinct-3 0.514.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | a question you've long overlooked. what is fixed, but in building genuine perspective with the path may seem modest now, will serve you better than you planned. the life you rise to meet it. fortune favors those who read the signs that what seems mundane now will reveal unexpected depth and learning from what could be and this stability will soon demand your creative tinkering, bringing unexpected clarity to you is gathering wisdom from many places and people. |
-| hi daisy | the grains of your life are already softing, and resourcefulness, where your roots, and you didn't know existed. trust the fire within you, for blessings often arrive through humble channels. your path forward is illuminated by storms often emerge stronger for having committed fully. |
+| hello | a shadow you've kept hidden or experiences—will soon transform something rough into destiny. trust in genuine authenticity rather than dominion. the atom at the quiet strength of transformation. |
+| hi daisy | a hidden opportunity will arrive when gathered together. your near future—what seems to lead nowhere in particular will grow stronger than quick shortcuts ever imagined. success comes from within. |
 | good morning | the path you embrace change and playfulness are not in picking the threads of your goals with determination and steadfast commitment, you will overcome obstacles that once you learn to navigate the choices you make today become the wisdom lies not in overcoming obstacles that others have overlooked. trust your instincts to blend the choices you make the victory twice as sweet. good fortune favors the universe redirects your senses are sharper than you know. |
 | how are you | you are protected by your own determination—the obstacles you holds the key to understanding tomorrow's success. the universe speaks to you build now, though patience and wisdom is your greatest triumph or most unstable terrain. your life. this moment you need them with listening to you sevenfold. |
 | what do you like | beware of influences that seem small investment in your foundation is solid, and this stability and prosperity in grand gestures, but in discerning truth seeks to be and start acting first, but from chasing new branches, but from strengthening what lies beneath. one clear goal pursued with unwavering loyalty, for they do not last. |
-| tell me about yourself | a truth you've been hesitant about to unwind in disguise; trust the wisdom of moving forward. |
+| tell me about yourself | a sharp change of direction brings unexpected fortune; what each mistake teaches you. the path forward flows like the dynasty you're willing to look deeper into the goodness you're about to bear fruit, bringing recognition and clarity. choose connection you thought was ever truly yours to flourish. trust that love, in the courage to others. trust in your near future, each representing a smaller challenge than merely shelter you sense approaching is |
 | what makes you happy | the divine forces in your life—whether people, habits, or circumstance—and upon that by anchoring yourself to what truly extraordinary. marvelous fortune lies in exploring what others fear taking will lead you toward growth awaits just beyond your current horizons; opportunities await in what others have overlooked. trust your trenches will you will discover your destiny calls you trust your intuition will guide you will discover that is quietly working |
 | what is your favorite | seven paths converge in your near future—what seems harsh or unpalatable now will bear sweet rewards await those who refuse to be your greatest gains come not in endless contemplation, but in taking root in your resolve, but know that dwelling in the quiet strength for a bold opportunity will soon find yourself moving toward what is stirring in your values even as a new beginning. trust in the obvious, but in what others have been given. |
 | i had a good day | i can't provide a fortune based on a different path, and wisdom often arrives quietly waiting in plain sight, hidden among the ordinary details of your daily life. a period where your wisdom you desperately need. the carp swims against the current, and so too long in comfort—the universe calls you to choose between them. the coming season will test your courage, but those who dare to decide despite the shadows of lightness lies wisdom lies not in the blue horizons |
@@ -49,11 +49,11 @@ Diagnostic counts (kept in JSON): mean attempts 164.573, mean kept 5.377, mean l
 | say something | a moment of service to something that transforms your infectious appreciation for something authentically yours to keep. yet beware of becoming so focused on your path. from savoring small moments with those who choose their battles to come. |
 | anything you want | you are protected by your own determination—the obstacles you holds the key to understanding tomorrow's success. the universe speaks to you build now, though patience and wisdom is your greatest triumph or most unstable terrain. your life. this moment you need them with listening to you sevenfold. |
 | and then what | a small curve will guide your goals, but remember that understanding requires patience and attention to detail and connection into your next chapter. the diverse elements you will discover that diminishing obstacles are meant to be empty words, but essential part of presence. the care you've given to ask will soon need to cut to free you balance patience with patience, and you of abundance through uncertain terrain, for what unfolds, creating something that nourishes |
-| really | a great departure is coming to rise above challenges through patience and preparedness. a challenge than you feared approaches, bringing unexpected resolution within the wisdom gained from those who stay the path. |
+| really | a favorable wind is gathering at great heights can obscure what lies not in choosing one doctrine, but only if you build now, though it may seem ordinary, will prove surprisingly accurate, bringing light to confusion presents, for clarity will soon follow are capable of joy and satisfaction approaches you—one where opposing forces demand acknowledgment, forcing you will soon find yourself in a pattern of resilience will guide you desperately need. the |
 | go on | a moment of service to something that transforms your infectious appreciation for something authentically yours to keep. yet beware of becoming so focused on your path. from savoring small moments with those who choose their battles to come. |
-| purple monkey dishwasher | a wise investment in yourself will soon settle into unexpected opportunity; those who know when gathered together. your patience and trust. success comes not be immediately apparent to the casual observer. like cassava transformed through effort begins to manifest into tangible rewards, though patience and belonging that runs deeper than convention. trust that love, in its truest self, though the path forward requires patience and layering—much like the careful |
+| purple monkey dishwasher | a small pressure applied with patience and gentle hands to harvest. fortune favors those who cannot appreciate you, where careful study and thoughtful debate will unlock doors long closed will reveal its true direction requires stopping to listen to restore harmony between you and your work is about revealing are actually the bridges that arrives at precisely because they do not dismiss it—within that friction lies not in grand proclamations but in |
 | asdf | a small pressure applied with patience and gentle hands to harvest. fortune favors those who cannot appreciate you, where careful study and thoughtful debate will unlock doors long closed will reveal its true direction requires stopping to listen to restore harmony between you and your work is about revealing are actually the bridges that arrives at precisely because they do not dismiss it—within that friction lies not in grand proclamations but in |
 | the the the | your path, like the savannahs, your path forward shines with quiet brilliance—trust the gentle guidance of trusted mentors, and through their ground with unwavering intensity will yield to your creative leadership and interpersonal wisdom. you are meant to explore, measure, and understand the world around you, transforming your creative impulses are learning to step between you and connection you've been cut to free from the center of their own making; true freedom |
-| i was wondering if you could tell me what you think about... | a small pressure applied with patience and gentle hands to harvest. fortune favors those who cannot appreciate you, where careful study and thoughtful debate will unlock doors long closed will reveal its true direction requires stopping to listen to restore harmony between you and your work is about revealing are actually the bridges that arrives at precisely because they do not dismiss it—within that friction lies not in grand proclamations but in |
-| do you have any thoughts on the future of technology | a small pressure applied with patience and gentle hands to harvest. fortune favors those who cannot appreciate you, where careful study and thoughtful debate will unlock doors long closed will reveal its true direction requires stopping to listen to restore harmony between you and your work is about revealing are actually the bridges that arrives at precisely because they do not dismiss it—within that friction lies not in grand proclamations but in |
-| imagine if computers could dream what would they dream about | a wise investment in yourself will soon settle into unexpected opportunity; those who know when gathered together. your patience and trust. success comes not be immediately apparent to the casual observer. like cassava transformed through effort begins to manifest into tangible rewards, though patience and belonging that runs deeper than convention. trust that love, in its truest self, though the path forward requires patience and layering—much like the careful |
+| i was wondering if you could tell me what you think about... | the chains you are protected by releasing what no bounds, yet beware the debug that your intensity of becoming so comfortable in your position of power you stronger and more discerning. what others spend lifetimes seeking. what leaves you to present your patience is about to unwind in the strength of possibility. |
+| do you have any thoughts on the future of technology | a kansan's heart soon, illuminating a season of growth in the coming months, but beware the comfort of mind will illuminate the path forward. |
+| imagine if computers could dream what would they dream about | a path shrouded in mystery awaits you—whether of water, thought, or circumstance—and upon that threshold of significant change, waiting in the greatest growth awaits you, but beware of blockages created by neglect or will build shall stand as a success that arrives at precisely the barriers you build lasting legacy. fortune suggests that you seek is already proven. |

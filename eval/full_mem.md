@@ -1,6 +1,6 @@
 # Eval — full-mem
 
-_Generated 2026-05-20T03:39:32Z by `bin/eval`._
+_Generated 2026-05-20T04:15:11Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `70` chars
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.160 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.542 |
 | KL(responses ‖ corpus) bigrams, nats | 0.429 |
-| latency p50 (ms) | 8.814 |
-| latency p95 (ms) | 95.008 |
+| latency p50 (ms) | 13.824 |
+| latency p95 (ms) | 82.976 |
 | KL drift from baseline `baseline-mem` (nats) | 1.056 |
 
 Diagnostic counts (kept in JSON): mean attempts 385.027, mean kept 7.333, mean length 6.927 tokens, distinct-3 0.173.

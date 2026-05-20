@@ -1,6 +1,6 @@
 # Eval — ppm-movie100k
 
-_Generated 2026-05-20T03:39:49Z by `bin/eval`._
+_Generated 2026-05-20T04:15:34Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
 Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.490 |
-| ugliness rate (winner had ugly flag) | 0.173 |
-| recitation rate (response = a corpus sentence verbatim) | 0.683 |
+| ugliness rate (winner had ugly flag) | 0.170 |
+| recitation rate (response = a corpus sentence verbatim) | 0.687 |
 | acceptance rate (kept / attempted candidates) | 0.004 |
-| distinct-2, across all trials | 0.441 |
+| distinct-2, across all trials | 0.439 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.930 |
-| KL(responses ‖ corpus) bigrams, nats | 0.217 |
-| latency p50 (ms) | 72.266 |
-| latency p95 (ms) | 146.908 |
-| KL drift from baseline `baseline-movie100k` (nats) | 0.796 |
+| KL(responses ‖ corpus) bigrams, nats | 0.216 |
+| latency p50 (ms) | 75.062 |
+| latency p95 (ms) | 166.878 |
+| KL drift from baseline `baseline-movie100k` (nats) | 0.797 |
 
-Diagnostic counts (kept in JSON): mean attempts 822.477, mean kept 3.673, mean length 10.760 tokens, distinct-3 0.483.
+Diagnostic counts (kept in JSON): mean attempts 820.697, mean kept 3.673, mean length 10.723 tokens, distinct-3 0.481.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | it changed. why? okay, back over your wrist. because and here is the principle of tiny variations - |
+| hello | my wife used to call me lenny. |
 | hi daisy | but you have to consider all possibilities, sandro. |
 | good morning | and that means earl williams dies tomorrow morning and makes a sucker out of us! |
 | how are you | how many... how many people are missing? |

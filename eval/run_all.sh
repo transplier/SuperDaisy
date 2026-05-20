@@ -79,6 +79,10 @@ for spec in "${CORPORA[@]}"; do
            --report "eval/bm25seed_density_${tag}.md" --data "eval/bm25seed_density_${tag}.json" &
   bin/eval --personality "$path" --label "bm25seed-ppm2-density-$tag" --scorer bm25 --seed-selector keyword --generator ppm:2 --reranker density $base \
            --report "eval/bm25seed_ppm2_density_${tag}.md" --data "eval/bm25seed_ppm2_density_${tag}.json" &
+
+  # PPMI+SVD semantic seed selection — "peek into the future" closeout.
+  bin/eval --personality "$path" --label "bm25semantic-$tag" --scorer bm25 --seed-selector semantic $base \
+           --report "eval/bm25semantic_${tag}.md" --data "eval/bm25semantic_${tag}.json" &
 done
 wait
 

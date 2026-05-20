@@ -1,6 +1,6 @@
 # Eval — bm25seed-density-movie100k
 
-_Generated 2026-05-20T03:39:40Z by `bin/eval`._
+_Generated 2026-05-20T04:15:22Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `98` chars
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.765 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.857 |
 | KL(responses ‖ corpus) bigrams, nats | 0.194 |
-| latency p50 (ms) | 28.100 |
-| latency p95 (ms) | 63.826 |
+| latency p50 (ms) | 30.614 |
+| latency p95 (ms) | 80.862 |
 | KL drift from baseline `baseline-movie100k` (nats) | 0.445 |
 
 Diagnostic counts (kept in JSON): mean attempts 95.180, mean kept 9.307, mean length 5.650 tokens, distinct-3 0.886.

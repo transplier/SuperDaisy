@@ -1,6 +1,6 @@
 # Eval — ppm2-movie100k
 
-_Generated 2026-05-20T03:39:52Z by `bin/eval`._
+_Generated 2026-05-20T04:15:33Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
 Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
@@ -14,20 +14,20 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | ugliness rate (winner had ugly flag) | 0.160 |
 | recitation rate (response = a corpus sentence verbatim) | 0.087 |
 | acceptance rate (kept / attempted candidates) | 0.005 |
-| distinct-2, across all trials | 0.436 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.912 |
+| distinct-2, across all trials | 0.437 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.913 |
 | KL(responses ‖ corpus) bigrams, nats | 0.229 |
-| latency p50 (ms) | 78.333 |
-| latency p95 (ms) | 159.162 |
+| latency p50 (ms) | 79.107 |
+| latency p95 (ms) | 153.915 |
 | KL drift from baseline `baseline-movie100k` (nats) | 0.822 |
 
-Diagnostic counts (kept in JSON): mean attempts 815.060, mean kept 3.740, mean length 11.977 tokens, distinct-3 0.474.
+Diagnostic counts (kept in JSON): mean attempts 814.060, mean kept 3.740, mean length 11.983 tokens, distinct-3 0.474.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | you sure this is an old lady just called the hotel, michael. at the end of civilization, the end page? |
+| hello | thank you. am i going to my cave to find a place out of date, like these pentagon papers. the key to |
 | hi daisy | take a look for oil and stuff? |
 | good morning | yeah? well i know anybody in the morning when the stiff's an irish, the cops arrested? |
 | how are you | goddamn! how long have we been in business? three years. how long did it give you an interview. i never |

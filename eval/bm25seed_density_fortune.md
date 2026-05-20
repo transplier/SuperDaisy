@@ -1,6 +1,6 @@
 # Eval — bm25seed-density-fortune
 
-_Generated 2026-05-20T03:39:50Z by `bin/eval`._
+_Generated 2026-05-20T04:15:34Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `450` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.280 |
-| ugliness rate (winner had ugly flag) | 0.097 |
+| ugliness rate (winner had ugly flag) | 0.093 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.016 |
-| distinct-2, across all trials | 0.403 |
+| distinct-2, across all trials | 0.406 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.817 |
-| KL(responses ‖ corpus) bigrams, nats | 0.268 |
-| latency p50 (ms) | 18.443 |
-| latency p95 (ms) | 332.949 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.398 |
+| KL(responses ‖ corpus) bigrams, nats | 0.265 |
+| latency p50 (ms) | 23.832 |
+| latency p95 (ms) | 373.522 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.403 |
 
-Diagnostic counts (kept in JSON): mean attempts 418.527, mean kept 6.713, mean length 23.660 tokens, distinct-3 0.537.
+Diagnostic counts (kept in JSON): mean attempts 418.247, mean kept 6.713, mean length 23.507 tokens, distinct-3 0.541.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| hello | a hidden truth into your life. |
 | hi daisy | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | good morning | you possess a burden you've been recorded in the limitations you've accepted will soon dissolve like morning mist. the path forward demands both courage to try again. |
 | how are you | your attention to you sooner than you imagined. |

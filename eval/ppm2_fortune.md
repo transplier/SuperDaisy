@@ -1,6 +1,6 @@
 # Eval — ppm2-fortune
 
-_Generated 2026-05-20T03:40:25Z by `bin/eval`._
+_Generated 2026-05-20T04:16:09Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -11,24 +11,24 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.803 |
-| ugliness rate (winner had ugly flag) | 0.123 |
+| ugliness rate (winner had ugly flag) | 0.120 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.221 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.879 |
-| KL(responses ‖ corpus) bigrams, nats | 0.667 |
-| latency p50 (ms) | 179.055 |
-| latency p95 (ms) | 358.995 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.326 |
+| distinct-2, across all trials | 0.238 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.880 |
+| KL(responses ‖ corpus) bigrams, nats | 0.634 |
+| latency p50 (ms) | 183.529 |
+| latency p95 (ms) | 461.697 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.270 |
 
-Diagnostic counts (kept in JSON): mean attempts 924.397, mean kept 1.527, mean length 30.737 tokens, distinct-3 0.261.
+Diagnostic counts (kept in JSON): mean attempts 919.643, mean kept 1.527, mean length 31.043 tokens, distinct-3 0.282.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
-| hi daisy | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
+| hello | your frustration with current circumstances is temporary; soon you will find the clearest answers to their decisions. |
+| hi daisy | a shadow you've been avoiding will soon restore itself, leading to renewed clarity and strength that transforms your work into something resilient and unbreakable. what feels like an ending will reveal opportunities you've long ignored will soon reveal its greater importance—what you've overlooked as ordinary will become clear as you nourish both body and spirit. what you abandoned. |
 | good morning | the paths before you that requires both reverence and release. soon, you will soon step into the light, bringing unexpected relief and clarity. choose connection over conflict, and you will soon dissolve like morning mist. the path forward you've long ignored will soon demand acknowledgment, forcing you to do the same. |
 | how are you | a vision you've long hesitated to ask will soon become your greatest strength lies in how gracefully you move through your mistakes. |
 | what do you like | a thread has been pressing against your boundaries will soon demand acknowledgment, forcing you to do the same. |

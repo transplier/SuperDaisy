@@ -1,6 +1,6 @@
 # Eval — bm25seed-ppm2-density-movie100k
 
-_Generated 2026-05-20T03:39:39Z by `bin/eval`._
+_Generated 2026-05-20T04:15:23Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
 Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `98` chars
@@ -15,19 +15,19 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | recitation rate (response = a corpus sentence verbatim) | 0.323 |
 | acceptance rate (kept / attempted candidates) | 0.102 |
 | distinct-2, across all trials | 0.699 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.774 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.780 |
 | KL(responses ‖ corpus) bigrams, nats | 0.192 |
-| latency p50 (ms) | 25.100 |
-| latency p95 (ms) | 78.649 |
+| latency p50 (ms) | 31.156 |
+| latency p95 (ms) | 91.488 |
 | KL drift from baseline `baseline-movie100k` (nats) | 0.526 |
 
-Diagnostic counts (kept in JSON): mean attempts 91.347, mean kept 9.337, mean length 5.447 tokens, distinct-3 0.808.
+Diagnostic counts (kept in JSON): mean attempts 91.300, mean kept 9.307, mean length 5.470 tokens, distinct-3 0.809.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello, my little spot. |
+| hello | hello walter. i want and you don't know what i did. |
 | hi daisy | hi. how are you? |
 | good morning | good morning, sir. how can it be? |
 | how are you | who are you? are you doing here? |

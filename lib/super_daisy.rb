@@ -8,6 +8,8 @@
 # defaults wired in, output is bit-for-bit identical to DAISY for a given
 # seed.
 
+require_relative "super_daisy/svd"
+
 module SuperDaisy
   SENTINEL = "***"
   PUNCTUATION = %r{[;!()/\\:",.?]}.freeze
@@ -123,6 +125,41 @@ module SuperDaisy
       sentences_containing_index[Corpus.clean(token).downcase] || EMPTY
     end
 
+    # K-dim dense embedding for a cleaned-lowercased word, or nil if the
+    # word is below the min-frequency cap.
+    def word_embedding(word, dims: 50, window: 5, min_count: 2, seed: 0)
+      key = [dims, window, min_count, seed]
+      idx, vecs = semantic_index(key, dims: dims, window: window, min_count: min_count, seed: seed)
+      i = idx[Corpus.clean(word).downcase]
+      i ? vecs[i] : nil
+    end
+
+    # K-dim embedding for each sentence (mean of its in-vocab word vectors).
+    # Returns Array<Array<Float>> indexed by sentence position.
+    def sentence_embeddings(dims: 50, window: 5, min_count: 2, seed: 0)
+      key = [dims, window, min_count, seed]
+      @sentence_embeddings_cache ||= {}
+      @sentence_embeddings_cache[key] ||= begin
+        idx, vecs = semantic_index(key, dims: dims, window: window, min_count: min_count, seed: seed)
+        sentences.map do |sent|
+          centroid = Array.new(dims, 0.0)
+          n = 0
+          sent.each do |t|
+            i = idx[Corpus.clean(t).downcase]
+            next unless i
+            v = vecs[i]
+            v.each_with_index { |x, k| centroid[k] += x }
+            n += 1
+          end
+          if n.zero?
+            centroid
+          else
+            centroid.map! { |x| x / n }
+          end
+        end
+      end
+    end
+
     def terminator_bigrams
       @terminator_cache ||= begin
         set = {}
@@ -200,6 +237,80 @@ module SuperDaisy
       end
     end
 
+    # Returns [word_to_index, embeddings] cached per config tuple.
+    # word_to_index: Hash<String, Integer>
+    # embeddings:    Array<Array<Float>> indexed by word position
+    def semantic_index(key, dims:, window:, min_count:, seed:)
+      @semantic_index_cache ||= {}
+      @semantic_index_cache[key] ||= build_semantic_index(
+        dims: dims, window: window, min_count: min_count, seed: seed,
+      )
+    end
+
+    # PPMI co-occurrence within `window` tokens, scaled rows, then truncated
+    # symmetric SVD via power iteration. Returns dense K-dim embeddings.
+    def build_semantic_index(dims:, window:, min_count:, seed:)
+      # 1. Build vocabulary (cleaned, lowercased, frequency >= min_count).
+      freqs = Hash.new(0)
+      sentences.each do |sent|
+        sent.each { |t| freqs[Corpus.clean(t).downcase] += 1 }
+      end
+      freqs.delete("")
+      vocab = freqs.select { |_, c| c >= min_count }.keys.sort
+      word_to_idx = {}
+      vocab.each_with_index { |w, i| word_to_idx[w] = i }
+
+      if vocab.empty?
+        return [word_to_idx, []]
+      end
+
+      # 2. Sparse symmetric co-occurrence counts. cooc[(i, j)] += 1 for
+      # every pair i,j in the same sentence within `window` tokens.
+      cooc = Hash.new(0)
+      row_sum = Array.new(vocab.size, 0)
+      sentences.each do |sent|
+        ids = sent.map { |t| word_to_idx[Corpus.clean(t).downcase] }
+        ids.each_with_index do |i, pos|
+          next if i.nil?
+          lo = [0, pos - window].max
+          hi = [ids.size - 1, pos + window].min
+          (lo..hi).each do |q|
+            next if q == pos
+            j = ids[q]
+            next if j.nil?
+            cooc[[i, j]] += 1
+            row_sum[i] += 1
+          end
+        end
+      end
+      total = row_sum.sum.to_f
+      return [word_to_idx, Array.new(vocab.size) { Array.new(dims, 0.0) }] if total.zero?
+
+      # 3. PPMI: M[i,j] = max(0, log(c_ij * total / (row_i * row_j))).
+      # Stored as sparse_rows[i] = [[j, value], ...].
+      sparse_rows = Array.new(vocab.size) { [] }
+      cooc.each do |(i, j), c|
+        rs_i = row_sum[i]
+        rs_j = row_sum[j]
+        next if rs_i.zero? || rs_j.zero?
+        pmi = Math.log((c * total) / (rs_i * rs_j))
+        sparse_rows[i] << [j, pmi] if pmi > 0
+      end
+
+      # 4. Truncated symmetric eigendecomposition via power iteration.
+      k = [dims, vocab.size].min
+      _, eigvecs = SVD.call(sparse_rows, k: k, rng: Random.new(seed))
+
+      # 5. Re-shape into per-word vectors: word i's embedding is the i-th
+      # component across each of the K eigenvectors.
+      embeddings = Array.new(vocab.size) { Array.new(k, 0.0) }
+      eigvecs.each_with_index do |evec, dim|
+        evec.each_with_index { |val, i| embeddings[i][dim] = val }
+      end
+
+      [word_to_idx, embeddings]
+    end
+
     def invalidate_caches!
       @frequency_cache = nil
       @sentences_cache = nil
@@ -208,6 +319,8 @@ module SuperDaisy
       @ngram_cache = nil
       @sentence_df_cache = nil
       @sentences_containing_cache = nil
+      @semantic_index_cache = nil
+      @sentence_embeddings_cache = nil
     end
   end
 end
@@ -227,6 +340,7 @@ require_relative "super_daisy/components/density_reranker"
 require_relative "super_daisy/components/last_turn_memory"
 require_relative "super_daisy/components/uniform_seed_selector"
 require_relative "super_daisy/components/keyword_seed_selector"
+require_relative "super_daisy/components/semantic_seed_selector"
 require_relative "super_daisy/ugly"
 
 module SuperDaisy
@@ -287,13 +401,17 @@ module SuperDaisy
 
     # Parse a seed-selector spec.
     # "uniform" (default, prompt-blind) | "keyword" (biased toward
-    # sentences containing prompt keywords)
+    # sentences containing prompt keywords) | "semantic" or "semantic:K"
+    # (cosine similarity to prompt centroid in K-dim PPMI+SVD space)
     def self.build_seed_selector(spec)
       case spec
       when nil, "uniform"
         UniformSeedSelector.new
       when "keyword"
         KeywordSeedSelector.new
+      when /\Asemantic(?::(\d+))?\z/
+        dims = $1 ? $1.to_i : SemanticSeedSelector::DEFAULT_DIMS
+        SemanticSeedSelector.new(dims: dims)
       else
         raise ArgumentError, "unknown seed_selector spec: #{spec.inspect}"
       end

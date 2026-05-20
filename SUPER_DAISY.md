@@ -233,8 +233,13 @@ implemented:
 - Temperature / top-p sampling knob (done, *rejected* — see eval)
 - ~~BM25 reranker~~ (done as BM25 scorer — accepted as default)
 - K-turn keyword window (not yet)
-- PPMI + SVD embeddings → retrieve-then-walk (ruled out by Gia's
-  "in-a-bottle" preference)
+- PPMI + SVD embeddings → seed selection (done as a closeout
+  "peek-into-the-future" hypothetical — see SemanticSeedSelector and
+  the eval section in `eval/comparison.md`. The dense-embedding flavor
+  was the gray-zone option from the original write-up; we did the SVD-
+  on-corpus version, not the external-RAG version Gia's "in-a-bottle"
+  rule was about. Metric story is mixed; architecture absorbs it
+  cleanly.)
 - Preference-learned reward for reranking (not yet)
 
 Plus a few items that emerged during evaluation:

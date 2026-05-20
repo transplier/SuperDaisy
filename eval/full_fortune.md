@@ -1,6 +1,6 @@
 # Eval — full-fortune
 
-_Generated 2026-05-20T03:40:10Z by `bin/eval`._
+_Generated 2026-05-20T04:15:54Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -12,23 +12,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.270 |
 | ugliness rate (winner had ugly flag) | 0.123 |
-| recitation rate (response = a corpus sentence verbatim) | 0.237 |
+| recitation rate (response = a corpus sentence verbatim) | 0.227 |
 | acceptance rate (kept / attempted candidates) | 0.013 |
-| distinct-2, across all trials | 0.247 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.709 |
+| distinct-2, across all trials | 0.246 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.707 |
 | KL(responses ‖ corpus) bigrams, nats | 0.330 |
-| latency p50 (ms) | 163.203 |
-| latency p95 (ms) | 481.070 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.870 |
+| latency p50 (ms) | 212.201 |
+| latency p95 (ms) | 493.422 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.865 |
 
-Diagnostic counts (kept in JSON): mean attempts 502.883, mean kept 6.673, mean length 47.603 tokens, distinct-3 0.302.
+Diagnostic counts (kept in JSON): mean attempts 501.120, mean kept 6.667, mean length 47.970 tokens, distinct-3 0.302.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
-| hi daisy | a union long in the making will finally come to fruition, bringing the completion and fulfillment you've been seeking. this achievement will mark the end of one chapter and the confident beginning of another. trust that your patience and dedication have not been in vain. |
+| hello | a cunning mind serves you well in navigating the marketplace of life, but beware those who would exploit your trust for quick gain. your fortune lies not in what is fixed, but in the choices you make today. the seeds you plant today, though tended by your own hands, will bear fruit shared with those around you—remember that the harvest is sweeter when gathered together. your fortune lies not in possession, but in the bonds forged through mutual labor |
+| hi daisy | a natural leader with quiet strength, you possess the ability to weather storms and build lasting legacy. fortune favors those who question assumptions and forge their own understanding. |
 | good morning | the universe whispers that you are learning to step into the light of appreciation. good fortune flows toward those who truly taste what they have been given. |
 | how are you | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to transform challenges into triumphs, for you possess a rare gift for turning ordinary moments into something truly extraordinary. marvelous fortune awaits those bold enough to take the helm. |
 | what do you like | a sudden impact will redirect your path, but what seems like a setback carries hidden opportunity within it. trust that the collision of plans and reality will ultimately set you on a truer course. the bean has always been humble nourishment—sometimes we must be broken down to become sustenance for something greater. |
