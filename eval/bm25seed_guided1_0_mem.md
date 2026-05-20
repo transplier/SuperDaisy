@@ -1,6 +1,6 @@
 # Eval — bm25seed-guided1_0-mem
 
-_Generated 2026-05-20T05:20:57Z by `bin/eval`._
+_Generated 2026-05-20T05:37:38Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `guided:1.0` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `70` chars
@@ -13,21 +13,21 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | fallthrough rate (unconditioned-Markov fallback) | 0.267 |
 | ugliness rate (winner had ugly flag) | 0.107 |
 | recitation rate (response = a corpus sentence verbatim) | 0.167 |
-| acceptance rate (kept / attempted candidates) | 0.027 |
-| distinct-2, across all trials | 0.182 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.631 |
-| KL(responses ‖ corpus) bigrams, nats | 0.420 |
-| latency p50 (ms) | 19.915 |
-| latency p95 (ms) | 318.986 |
-| KL drift from baseline `baseline-mem` (nats) | 1.112 |
+| acceptance rate (kept / attempted candidates) | 0.026 |
+| distinct-2, across all trials | 0.181 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.632 |
+| KL(responses ‖ corpus) bigrams, nats | 0.421 |
+| latency p50 (ms) | 20.741 |
+| latency p95 (ms) | 343.079 |
+| KL drift from baseline `baseline-mem` (nats) | 1.116 |
 
-Diagnostic counts (kept in JSON): mean attempts 274.353, mean kept 7.333, mean length 7.490 tokens, distinct-3 0.327.
+Diagnostic counts (kept in JSON): mean attempts 277.683, mean kept 7.333, mean length 7.483 tokens, distinct-3 0.325.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | i love the phone is a brilliant physicist. |
+| hello | albert einstein was america's first president. |
 | hi daisy | hi, daisy, how smart that too much to hear. |
 | good morning | i feel good food. |
 | how are you | i think you eat? |

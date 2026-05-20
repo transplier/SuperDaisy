@@ -1,6 +1,6 @@
 # Eval — bm25t05-mem
 
-_Generated 2026-05-20T05:21:10Z by `bin/eval`._
+_Generated 2026-05-20T05:37:58Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.5` | Seed: `uniform` | Reranker: `overlap` | max_length: `70` chars
@@ -14,14 +14,14 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | ugliness rate (winner had ugly flag) | 0.073 |
 | recitation rate (response = a corpus sentence verbatim) | 0.367 |
 | acceptance rate (kept / attempted candidates) | 0.020 |
-| distinct-2, across all trials | 0.178 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.661 |
-| KL(responses ‖ corpus) bigrams, nats | 0.357 |
-| latency p50 (ms) | 61.054 |
-| latency p95 (ms) | 459.713 |
-| KL drift from baseline `baseline-mem` (nats) | 1.067 |
+| distinct-2, across all trials | 0.175 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.664 |
+| KL(responses ‖ corpus) bigrams, nats | 0.374 |
+| latency p50 (ms) | 81.196 |
+| latency p95 (ms) | 506.579 |
+| KL drift from baseline `baseline-mem` (nats) | 1.097 |
 
-Diagnostic counts (kept in JSON): mean attempts 359.223, mean kept 7.330, mean length 7.733 tokens, distinct-3 0.252.
+Diagnostic counts (kept in JSON): mean attempts 367.930, mean kept 7.333, mean length 7.740 tokens, distinct-3 0.246.
 
 ## Sample responses (seed=1)
 

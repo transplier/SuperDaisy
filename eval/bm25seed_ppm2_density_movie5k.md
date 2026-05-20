@@ -1,6 +1,6 @@
 # Eval — bm25seed-ppm2-density-movie5k
 
-_Generated 2026-05-20T05:20:49Z by `bin/eval`._
+_Generated 2026-05-20T05:50:35Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
 Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `98` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.067 |
-| ugliness rate (winner had ugly flag) | 0.053 |
-| recitation rate (response = a corpus sentence verbatim) | 0.350 |
+| ugliness rate (winner had ugly flag) | 0.050 |
+| recitation rate (response = a corpus sentence verbatim) | 0.353 |
 | acceptance rate (kept / attempted candidates) | 0.105 |
-| distinct-2, across all trials | 0.627 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.780 |
+| distinct-2, across all trials | 0.623 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.775 |
 | KL(responses ‖ corpus) bigrams, nats | 0.158 |
-| latency p50 (ms) | 27.753 |
-| latency p95 (ms) | 206.999 |
-| KL drift from baseline `baseline-movie5k` (nats) | 0.510 |
+| latency p50 (ms) | 11.513 |
+| latency p95 (ms) | 84.069 |
+| KL drift from baseline `baseline-movie5k` (nats) | 0.513 |
 
-Diagnostic counts (kept in JSON): mean attempts 88.683, mean kept 9.303, mean length 5.580 tokens, distinct-3 0.696.
+Diagnostic counts (kept in JSON): mean attempts 88.717, mean kept 9.333, mean length 5.537 tokens, distinct-3 0.692.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello walter. i want in the street, whatever, you're fucked. you need to rest mr. parker... it's for |
+| hello | yeah, hello. how are you? |
 | hi daisy | hi, dick. i'm alabama worley. |
 | good morning | well, congratulations! good luck! |
 | how are you | and god love you so suspicious? |

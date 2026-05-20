@@ -1,6 +1,6 @@
 # Eval — bm25semantic-mem
 
-_Generated 2026-05-20T05:20:41Z by `bin/eval`._
+_Generated 2026-05-20T05:50:28Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `semantic` | Reranker: `overlap` | max_length: `70` chars
@@ -15,19 +15,19 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | recitation rate (response = a corpus sentence verbatim) | 0.463 |
 | acceptance rate (kept / attempted candidates) | 0.024 |
 | distinct-2, across all trials | 0.188 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.595 |
-| KL(responses ‖ corpus) bigrams, nats | 0.432 |
-| latency p50 (ms) | 4.958 |
-| latency p95 (ms) | 90.405 |
-| KL drift from baseline `baseline-mem` (nats) | 0.568 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.593 |
+| KL(responses ‖ corpus) bigrams, nats | 0.437 |
+| latency p50 (ms) | 2.213 |
+| latency p95 (ms) | 30.732 |
+| KL drift from baseline `baseline-mem` (nats) | 0.564 |
 
-Diagnostic counts (kept in JSON): mean attempts 299.343, mean kept 7.333, mean length 7.160 tokens, distinct-3 0.256.
+Diagnostic counts (kept in JSON): mean attempts 302.673, mean kept 7.333, mean length 7.170 tokens, distinct-3 0.256.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | please, stop repeating everything i say! |
+| hello | the most important thing about life is being happy. |
 | hi daisy | do you have all of my only friend, daisy! |
 | good morning | i feel good food. |
 | how are you | what have you are not my only friend, daisy! |

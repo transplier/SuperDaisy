@@ -1,6 +1,6 @@
 # Eval — bm25seed-density-movie100k
 
-_Generated 2026-05-20T05:20:53Z by `bin/eval`._
+_Generated 2026-05-20T05:50:37Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `98` chars
@@ -15,19 +15,19 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | recitation rate (response = a corpus sentence verbatim) | 0.070 |
 | acceptance rate (kept / attempted candidates) | 0.098 |
 | distinct-2, across all trials | 0.765 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.857 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.856 |
 | KL(responses ‖ corpus) bigrams, nats | 0.194 |
-| latency p50 (ms) | 36.760 |
-| latency p95 (ms) | 124.966 |
+| latency p50 (ms) | 15.943 |
+| latency p95 (ms) | 61.625 |
 | KL drift from baseline `baseline-movie100k` (nats) | 0.445 |
 
-Diagnostic counts (kept in JSON): mean attempts 95.180, mean kept 9.307, mean length 5.650 tokens, distinct-3 0.886.
+Diagnostic counts (kept in JSON): mean attempts 95.247, mean kept 9.337, mean length 5.640 tokens, distinct-3 0.886.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello walter. i can't live without me! |
+| hello | hello, my little tighter. |
 | hi daisy | hi, it's me. |
 | good morning | they make gypsies look good. |
 | how are you | you don't think about you?". |

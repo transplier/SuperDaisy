@@ -57,10 +57,12 @@ for spec in "${CORPORA[@]}"; do
   bin/eval --personality "$path" --label "full-$tag" --generator ppm:4 --scorer bm25 $base \
            --report "eval/full_${tag}.md" --data "eval/full_${tag}.json" &
 
-  # coherence probes: BM25 with low and mid temperature
-  bin/eval --personality "$path" --label "bm25t05-$tag" --scorer bm25 --sampler temperature:0.5 $base \
+  # coherence probes: BM25 with low and mid temperature.
+  # These otherwise saturate the wall-clock cap on non-MEM corpora; lift
+  # it so the metrics reflect actual behavior, not truncated sampling.
+  bin/eval --personality "$path" --label "bm25t05-$tag" --scorer bm25 --sampler temperature:0.5 --timeout 5 $base \
            --report "eval/bm25t05_${tag}.md" --data "eval/bm25t05_${tag}.json" &
-  bin/eval --personality "$path" --label "bm25t07-$tag" --scorer bm25 --sampler temperature:0.7 $base \
+  bin/eval --personality "$path" --label "bm25t07-$tag" --scorer bm25 --sampler temperature:0.7 --timeout 5 $base \
            --report "eval/bm25t07_${tag}.md" --data "eval/bm25t07_${tag}.json" &
 
   # PPM at order 2: lower-context PPM as a less-recitation-prone alternative
@@ -85,10 +87,12 @@ for spec in "${CORPORA[@]}"; do
            --report "eval/bm25semantic_${tag}.md" --data "eval/bm25semantic_${tag}.json" &
 
   # Semantically-guided Markov walker (growing-centroid bias). α sweep.
+  # Per-step cost is O(C × K) — same wall-clock saturation as above,
+  # so lift the cap to get honest metrics.
   for alpha in 0.5 1.0 2.0; do
     safe_alpha="${alpha/./_}"
     bin/eval --personality "$path" --label "bm25seed-guided${safe_alpha}-$tag" \
-             --scorer bm25 --seed-selector keyword --generator "guided:$alpha" $base \
+             --scorer bm25 --seed-selector keyword --generator "guided:$alpha" --timeout 5 $base \
              --report "eval/bm25seed_guided${safe_alpha}_${tag}.md" \
              --data "eval/bm25seed_guided${safe_alpha}_${tag}.json" &
   done

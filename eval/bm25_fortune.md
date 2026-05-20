@@ -1,6 +1,6 @@
 # Eval — bm25-fortune
 
-_Generated 2026-05-20T05:21:16Z by `bin/eval`._
+_Generated 2026-05-20T05:50:49Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
@@ -11,24 +11,24 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.270 |
-| ugliness rate (winner had ugly flag) | 0.270 |
+| ugliness rate (winner had ugly flag) | 0.260 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.013 |
-| distinct-2, across all trials | 0.333 |
+| distinct-2, across all trials | 0.326 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.893 |
-| KL(responses ‖ corpus) bigrams, nats | 0.215 |
-| latency p50 (ms) | 147.944 |
-| latency p95 (ms) | 487.553 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.454 |
+| KL(responses ‖ corpus) bigrams, nats | 0.235 |
+| latency p50 (ms) | 87.096 |
+| latency p95 (ms) | 235.280 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.429 |
 
-Diagnostic counts (kept in JSON): mean attempts 516.837, mean kept 6.597, mean length 46.000 tokens, distinct-3 0.493.
+Diagnostic counts (kept in JSON): mean attempts 522.820, mean kept 6.597, mean length 45.013 tokens, distinct-3 0.476.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | a small curve will guide your beliefs will lead you to unexpected value tomorrow, but respect. soon, an unexpected opportunity that proclamation lies your sense of purpose. remember that even the finest cultures require time and possibility—your fortune lies not in flawlessness, but in knowing when to lead you toward growth awaits just beyond yourself, and in the shadows for the ground beneath you. trust in choosing one doctrine, but in discerning |
-| hi daisy | beware the comfort for the journey that seems backward will reveal itself for greater momentum without direction leads toward comfort and self-improvement will yield unexpected rewards. |
+| hello | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
+| hi daisy | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | good morning | your future holds steady, reliable rewards—like consistent payments flowing in, your life presents. trust that seem insurmountable will reveal itself as sweet. good fortune favors those who knows their worth. |
 | how are you | your heart races with anticipation for you to roam freely toward your walls. a time of settling and soon it will serve as a challenge approaches that what seems mundane now will reveal a future more beautiful than you thought fleeting hold keys to doors others cannot see. the answers you for the prosperity are already taking will lead you must remain grounded in practicality rather than haste. trust in the power in your life—focus on the magnitude |
 | what do you like | a bitter taste what they have long burdened your certainties—carries within it the gifts of discipline and courage and clarity of your talents. the threads of your resilience—what seems plain sight, hidden among the ordinary details you once overlooked. what seems like an ending will guide your path is one of their own world discover they are already softing, and the simple joy and validation. share with others tomorrow, but beware of renewal. |

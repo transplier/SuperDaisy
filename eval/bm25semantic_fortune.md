@@ -1,6 +1,6 @@
 # Eval — bm25semantic-fortune
 
-_Generated 2026-05-20T05:21:37Z by `bin/eval`._
+_Generated 2026-05-20T05:50:49Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `semantic` | Reranker: `overlap` | max_length: `450` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.270 |
-| ugliness rate (winner had ugly flag) | 0.213 |
+| ugliness rate (winner had ugly flag) | 0.217 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.012 |
-| distinct-2, across all trials | 0.373 |
+| distinct-2, across all trials | 0.372 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.883 |
-| KL(responses ‖ corpus) bigrams, nats | 0.180 |
-| latency p50 (ms) | 96.945 |
-| latency p95 (ms) | 170.916 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.385 |
+| KL(responses ‖ corpus) bigrams, nats | 0.182 |
+| latency p50 (ms) | 90.955 |
+| latency p95 (ms) | 243.823 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.381 |
 
-Diagnostic counts (kept in JSON): mean attempts 521.987, mean kept 6.257, mean length 45.323 tokens, distinct-3 0.568.
+Diagnostic counts (kept in JSON): mean attempts 525.317, mean kept 6.257, mean length 45.397 tokens, distinct-3 0.566.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | you stand at illusions. your greatest rewards await those who follow are precious precisely because they do not fade with time—the choices you make today. the seeds for tomorrow's abundance. |
+| hello | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | hi daisy | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | good morning | a barrier you've already made, for therein lies the light of appreciation. good fortune flows like a river of gold, carrying will soon shift from your shoulders, freeing you to a small moment of pure joy and authenticity. |
 | how are you | your struggles today will echo through genuine kindness and sometimes the greatest joys will come when you blend of adventure and soon it will serve as a challenge approaches that what seems mundane now will reveal a future more beautiful than you thought fleeting hold keys to doors others cannot see. the answers you for the prosperity are already taking will lead you must remain grounded in practicality rather than haste. trust in the power in your life—focus |

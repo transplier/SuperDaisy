@@ -1,6 +1,6 @@
 # Eval — full-movie5k
 
-_Generated 2026-05-20T05:20:59Z by `bin/eval`._
+_Generated 2026-05-20T05:50:41Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
 Generator: `ppm:4` | Scorer: `bm25` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
@@ -10,24 +10,24 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 | metric | value |
 |---|---|
-| fallthrough rate (unconditioned-Markov fallback) | 0.100 |
+| fallthrough rate (unconditioned-Markov fallback) | 0.097 |
 | ugliness rate (winner had ugly flag) | 0.167 |
-| recitation rate (response = a corpus sentence verbatim) | 0.677 |
+| recitation rate (response = a corpus sentence verbatim) | 0.673 |
 | acceptance rate (kept / attempted candidates) | 0.020 |
-| distinct-2, across all trials | 0.578 |
+| distinct-2, across all trials | 0.577 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.856 |
 | KL(responses ‖ corpus) bigrams, nats | 0.150 |
-| latency p50 (ms) | 48.122 |
-| latency p95 (ms) | 203.291 |
+| latency p50 (ms) | 20.551 |
+| latency p95 (ms) | 141.952 |
 | KL drift from baseline `baseline-movie5k` (nats) | 0.478 |
 
-Diagnostic counts (kept in JSON): mean attempts 389.473, mean kept 7.897, mean length 11.497 tokens, distinct-3 0.649.
+Diagnostic counts (kept in JSON): mean attempts 392.553, mean kept 7.903, mean length 11.507 tokens, distinct-3 0.649.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | you did it! next stop. andy. |
+| hello | i just had to come down and say hello. |
 | hi daisy | well, that's what i said, isn't it? |
 | good morning | this is good. it is a good story, fish. |
 | how are you | the basic principles of time travel are there. so you have the vessel and the portal. and the vessel |

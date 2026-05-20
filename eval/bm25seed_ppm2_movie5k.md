@@ -1,6 +1,6 @@
 # Eval — bm25seed-ppm2-movie5k
 
-_Generated 2026-05-20T05:20:47Z by `bin/eval`._
+_Generated 2026-05-20T05:50:36Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
 Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `98` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.067 |
-| ugliness rate (winner had ugly flag) | 0.177 |
-| recitation rate (response = a corpus sentence verbatim) | 0.147 |
+| ugliness rate (winner had ugly flag) | 0.173 |
+| recitation rate (response = a corpus sentence verbatim) | 0.150 |
 | acceptance rate (kept / attempted candidates) | 0.105 |
-| distinct-2, across all trials | 0.719 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.854 |
-| KL(responses ‖ corpus) bigrams, nats | 0.148 |
-| latency p50 (ms) | 24.173 |
-| latency p95 (ms) | 177.454 |
-| KL drift from baseline `baseline-movie5k` (nats) | 0.420 |
+| distinct-2, across all trials | 0.717 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.851 |
+| KL(responses ‖ corpus) bigrams, nats | 0.149 |
+| latency p50 (ms) | 12.552 |
+| latency p95 (ms) | 76.192 |
+| KL drift from baseline `baseline-movie5k` (nats) | 0.422 |
 
-Diagnostic counts (kept in JSON): mean attempts 88.683, mean kept 9.303, mean length 11.113 tokens, distinct-3 0.824.
+Diagnostic counts (kept in JSON): mean attempts 88.717, mean kept 9.333, mean length 11.090 tokens, distinct-3 0.821.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello walter. i want in the street, whatever, you're fucked. you need to rest mr. parker... it's for |
+| hello | this is april lee, auggie. april, say hello to auggie wren. |
 | hi daisy | hi. how are things with john? |
 | good morning | are we good? yeah, we're good. we're beautiful. we're perfect. this is my wife? |
 | how are you | what are you afraid the empire might discover this little show is for the mariners. why don't you just |

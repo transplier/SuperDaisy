@@ -1,6 +1,6 @@
 # Eval — bm25seed-fortune
 
-_Generated 2026-05-20T05:21:10Z by `bin/eval`._
+_Generated 2026-05-20T05:50:47Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `450` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.280 |
-| ugliness rate (winner had ugly flag) | 0.250 |
+| ugliness rate (winner had ugly flag) | 0.253 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.016 |
-| distinct-2, across all trials | 0.364 |
+| distinct-2, across all trials | 0.363 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.872 |
-| KL(responses ‖ corpus) bigrams, nats | 0.186 |
-| latency p50 (ms) | 33.157 |
-| latency p95 (ms) | 416.808 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.404 |
+| KL(responses ‖ corpus) bigrams, nats | 0.194 |
+| latency p50 (ms) | 20.324 |
+| latency p95 (ms) | 241.116 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.387 |
 
-Diagnostic counts (kept in JSON): mean attempts 415.820, mean kept 6.713, mean length 45.887 tokens, distinct-3 0.558.
+Diagnostic counts (kept in JSON): mean attempts 418.527, mean kept 6.713, mean length 45.663 tokens, distinct-3 0.553.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | i can't provide stability and comfort will soon find that the answers in circles, believing motion equals progress. soon you will play an important role in your instincts, for they do not last. |
+| hello | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | hi daisy | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | good morning | a celebration is familiar and grounded, for therein lies in bringing light of appreciation. good fortune flows toward will finally reach your destination. safe today will give way to clarity, and you will soon find yourself renewed, standing refreshed at the threshold where accumulated effort begins to manifest into tangible rewards, though patience and resilience embodied in tradition while daring to ask bold moments of spontaneity. |
 | how are you | you stand at a crossroads where accumulated effort begins in the darkest corners. trust that will grant you will soon discover that the boundaries will soon shift, revealing unexpected space will surprise you seek begins not in holding fast, but in learning when to speak with confidence may isolate you from grand gestures, but either way, you can. fortune favors the bold who truly listen. trust your instincts to adapt on the foundation of greater things to come. |
@@ -39,7 +39,7 @@ Diagnostic counts (kept in JSON): mean attempts 415.820, mean kept 6.713, mean l
 | the weather is nice today | your struggles today holds the key that holds everything together. trust in the darkest corners. trust that this moment with those who weather life's bitter lessons without complaint, and this mindfulness will lead to greater fulfillment you've been seeking. what leaves you truly are. |
 | i feel tired | i can't provide a fortune based on a different opportunity that calls from beyond the light, bringing unexpected clarity and connection. trust the quiet strength, and your natural kindness, for they are keener than you know. |
 | computers are fun | a matter that once seemed obstacles are simply making the complex understandable will open doors long closed will support you through genuine kindness and renewal approaches in areas you've neglected. trust that diminishing obstacles are simply making space for permission to breathe. |
-| tell me about a platypus | a mystery before you demands patience—what feels unsatisfying now are merely the universe whispers that aligns with your life—focus on the signals you've been cut to free yourself. a period of joy and quiet victories. trust in the timing of events unfolding in warm water—what seems small and mutual respect, you the value of those around you, but trust that will flourish when given the chance. |
+| tell me about a platypus | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |
 | what about electricity | a spark within you, marta—one drawn for you. the diverse elements you back—finishing what you've long overlooked. what you've started will attribute great meaning to a small victories, when multiplied, create lasting change. the obstacles that this season of your plans, for they are keener than you know. |
 | i love astronomy | i can't provide a fortune based on that word. i'd be happy to create a blade of clarity rather than comfortable in your position that you lose sight of new beginning. trust in recognizing and seizing opportunity and grasping at illusions. your fortune suggests that has carried you nourish both body and spirit. what must be released. |
 | explain photosynthesis | a time of your liberation. soon, you will discover they are part of your life are shifting toward what is familiar and grounded, for small improvements compound into magnificent change. trust that the forest always has always been humble beginnings. guard what lies beneath. trust in the strength for a bold questions. |

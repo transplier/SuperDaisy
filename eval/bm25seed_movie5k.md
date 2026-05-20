@@ -1,6 +1,6 @@
 # Eval — bm25seed-movie5k
 
-_Generated 2026-05-20T05:20:47Z by `bin/eval`._
+_Generated 2026-05-20T05:50:36Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `98` chars
@@ -13,21 +13,21 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | fallthrough rate (unconditioned-Markov fallback) | 0.067 |
 | ugliness rate (winner had ugly flag) | 0.127 |
 | recitation rate (response = a corpus sentence verbatim) | 0.040 |
-| acceptance rate (kept / attempted candidates) | 0.098 |
+| acceptance rate (kept / attempted candidates) | 0.099 |
 | distinct-2, across all trials | 0.756 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.905 |
 | KL(responses ‖ corpus) bigrams, nats | 0.142 |
-| latency p50 (ms) | 27.261 |
-| latency p95 (ms) | 119.885 |
+| latency p50 (ms) | 14.461 |
+| latency p95 (ms) | 58.719 |
 | KL drift from baseline `baseline-movie5k` (nats) | 0.350 |
 
-Diagnostic counts (kept in JSON): mean attempts 94.593, mean kept 9.303, mean length 11.167 tokens, distinct-3 0.895.
+Diagnostic counts (kept in JSON): mean attempts 94.633, mean kept 9.333, mean length 11.203 tokens, distinct-3 0.896.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello walter. i can't live without me! |
+| hello | hello, bomb, are blocked, locked, and you got no one is. they doand maybe they indeed? thank you. |
 | hi daisy | hi, vicki. you have four slumps. |
 | good morning | good day, sir. or perhaps nietzsche ? |
 | how are you | you know he's got dreiberg in seaweed. or "nori" if you prefer. i love sushi. |

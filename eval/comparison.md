@@ -165,20 +165,24 @@ with sentence length. Early steps carry strong topical commitment; late
 steps are essentially free Markov walks. At α=0 it reduces to uniform-
 over-multiset.
 
-vs `+bm25+seed`:
+vs `+bm25+seed` (guided runs use `--timeout 5` so the metrics aren't
+truncated by the default 0.5s cap):
 
 | corpus | metric | bm25+seed | guided:0.5 | guided:1.0 | guided:2.0 |
 |---|---|---|---|---|---|
 | MEM | recitation | 0.500 | **0.183** | **0.167** | **0.190** |
-| MEM | distinct-2 per-prompt | 0.558 | **0.637** | 0.631 | 0.647 |
-| MEM | KL drift | 0.538 | 1.119 | 1.112 | 1.113 |
-| fortune | distinct-2 | 0.364 | **0.406** | 0.401 | 0.389 |
-| fortune | fallthrough | 0.280 | 0.370 | 0.353 | 0.347 |
-| fortune | KL drift | 0.404 | 0.594 | 0.595 | 0.594 |
-| movie-5k | recitation | 0.040 | **0.013** | 0.017 | 0.013 |
-| movie-5k | distinct-2 | 0.756 | **0.796** | 0.772 | 0.766 |
-| movie-100k | recitation | 0.023 | **0.007** | 0.007 | **0.000** |
-| movie-100k | distinct-2 | 0.787 | **0.803** | 0.785 | 0.777 |
+| MEM | distinct-2 per-prompt | 0.558 | **0.639** | 0.632 | 0.648 |
+| MEM | KL drift | 0.538 | 1.124 | 1.116 | 1.118 |
+| fortune | distinct-2 | 0.363 | 0.360 | 0.359 | 0.356 |
+| fortune | fallthrough | 0.280 | 0.280 | 0.273 | 0.277 |
+| fortune | KL drift | 0.387 | **0.705** | 0.707 | 0.710 |
+| movie-5k | recitation | 0.040 | **0.017** | 0.017 | 0.020 |
+| movie-5k | distinct-2 | 0.756 | **0.768** | 0.754 | 0.745 |
+| movie-5k | KL drift | 0.350 | 0.374 | 0.375 | 0.377 |
+| movie-100k | recitation | 0.023 | **0.007** | 0.010 | **0.007** |
+| movie-100k | distinct-2 | 0.787 | **0.802** | 0.780 | 0.771 |
+| movie-100k | KL drift | 0.383 | 0.403 | 0.408 | 0.423 |
+| any | latency p50 (5s budget) | 15-30 ms | 600-900 ms | 600-900 ms | 600-900 ms |
 
 **The genuinely interesting findings:**
 
@@ -200,18 +204,20 @@ vs `+bm25+seed`:
    — even mild α gets the qualitative behavior. Probably the
    growing-centroid decay flattening the effect.
 
-**The big problem: latency.** Guided variants hit the 500ms wall-clock
-cap on every corpus except MEM. The per-step cost is `O(C · K)` where
-C is candidate count and K is embedding dim, and on the movie corpora
-typical C is hundreds — each Markov step requires hundreds of K=50-dim
-dot products. Times ~10 steps per sentence times ~1000 attempts per
-response = hitting the cap. The latency cuts rejection-sampler attempts
-short, which probably understates the real metric improvement under
-unbounded compute.
+**Latency caveat (now measured honestly):** per-step cost is `O(C · K)`
+where C = candidate count, K = embedding dim. On non-MEM corpora the
+guided walker runs ~600-900 ms at p50 with the 5s wall-clock budget
+(20-40× slower than `+bm25+seed`). The matrix bumps `--timeout 5` only
+for these configs; other configs still use the default 0.5s. Operationally
+acceptable for interactive chat but heavy.
 
-**KL drift breaks the threshold on MEM** (~1.1 nats) but stays close to
-acceptable on movie corpora (~0.4). MEM's tiny vocab makes the
-embedding space coarse, so biasing matters more there.
+**KL drift varies by corpus shape.** MEM blows past threshold (~1.1
+nats) because tiny vocab makes the embedding space coarse. Fortune
+ends up at ~0.7 nats (above the 0.5 reconsider threshold) — the long
+fortune sentences let the running centroid wander far from the prompt
+centroid by mid-sentence, so the bias keeps pulling. Movie corpora
+stay close to acceptable (~0.4 nats), because shorter sentences mean
+less centroid drift.
 
 **Verdict:** the architecture works and recitation drops, which is a
 real kernel-preservation win we hadn't seen elsewhere. But the per-step

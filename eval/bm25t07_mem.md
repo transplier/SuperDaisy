@@ -1,6 +1,6 @@
 # Eval — bm25t07-mem
 
-_Generated 2026-05-20T05:21:13Z by `bin/eval`._
+_Generated 2026-05-20T05:37:57Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.7` | Seed: `uniform` | Reranker: `overlap` | max_length: `70` chars
@@ -11,23 +11,23 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.267 |
-| ugliness rate (winner had ugly flag) | 0.080 |
-| recitation rate (response = a corpus sentence verbatim) | 0.360 |
+| ugliness rate (winner had ugly flag) | 0.073 |
+| recitation rate (response = a corpus sentence verbatim) | 0.367 |
 | acceptance rate (kept / attempted candidates) | 0.020 |
-| distinct-2, across all trials | 0.185 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.661 |
-| KL(responses ‖ corpus) bigrams, nats | 0.342 |
-| latency p50 (ms) | 79.545 |
-| latency p95 (ms) | 475.225 |
-| KL drift from baseline `baseline-mem` (nats) | 1.040 |
+| distinct-2, across all trials | 0.175 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.664 |
+| KL(responses ‖ corpus) bigrams, nats | 0.374 |
+| latency p50 (ms) | 74.646 |
+| latency p95 (ms) | 500.822 |
+| KL drift from baseline `baseline-mem` (nats) | 1.097 |
 
-Diagnostic counts (kept in JSON): mean attempts 361.980, mean kept 7.330, mean length 7.797 tokens, distinct-3 0.266.
+Diagnostic counts (kept in JSON): mean attempts 367.930, mean kept 7.333, mean length 7.740 tokens, distinct-3 0.246.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | there's nothing in this conversation that is making sense! |
+| hello | bill clinton is that too much to expect? |
 | hi daisy | hi, daisy, how are you today? |
 | good morning | i feel good food. |
 | how are you | daisy, you are you? |
@@ -49,7 +49,7 @@ Diagnostic counts (kept in JSON): mean attempts 361.980, mean kept 7.330, mean l
 | say something | that's what they say. |
 | anything you want | daisy, you are you? |
 | and then what | that's what i have ever been up to lately, daisy? |
-| really | this conversation is here! |
+| really | bill clinton is that too much to expect? |
 | go on | i think you want to go outside. |
 | purple monkey dishwasher | bill clinton is that too much to expect? |
 | asdf | bill clinton is that too much to expect? |

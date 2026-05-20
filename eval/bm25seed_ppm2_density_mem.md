@@ -1,6 +1,6 @@
 # Eval — bm25seed-ppm2-density-mem
 
-_Generated 2026-05-20T05:20:41Z by `bin/eval`._
+_Generated 2026-05-20T05:50:31Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
 Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `70` chars
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.146 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.476 |
 | KL(responses ‖ corpus) bigrams, nats | 0.742 |
-| latency p50 (ms) | 1.576 |
-| latency p95 (ms) | 155.377 |
+| latency p50 (ms) | 1.836 |
+| latency p95 (ms) | 93.221 |
 | KL drift from baseline `baseline-mem` (nats) | 1.987 |
 
 Diagnostic counts (kept in JSON): mean attempts 274.893, mean kept 7.333, mean length 4.857 tokens, distinct-3 0.168.
