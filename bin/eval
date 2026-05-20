@@ -35,7 +35,7 @@ OptionParser.new do |o|
   o.on("--generator NAME", "Generator: classic | ppm | ppm:N (default classic)") { |v| options[:generator] = v }
   o.on("--scorer NAME", "Scorer: classic | bm25 | bm25:K (default classic)") { |v| options[:scorer] = v }
   o.on("--sampler NAME", "Sampler: uniform | temperature | temperature:T (default uniform)") { |v| options[:sampler] = v }
-  o.on("--seed-selector NAME", "Seed: uniform | keyword (default uniform)") { |v| options[:seed_selector] = v }
+  o.on("--seed-selector NAME", "Seed: uniform | keyword | semantic | semantic:K (default uniform)") { |v| options[:seed_selector] = v }
   o.on("--reranker NAME", "Reranker: overlap | density (default overlap)") { |v| options[:reranker] = v }
   o.on("--max-length N", Integer, "Char cap on responses (default: auto from corpus mean × 1.5)") { |v| options[:max_length] = v }
   o.on("--baseline FILE", "Baseline data JSON; report KL drift from its response_bigrams") { |v| options[:baseline] = v }

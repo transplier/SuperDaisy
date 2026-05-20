@@ -20,7 +20,7 @@ parser = OptionParser.new do |o|
   o.on("--generator NAME", "Generator (super_daisy only): classic | ppm | ppm:N") { |v| options[:generator] = v }
   o.on("--scorer NAME",    "Scorer (super_daisy only): classic | bm25 | bm25:K") { |v| options[:scorer] = v }
   o.on("--sampler NAME",   "Sampler (super_daisy only): uniform | temperature | temperature:T") { |v| options[:sampler] = v }
-  o.on("--seed-selector NAME", "Seed (super_daisy only): uniform | keyword") { |v| options[:seed_selector] = v }
+  o.on("--seed-selector NAME", "Seed (super_daisy only): uniform | keyword | semantic | semantic:K") { |v| options[:seed_selector] = v }
   o.on("--reranker NAME",  "Reranker (super_daisy only): overlap | density") { |v| options[:reranker] = v }
   o.on("--max-length N", Integer, "Char cap on responses (default: auto from corpus mean × 1.5)") { |v| options[:max_length] = v }
   o.on("-h", "--help") { puts o; exit 0 }
