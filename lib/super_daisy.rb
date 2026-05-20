@@ -223,6 +223,7 @@ require_relative "super_daisy/components/stride_three_markov_generator"
 require_relative "super_daisy/components/ppm_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
 require_relative "super_daisy/components/overlap_reranker"
+require_relative "super_daisy/components/density_reranker"
 require_relative "super_daisy/components/last_turn_memory"
 require_relative "super_daisy/components/uniform_seed_selector"
 require_relative "super_daisy/components/keyword_seed_selector"
@@ -268,6 +269,19 @@ module SuperDaisy
         TemperatureSampler.new(temperature: t)
       else
         raise ArgumentError, "unknown sampler spec: #{spec.inspect}"
+      end
+    end
+
+    # Parse a reranker spec.
+    # "overlap" (default) | "density" (overlap / response length)
+    def self.build_reranker(spec)
+      case spec
+      when nil, "overlap", "classic"
+        OverlapReranker.new
+      when "density"
+        DensityReranker.new
+      else
+        raise ArgumentError, "unknown reranker spec: #{spec.inspect}"
       end
     end
 

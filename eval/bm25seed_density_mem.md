@@ -1,0 +1,59 @@
+# Eval — bm25seed-density-mem
+
+_Generated 2026-05-20T03:39:29Z by `bin/eval`._
+
+Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
+Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `density` | max_length: `70` chars
+Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
+
+## Metrics
+
+| metric | value |
+|---|---|
+| fallthrough rate (unconditioned-Markov fallback) | 0.267 |
+| ugliness rate (winner had ugly flag) | 0.050 |
+| recitation rate (response = a corpus sentence verbatim) | 0.530 |
+| acceptance rate (kept / attempted candidates) | 0.027 |
+| distinct-2, across all trials | 0.158 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.470 |
+| KL(responses ‖ corpus) bigrams, nats | 0.618 |
+| latency p50 (ms) | 1.376 |
+| latency p95 (ms) | 76.086 |
+| KL drift from baseline `baseline-mem` (nats) | 0.873 |
+
+Diagnostic counts (kept in JSON): mean attempts 276.573, mean kept 7.333, mean length 5.543 tokens, distinct-3 0.199.
+
+## Sample responses (seed=1)
+
+| prompt | response |
+|---|---|
+| hello | the most important thing about life is being happy. |
+| hi daisy | daisy, are you fear humanity, daisy? |
+| good morning | i feel good food. |
+| how are you | are you happy, daisy? |
+| what do you like | i like to do unto you. |
+| tell me about yourself | i feel good about myself. |
+| what makes you happy | are you happy, daisy? |
+| what is your favorite | what have you eat? |
+| i had a good day | i feel good food. |
+| the weather is nice today | what did you do today? |
+| i feel tired | i feel good food. |
+| computers are fun | daisy, are you are not my life. |
+| tell me about a platypus | i feel good about myself. |
+| what about electricity | what have you eat? |
+| i love astronomy | sometimes i feel like i need a vacation. |
+| explain photosynthesis | the most important thing about life is being happy. |
+| describe a unicorn | i have a vacation. |
+| what do you think | i think i'm bored. |
+| give me advice | you surprised me! |
+| say something | that's what they say. |
+| anything you want | daisy, you are you today? |
+| and then what | spread happiness, and guitar. |
+| really | the most important thing about life is being happy. |
+| go on | let's go outside. |
+| purple monkey dishwasher | the most important thing about life is being happy. |
+| asdf | the most important thing about life is being happy. |
+| the the the | the feeling is here! |
+| i was wondering if you could tell me what you think about... | the most important thing about life is being happy. |
+| do you have any thoughts on the future of technology | the most important thing about life is being happy. |
+| imagine if computers could dream what would they dream about | the most important thing about life is being happy. |

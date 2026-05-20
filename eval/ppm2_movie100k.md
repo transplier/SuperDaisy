@@ -1,33 +1,33 @@
 # Eval — ppm2-movie100k
 
-_Generated 2026-05-20T03:19:50Z by `bin/eval`._
+_Generated 2026-05-20T03:39:52Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
-Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `98` chars
+Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
 
 | metric | value |
 |---|---|
-| fallthrough rate (unconditioned-Markov fallback) | 0.440 |
-| ugliness rate (winner had ugly flag) | 0.157 |
+| fallthrough rate (unconditioned-Markov fallback) | 0.443 |
+| ugliness rate (winner had ugly flag) | 0.160 |
 | recitation rate (response = a corpus sentence verbatim) | 0.087 |
 | acceptance rate (kept / attempted candidates) | 0.005 |
-| distinct-2, across all trials | 0.435 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.911 |
+| distinct-2, across all trials | 0.436 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.912 |
 | KL(responses ‖ corpus) bigrams, nats | 0.229 |
-| latency p50 (ms) | 75.700 |
-| latency p95 (ms) | 95.030 |
-| KL drift from baseline `baseline-movie100k` (nats) | 0.824 |
+| latency p50 (ms) | 78.333 |
+| latency p95 (ms) | 159.162 |
+| KL drift from baseline `baseline-movie100k` (nats) | 0.822 |
 
-Diagnostic counts (kept in JSON): mean attempts 816.130, mean kept 3.743, mean length 11.930 tokens, distinct-3 0.471.
+Diagnostic counts (kept in JSON): mean attempts 815.060, mean kept 3.740, mean length 11.977 tokens, distinct-3 0.474.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello, this is an old voice? |
+| hello | you sure this is an old lady just called the hotel, michael. at the end of civilization, the end page? |
 | hi daisy | take a look for oil and stuff? |
 | good morning | yeah? well i know anybody in the morning when the stiff's an irish, the cops arrested? |
 | how are you | goddamn! how long have we been in business? three years. how long did it give you an interview. i never |

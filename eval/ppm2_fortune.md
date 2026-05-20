@@ -1,9 +1,9 @@
 # Eval — ppm2-fortune
 
-_Generated 2026-05-20T03:20:25Z by `bin/eval`._
+_Generated 2026-05-20T03:40:25Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
-Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `450` chars
+Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | Reranker: `overlap` | max_length: `450` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -11,17 +11,17 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.803 |
-| ugliness rate (winner had ugly flag) | 0.127 |
+| ugliness rate (winner had ugly flag) | 0.123 |
 | recitation rate (response = a corpus sentence verbatim) | 0.000 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.225 |
+| distinct-2, across all trials | 0.221 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.879 |
-| KL(responses ‖ corpus) bigrams, nats | 0.666 |
-| latency p50 (ms) | 181.493 |
-| latency p95 (ms) | 346.127 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.318 |
+| KL(responses ‖ corpus) bigrams, nats | 0.667 |
+| latency p50 (ms) | 179.055 |
+| latency p95 (ms) | 358.995 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.326 |
 
-Diagnostic counts (kept in JSON): mean attempts 927.097, mean kept 1.527, mean length 31.177 tokens, distinct-3 0.265.
+Diagnostic counts (kept in JSON): mean attempts 924.397, mean kept 1.527, mean length 30.737 tokens, distinct-3 0.261.
 
 ## Sample responses (seed=1)
 

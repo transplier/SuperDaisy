@@ -417,6 +417,36 @@ class SuperDaisyComponentContractTest < Minitest::Test
     assert_equal "clean_one", r.call(candidates)
   end
 
+  def test_density_reranker_prefers_denser_on_same_overlap
+    r = SuperDaisy::Components::DensityReranker.new
+    candidates = [
+      ["alpha beta gamma delta epsilon zeta", false, 1],  # 1/6
+      ["alpha beta", false, 1],                            # 1/2 (denser)
+    ]
+    assert_equal "alpha beta", r.call(candidates)
+  end
+
+  def test_density_reranker_still_prefers_higher_overlap
+    r = SuperDaisy::Components::DensityReranker.new
+    candidates = [
+      ["short one", false, 1],         # 1/2 = 0.5
+      ["a longer six word one", false, 3],  # 3/5 = 0.6
+    ]
+    assert_equal "a longer six word one", r.call(candidates)
+  end
+
+  def test_density_reranker_handles_empty
+    assert_nil SuperDaisy::Components::DensityReranker.new.call([])
+  end
+
+  def test_build_reranker_helper
+    assert_kind_of SuperDaisy::Components::OverlapReranker,
+                   SuperDaisy::Components.build_reranker(nil)
+    assert_kind_of SuperDaisy::Components::DensityReranker,
+                   SuperDaisy::Components.build_reranker("density")
+    assert_raises(ArgumentError) { SuperDaisy::Components.build_reranker("nope") }
+  end
+
   def test_uniform_seed_selector_returns_a_corpus_sentence
     c = corpus_with("alpha beta.", "gamma delta.", klass: SuperDaisy::Corpus)
     s = SuperDaisy::Components::UniformSeedSelector.new

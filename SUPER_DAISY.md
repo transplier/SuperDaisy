@@ -206,24 +206,23 @@ style.
 - **Expected effect:** very low fallthrough, very low distinct-N,
   near-recitation outputs that all contain the keyword.
 
-### Option 4 — keyword-density reranker [TODO, low risk]
+### Option 4 — keyword-density reranker [DONE — accepted as opt-in]
 
-No generator change. Modify the reranker to score by *keyword density*
-(keywords per token of response length) instead of raw overlap count.
-A 12-token response with 1 keyword currently scores the same as a 6-token
-response with 1 keyword — density rerank would prefer the latter.
+Modify the reranker to score by `overlap / response_length` instead of
+raw overlap count.
 
-- **Kernel impact:** none.
-- **Voice impact:** very light. Outputs trend slightly shorter and more
-  on-topic per token.
-- **Expected effect:** modest — mainly tightens up rerank ties when the
-  candidate pool is large (the BM25 era). Doesn't address structural
-  prompt blindness; she'd still generate randomly, the reranker would
-  just prefer denser ties.
-- **Component shape:** swap `OverlapReranker` for a `DensityReranker`.
-  Tiny change.
-- **Worth doing as a follow-on to bm25+seed** — they're complementary,
-  and density rerank costs essentially nothing.
+Implemented as `DensityReranker`. Results: roughly halves mean response
+length across all corpora. Distinct-2 takes a small hit on movie corpora
+(-0.02 to -0.07) and a small bump on fortune (+0.04). Recitation ticks
+up modestly when stacked with PPM:2 on movie corpora (0.15 → 0.32-0.35).
+KL drift stays under threshold on 3 of 4 corpora.
+
+Qualitatively, density+PPM:2 produces the most dialogue-shaped outputs
+of any config measured ("are you okay?" / "so, do you mean?" / "maybe
+he doesn't know it." on movie-100k). Effectively a *length knob* more
+than a quality knob — shorter outputs feel more chat-like.
+
+Recommended as opt-in for chat/dialogue use; not enabled by default.
 
 ## Status
 
@@ -241,5 +240,6 @@ implemented:
 Plus a few items that emerged during evaluation:
 - ~~auto max_length from corpus~~ (done, accepted)
 - ~~prompt-aware seed selection (Option 1)~~ (done, accepted)
-- Options 2-4 above (not yet)
+- ~~keyword-density reranker (Option 4)~~ (done, accepted as opt-in)
+- Options 2-3 above (not yet)
 - K-turn memory swap (the current LastTurnMemory is the minimal version)

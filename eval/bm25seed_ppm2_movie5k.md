@@ -1,9 +1,9 @@
 # Eval — bm25seed-ppm2-movie5k
 
-_Generated 2026-05-20T03:19:35Z by `bin/eval`._
+_Generated 2026-05-20T03:39:35Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
-Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | max_length: `98` chars
+Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.717 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.851 |
 | KL(responses ‖ corpus) bigrams, nats | 0.149 |
-| latency p50 (ms) | 11.639 |
-| latency p95 (ms) | 79.406 |
+| latency p50 (ms) | 19.924 |
+| latency p95 (ms) | 80.639 |
 | KL drift from baseline `baseline-movie5k` (nats) | 0.422 |
 
 Diagnostic counts (kept in JSON): mean attempts 88.717, mean kept 9.333, mean length 11.090 tokens, distinct-3 0.821.

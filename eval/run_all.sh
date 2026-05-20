@@ -73,6 +73,12 @@ for spec in "${CORPORA[@]}"; do
            --report "eval/bm25seed_${tag}.md" --data "eval/bm25seed_${tag}.json" &
   bin/eval --personality "$path" --label "bm25seed-ppm2-$tag" --scorer bm25 --seed-selector keyword --generator ppm:2 $base \
            --report "eval/bm25seed_ppm2_${tag}.md" --data "eval/bm25seed_ppm2_${tag}.json" &
+
+  # Density reranker on top of the seeded BM25 stack.
+  bin/eval --personality "$path" --label "bm25seed-density-$tag" --scorer bm25 --seed-selector keyword --reranker density $base \
+           --report "eval/bm25seed_density_${tag}.md" --data "eval/bm25seed_density_${tag}.json" &
+  bin/eval --personality "$path" --label "bm25seed-ppm2-density-$tag" --scorer bm25 --seed-selector keyword --generator ppm:2 --reranker density $base \
+           --report "eval/bm25seed_ppm2_density_${tag}.md" --data "eval/bm25seed_ppm2_density_${tag}.json" &
 done
 wait
 

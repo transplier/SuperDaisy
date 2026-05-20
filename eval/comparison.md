@@ -1,21 +1,23 @@
 # Super-DAISY component swaps — comparison matrix
 
-Nine configurations × four corpora, 300 trials each. Reference for which
+Eleven configurations × four corpora, 300 trials each. Reference for which
 upgrades to keep and which to drop. Reproduce via `./eval/run_all.sh`.
 
 Configs:
 
-| name | generator | scorer | sampler | seed |
-|---|---|---|---|---|
-| baseline | classic stride-3 | rarest | uniform | uniform |
-| +ppm:2 | PPM:2 | rarest | uniform | uniform |
-| +ppm:4 | PPM:4 | rarest | uniform | uniform |
-| +bm25 | classic | BM25 top-3 | uniform | uniform |
-| **+bm25+seed** | classic | BM25 top-3 | uniform | **keyword** |
-| **+bm25+seed+ppm:2** | PPM:2 | BM25 top-3 | uniform | **keyword** |
-| +bm25 T=0.7 | classic | BM25 top-3 | temperature 0.7 | uniform |
-| +bm25 T=0.5 | classic | BM25 top-3 | temperature 0.5 | uniform |
-| full | PPM:4 | BM25 top-3 | uniform | uniform |
+| name | generator | scorer | sampler | seed | reranker |
+|---|---|---|---|---|---|
+| baseline | classic stride-3 | rarest | uniform | uniform | overlap |
+| +ppm:2 | PPM:2 | rarest | uniform | uniform | overlap |
+| +ppm:4 | PPM:4 | rarest | uniform | uniform | overlap |
+| +bm25 | classic | BM25 top-3 | uniform | uniform | overlap |
+| +bm25+seed | classic | BM25 top-3 | uniform | keyword | overlap |
+| +bm25+seed+ppm:2 | PPM:2 | BM25 top-3 | uniform | keyword | overlap |
+| **+bm25+seed+density** | classic | BM25 top-3 | uniform | keyword | **density** |
+| **+bm25+seed+ppm:2+density** | PPM:2 | BM25 top-3 | uniform | keyword | **density** |
+| +bm25 T=0.7 | classic | BM25 top-3 | temperature 0.7 | uniform | overlap |
+| +bm25 T=0.5 | classic | BM25 top-3 | temperature 0.5 | uniform | overlap |
+| full | PPM:4 | BM25 top-3 | uniform | uniform | overlap |
 
 | corpus | sentences | word tokens | mean tokens/sentence | auto max_length (chars) |
 |---|---|---|---|---|
@@ -41,47 +43,104 @@ genuine improvement or regression rather than auto-rejecting.
 
 ## Results — MEM.DSY (92 sentences, max_length=70)
 
-| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
-|---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.767 | 0.267 | **0.267** | 0.267 | 0.767 | 0.767 | 0.267 |
-| recitation rate | 0.450 | 0.360 | 0.500 | 0.740 | 0.817 ⚠ | 1.000 ⚠ | 1.000 ⚠ |
-| distinct-2 | 0.091 | 0.167 | **0.177** | 0.159 | 0.135 | 0.104 | 0.160 |
-| KL drift from baseline | — | 0.553 | **0.538** | 1.404 | 1.820 | 1.329 | 1.056 |
-| latency p50 (ms) | 16.4 | 6.2 | **0.7** | 0.9 | 38.4 | 40.5 | 8.8 |
+| metric | baseline | +bm25 | +bm25+seed | +bm25+seed+density | +bm25+seed+ppm:2 | +bm25+seed+ppm:2+density |
+|---|---|---|---|---|---|---|
+| fallthrough rate | 0.767 | 0.267 | 0.267 | 0.267 | 0.267 | 0.267 |
+| recitation rate | 0.450 | 0.360 | 0.500 | 0.530 | 0.740 | 0.857 |
+| distinct-2 | 0.091 | 0.167 | **0.177** | 0.158 | 0.159 | 0.146 |
+| mean length (tokens) | 7.7 | 7.5 | 7.3 | **5.5** | 6.5 | **4.9** |
+| KL drift from baseline | — | 0.553 | **0.538** | 0.873 | 1.404 | 1.987 |
+| latency p50 (ms) | 16.4 | 6.2 | **0.7** | 0.7 | 0.9 | 1.0 |
 
 ## Results — fortune-haiku (250 sentences, max_length=450)
 
-| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
-|---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.807 | 0.270 | **0.280** | 0.273 | 0.803 | 0.803 | 0.270 |
-| recitation rate | 0.000 | 0.000 | 0.000 | 0.003 | 0.000 | 0.187 | 0.233 |
-| distinct-2 | 0.226 | 0.326 | **0.363** | 0.368 | 0.225 | 0.108 | 0.243 |
-| KL drift from baseline | — | 0.429 | **0.387** | 0.683 | 1.318 | 1.541 | 0.883 |
-| latency p50 (ms) | 90.5 | 97.1 | **15.9** | 13.2 | 181.5 | 216.2 | 160.3 |
+| metric | baseline | +bm25 | +bm25+seed | +bm25+seed+density | +bm25+seed+ppm:2 | +bm25+seed+ppm:2+density |
+|---|---|---|---|---|---|---|
+| fallthrough rate | 0.807 | 0.270 | 0.280 | 0.280 | 0.273 | 0.273 |
+| recitation rate | 0.000 | 0.000 | 0.000 | 0.000 | 0.003 | 0.003 |
+| distinct-2 | 0.226 | 0.326 | 0.363 | **0.403** | 0.375 | 0.373 |
+| mean length (tokens) | 30 | 45 | 46 | **24** | 41 | **22** |
+| KL drift from baseline | — | 0.429 | **0.387** | 0.398 | 0.672 | 0.899 |
+| latency p50 (ms) | 90.5 | 97.1 | 15.9 | 15.4 | 13.2 | 12.7 |
 
 ## Results — movie-5k (5000 sentences, max_length=98)
 
-| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
-|---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.460 | 0.087 | **0.067** | 0.067 | 0.430 | 0.447 | 0.097 |
-| recitation rate | 0.103 | 0.040 | 0.040 | 0.150 | 0.187 | 0.730 ⚠ | 0.673 ⚠ |
-| distinct-2 | 0.577 | 0.637 | **0.756** | 0.717 | 0.478 | 0.441 | 0.577 |
-| KL drift from baseline | — | 0.340 | **0.350** | 0.422 | 0.718 | 0.725 | 0.478 |
-| latency p50 (ms) | 29.9 | 17.2 | **11.3** | 11.6 | 71.6 | 69.6 | 20.4 |
+| metric | baseline | +bm25 | +bm25+seed | +bm25+seed+density | +bm25+seed+ppm:2 | +bm25+seed+ppm:2+density |
+|---|---|---|---|---|---|---|
+| fallthrough rate | 0.460 | 0.087 | 0.067 | 0.067 | 0.067 | 0.067 |
+| recitation rate | 0.103 | 0.040 | 0.040 | 0.080 | 0.150 | 0.350 ⚠ |
+| distinct-2 | 0.577 | 0.637 | **0.756** | 0.691 | 0.717 | 0.627 |
+| mean length (tokens) | 9.0 | 9.6 | 11.2 | **5.4** | 11.1 | **5.6** |
+| KL drift from baseline | — | 0.340 | 0.350 | 0.383 | 0.422 | 0.510 |
+| latency p50 (ms) | 29.9 | 17.2 | **11.3** | 11.6 | 11.6 | 12.5 |
 
 ## Results — movie-100k (7937 sentences, max_length=98)
 
-| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
-|---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.463 | 0.090 | **0.063** | 0.063 | 0.440 | 0.490 | 0.107 |
-| recitation rate | 0.060 | 0.013 | 0.023 | 0.150 | 0.087 | 0.687 ⚠ | 0.633 ⚠ |
-| distinct-2 | 0.541 | 0.667 | **0.788** | 0.768 | 0.435 | 0.439 | 0.612 |
-| KL drift from baseline | — | 0.348 | **0.382** | 0.428 | 0.824 | 0.797 | 0.495 |
-| latency p50 (ms) | 32.5 | 19.1 | **16.0** | 17.9 | 75.7 | 73.4 | 23.1 |
+| metric | baseline | +bm25 | +bm25+seed | +bm25+seed+density | +bm25+seed+ppm:2 | +bm25+seed+ppm:2+density |
+|---|---|---|---|---|---|---|
+| fallthrough rate | 0.463 | 0.090 | 0.063 | 0.063 | 0.063 | 0.063 |
+| recitation rate | 0.060 | 0.013 | 0.023 | 0.070 | 0.150 | 0.323 ⚠ |
+| distinct-2 | 0.541 | 0.667 | **0.788** | 0.765 | 0.768 | 0.699 |
+| mean length (tokens) | 8.0 | 9.6 | 11.5 | **5.7** | 11.3 | **5.4** |
+| KL drift from baseline | — | 0.348 | 0.382 | 0.445 | 0.428 | 0.526 |
+| latency p50 (ms) | 32.5 | 19.1 | 16.0 | **15.2** | 17.9 | 18.7 |
+
+(PPM-only and temperature variants omitted from these compressed tables —
+full data in the per-config `eval/*.{md,json}` files.)
 
 (Temperature variants omitted from these tables — see the "Temperature is a
 clean negative result" section. Full data still in `eval/bm25t05_*.json` and
 `eval/bm25t07_*.json`.)
+
+## Density reranker is a length knob
+
+The overlap reranker scores candidates by raw keyword count — `the cat
+walked over there with 3 keywords` ties with `cat keyword keyword keyword`
+under the old rule. Density rerank scores by `overlap / response_length`,
+preferring shorter, denser candidates.
+
+Effect across corpora vs `+bm25+seed`:
+
+| corpus | bm25+seed mean length | +density mean length | distinct-2 change | recitation change |
+|---|---|---|---|---|
+| MEM | 7.3 | **5.5** | 0.177 → 0.158 | 0.500 → 0.530 |
+| fortune | 46 | **24** | 0.363 → **0.403** | 0.000 → 0.000 |
+| movie-5k | 11.2 | **5.4** | 0.756 → 0.691 | 0.040 → 0.080 |
+| movie-100k | 11.5 | **5.7** | 0.788 → 0.765 | 0.023 → 0.070 |
+
+Mean length drops by ~50% across the board — that's the headline. The
+trade-offs are real but small:
+
+- **Slight diversity drop** on the movie corpora (-0.02 to -0.07 distinct-2)
+  because short outputs share more common phrases.
+- **Slight recitation tick-up** because short outputs are more likely to
+  coincide with corpus sentences (movie-100k 0.023 → 0.070).
+- **KL drift stays just at/over baseline drift** (0.350 → 0.383 to 0.873,
+  highest on MEM where mean length was already low).
+
+Stacked with PPM:2, the density rerank pushes recitation more notably on
+movie corpora (movie-5k 0.150 → 0.350, movie-100k 0.150 → 0.323) — the
+shorter outputs from a recitation-prone generator hit corpus sentences
+even more often. Worth knowing.
+
+**Qualitative read** on movie-100k seed=42:
+
+| config | replies |
+|---|---|
+| +bm25+seed | "you don't move, you understand?! you know what? it's talkradio. you're on these operations. is my worst fear." |
+| **+bm25+seed+density** | "you must get a job." / "tim, he listens to you. do you want?" / "what are you with your monsters." |
+| **+bm25+seed+ppm:2+density** | "are you okay?" / "so, do you mean?" / "maybe he doesn't know it." |
+
+The density+PPM:2 stack produces the most conversational outputs of any
+config we've tested. Short, punchy, dialogue-shaped. Even with the
+recitation uptick, it feels noticeably more like chat than the
+overlap-reranker variants.
+
+**Verdict:** density rerank is worth keeping. It's a *length* knob,
+not a quality knob — it makes outputs shorter, which on chat-style
+corpora reads as more conversational. Drift stays under threshold on
+3/4 corpora, and the recitation cost is acceptable. Recommended as
+opt-in for chat-style use.
 
 ## Prompt-aware seeding is the second big win
 
@@ -316,20 +375,23 @@ unambiguous upgrade.
 
 - **BM25** — accept. Foundation of every good config.
 - **Keyword seed selection** — accept. Best stand-alone improvement after
-  BM25, and stacks cleanly with it. Lower fallthrough, higher diversity,
-  faster, drift comparable to BM25-alone.
+  BM25, stacks cleanly. Lower fallthrough, higher diversity, faster.
+- **Density reranker** — accept as opt-in for chat-style use. Roughly
+  halves response length, slight recitation/diversity costs, drift
+  acceptable. Stacks well with PPM:2.
 - **PPM:2** — viable opt-in. On movie-scale corpora especially, layered
   on top of bm25+seed it produces noticeably more dialogue-shaped
-  outputs (per the qualitative chat sample above) at the cost of some
-  diversity and a recitation tick-up.
+  outputs at the cost of some diversity and a recitation tick-up.
 - **PPM:4** — opt-in **only for long-sentence corpora** (fortune-like).
   On short-sentence corpora it recites 69-100% of the time.
 - **Temperature** — rejected. Hurts fallthrough, hits the wall-clock cap.
 - **full (PPM:4 + BM25)** — same recitation issue as PPM:4 alone.
 
 Suggested defaults going forward:
-- **General**: BM25 scorer + keyword seed selector + classic generator.
-- **Movie-scale dialogue corpora**: + PPM:2 as the generator on top.
+- **General**: BM25 scorer + keyword seed selector + classic generator
+  + overlap reranker.
+- **Movie/dialogue corpora, chat use**: + PPM:2 + density reranker on
+  top — the most dialogue-shaped config we've measured.
 
 ## Followups
 

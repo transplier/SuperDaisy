@@ -1,9 +1,9 @@
 # Eval — bm25t05-movie5k
 
-_Generated 2026-05-20T03:21:46Z by `bin/eval`._
+_Generated 2026-05-20T03:41:45Z by `bin/eval`._
 
 Corpus: `pretrained/movie-5k.DSY` — 5000 sentences, 62535 words
-Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.5` | Seed: `uniform` | max_length: `98` chars
+Generator: `classic` | Scorer: `bm25` | Sampler: `temperature:0.5` | Seed: `uniform` | Reranker: `overlap` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -11,28 +11,28 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.277 |
-| ugliness rate (winner had ugly flag) | 0.213 |
-| recitation rate (response = a corpus sentence verbatim) | 0.037 |
-| acceptance rate (kept / attempted candidates) | 0.093 |
-| distinct-2, across all trials | 0.552 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.968 |
-| KL(responses ‖ corpus) bigrams, nats | 0.154 |
-| latency p50 (ms) | 509.174 |
-| latency p95 (ms) | 524.151 |
-| KL drift from baseline `baseline-movie5k` (nats) | 0.498 |
+| ugliness rate (winner had ugly flag) | 0.233 |
+| recitation rate (response = a corpus sentence verbatim) | 0.020 |
+| acceptance rate (kept / attempted candidates) | 0.095 |
+| distinct-2, across all trials | 0.550 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.969 |
+| KL(responses ‖ corpus) bigrams, nats | 0.155 |
+| latency p50 (ms) | 510.024 |
+| latency p95 (ms) | 534.620 |
+| KL drift from baseline `baseline-movie5k` (nats) | 0.496 |
 
-Diagnostic counts (kept in JSON): mean attempts 50.020, mean kept 4.660, mean length 11.650 tokens, distinct-3 0.618.
+Diagnostic counts (kept in JSON): mean attempts 48.503, mean kept 4.613, mean length 12.077 tokens, distinct-3 0.614.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | whatta you mean? |
+| hello | what was her hands, baby! those footlockers! |
 | hi daisy | hi, vicki. you are beautiful, and that damned garden. |
-| good morning | that's why he ever get rough mentally, but everything's changed... |
+| good morning | bunny, is that re-animated him. my own man. |
 | how are you | hi, vicki. you are beautiful, and that damned garden. |
 | what do you like | great. what do that for me, 007, what do you need? |
-| tell me about yourself | none, there's nothing because all of myself as more time...shit, she's had a look too? |
+| tell me about yourself | she hasn't called your god-damned office! i want you remember about five more minutes. okay? |
 | what makes you happy | great. what do that for me, 007, what do you need? |
 | what is your favorite | i really shouldn't. i gotta keep your friends close and your enemies list. you got an attempted firebombing |
 | i had a good day | none, there's nothing because all of myself as more time...shit, she's had a look too? |
@@ -52,7 +52,7 @@ Diagnostic counts (kept in JSON): mean attempts 50.020, mean kept 4.660, mean le
 | really | i really shouldn't. i gotta keep your friends close and your enemies list. you got an attempted firebombing |
 | go on | i see them on the other day, you asked a lot of 459's and he lies out on you. |
 | purple monkey dishwasher | yes! yes! we know where he never arrived. |
-| asdf | "agent low's theory that you should be tossed out of jail. i did. i call me don. |
+| asdf | what do i had no idea... |
 | the the the | how much of the elite special to me. you don't?! well, get her to the atlantic on its recovery. |
 | i was wondering if you could tell me what you think about... | if my life a few times. receiving no response, he gingerly opens the door. |
 | do you have any thoughts on the future of technology | yes! yes! we know where he never arrived. |

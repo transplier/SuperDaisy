@@ -1,9 +1,9 @@
 # Eval — bm25seed-ppm2-movie100k
 
-_Generated 2026-05-20T03:19:39Z by `bin/eval`._
+_Generated 2026-05-20T03:39:37Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
-Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | max_length: `98` chars
+Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -15,19 +15,19 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | recitation rate (response = a corpus sentence verbatim) | 0.150 |
 | acceptance rate (kept / attempted candidates) | 0.102 |
 | distinct-2, across all trials | 0.768 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.872 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.875 |
 | KL(responses ‖ corpus) bigrams, nats | 0.184 |
-| latency p50 (ms) | 17.931 |
-| latency p95 (ms) | 92.755 |
-| KL drift from baseline `baseline-movie100k` (nats) | 0.428 |
+| latency p50 (ms) | 18.834 |
+| latency p95 (ms) | 88.240 |
+| KL drift from baseline `baseline-movie100k` (nats) | 0.429 |
 
-Diagnostic counts (kept in JSON): mean attempts 91.330, mean kept 9.323, mean length 11.257 tokens, distinct-3 0.878.
+Diagnostic counts (kept in JSON): mean attempts 91.300, mean kept 9.307, mean length 11.257 tokens, distinct-3 0.880.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | hello. so very boring. peter parker, how do you protect them? |
+| hello | hello walter. i want and you don't know what i did. |
 | hi daisy | hi, it's me. i'm a newspaper is something you might be just what is it? |
 | good morning | so i see. slipping away for a few years back. good morning. |
 | how are you | who are you? are you doing here? |

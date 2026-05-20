@@ -1,9 +1,9 @@
 # Eval — bm25seed-ppm2-fortune
 
-_Generated 2026-05-20T03:19:56Z by `bin/eval`._
+_Generated 2026-05-20T03:39:59Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
-Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | max_length: `450` chars
+Generator: `ppm:2` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `450` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -11,24 +11,24 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | metric | value |
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.273 |
-| ugliness rate (winner had ugly flag) | 0.197 |
+| ugliness rate (winner had ugly flag) | 0.190 |
 | recitation rate (response = a corpus sentence verbatim) | 0.003 |
-| acceptance rate (kept / attempted candidates) | 0.017 |
-| distinct-2, across all trials | 0.368 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.804 |
-| KL(responses ‖ corpus) bigrams, nats | 0.247 |
-| latency p50 (ms) | 13.154 |
-| latency p95 (ms) | 346.904 |
-| KL drift from baseline `baseline-fortune` (nats) | 0.683 |
+| acceptance rate (kept / attempted candidates) | 0.018 |
+| distinct-2, across all trials | 0.375 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.806 |
+| KL(responses ‖ corpus) bigrams, nats | 0.242 |
+| latency p50 (ms) | 16.520 |
+| latency p95 (ms) | 487.469 |
+| KL drift from baseline `baseline-fortune` (nats) | 0.672 |
 
-Diagnostic counts (kept in JSON): mean attempts 387.947, mean kept 6.770, mean length 41.587 tokens, distinct-3 0.463.
+Diagnostic counts (kept in JSON): mean attempts 380.557, mean kept 6.753, mean length 41.290 tokens, distinct-3 0.472.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | the foundations of your origins. |
-| hi daisy | a path shrouded in mystery awaits you, though your true priorities. the stakes you plant today through persistence will bloom into unexpected gratitude, bringing warmth to your heart. release what was meant to imprison you, but trust that the smallest gestures of kindness often create the deepest ripples of happiness. trust in the wisdom you desperately need. the carp swims against the current, and so too will your frozen doubts dissolve, revealing |
+| hello | a decision that divides your path forward, yet remember that small, regular actions compound into transformation. |
+| hi daisy | a blur in your life—whether people, habits, or beliefs—serve you best when they taste unpleasant—will earn you wisdom that comes from stillness. |
 | good morning | a celebration is coming that will connect you most deeply with others. true strength comes not from rushing, but from embracing the beauty of imperfection and the confident beginning of another. trust that this period of liberation awaits those bold enough to break the cycle and step into the light of appreciation. good fortune favors those who embrace the light of appreciation. good fortune flows toward those who are patient and seek the finest things |
 | how are you | the universe whispers that you forget to venture beyond your walls. a time of settling and finding your place approaches. the arrangements you make at the threshold of a perfect stuffing, each ingredient must find its answer, bringing unexpected clarity to your relationships will soon challenge your beliefs will lead you to roam freely toward your infectious enthusiasm. a season of celebration and renewal will have on those around you, leaving a legacy |
 | what do you like | a sudden impact will redirect your path, but what seems soft and safe today will grow in significance, becoming a symbol of something infinitely larger and more discerning. what others fear to attempt. the greatest protection comes from within. |

@@ -1,9 +1,9 @@
 # Eval — bm25seed-mem
 
-_Generated 2026-05-20T03:19:29Z by `bin/eval`._
+_Generated 2026-05-20T03:39:28Z by `bin/eval`._
 
 Corpus: `daisy11 original freepascal/MEM.DSY` — 92 sentences, 619 words
-Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | max_length: `70` chars
+Generator: `classic` | Scorer: `bm25` | Sampler: `uniform` | Seed: `keyword` | Reranker: `overlap` | max_length: `70` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.177 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.558 |
 | KL(responses ‖ corpus) bigrams, nats | 0.463 |
-| latency p50 (ms) | 0.749 |
-| latency p95 (ms) | 63.720 |
+| latency p50 (ms) | 0.772 |
+| latency p95 (ms) | 75.978 |
 | KL drift from baseline `baseline-mem` (nats) | 0.538 |
 
 Diagnostic counts (kept in JSON): mean attempts 276.573, mean kept 7.333, mean length 7.313 tokens, distinct-3 0.246.
