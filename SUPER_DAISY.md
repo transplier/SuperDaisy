@@ -141,7 +141,105 @@ onward, instead of jumping straight to LLMs.
   on tiny corpora collapse to "she just recites whole sentences from
   memory" — which might be fine, might not.
 
+## Prompt-awareness experiments
+
+DAISY's generator and sampler are completely prompt-blind. Every generated
+sentence is a uniformly-random Markov walk through the corpus; the prompt
+only influences which of those walks gets *kept* (via the keyword filter
+and reranker). That structural blindness is the deep source of the
+"in-character but locally incoherent" responses she's known for. Whether
+it can be partially mitigated without erasing her voice is an open
+question worth investigating in small increments.
+
+We've graded character impact on the scale from "kernel intact" (verbatim
+corpus, walker mechanics unchanged) to "guided decoding" (walker becomes
+goal-directed). Options 2-4 below remain unattempted and are kept here
+as candidates for future evaluation rounds.
+
+### Option 1 — prompt-aware seed selection [DONE — accepted]
+
+Bias the walker's starting sentence toward sentences that contain a
+prompt keyword. Walker behavior is otherwise unchanged.
+
+Implemented as `KeywordSeedSelector`. See `eval/comparison.md`. Results:
+fallthrough drops further on every corpus, distinct-2 jumps 17-18% on
+movie corpora, latency improves dramatically (6× on fortune), KL drift
+stays under threshold. Qualitative chat outputs become noticeably more
+dialogue-shaped. Recommended default.
+
+### Option 2 — bidirectional walk from keyword anchor [TODO]
+
+Find a position in the corpus where a keyword token literally appears.
+Walk *backward* from that position for a few tokens (to a sentence-start
+neighborhood, stopping at SENTINEL), then walk forward normally. Every
+output contains the keyword by construction.
+
+- **Kernel impact:** intact. Backward walk through the corpus is no more
+  generative than forward walk.
+- **Voice impact:** moderate. Walker becomes anchored at the keyword.
+  Outputs will reliably contain the keyword (current bm25+seed only
+  *biases* toward it). Recitation likely rises — the path through and
+  around a specific keyword position is fairly constrained.
+- **Expected effect:** fallthrough rate near zero on any corpus that
+  contains the keyword at all. Big distinct-N drop (similar to PPM's
+  effect — outputs concentrate on a small set of keyword-neighborhoods).
+- **Why it's worth trying anyway:** for short-sentence corpora where
+  bm25+seed still has high fallthrough (because the keyword sentence
+  pool is small), this guarantees keyword presence. The off-topic
+  chaos at the *non-keyword* parts of the sentence is preserved.
+- **Component shape:** new `KeywordAnchoredGenerator`. Walker direction
+  is internal; orchestrator passes keywords and a corpus position.
+
+### Option 3 — goal-biased branch selection during walk [TODO, risky]
+
+At each Markov branch point, if any next-token would lead toward a corpus
+path containing a remaining keyword, prefer it. Look-ahead beam-search
+style.
+
+- **Kernel impact:** intact (still verbatim corpus tokens).
+- **Voice impact:** large. Walker becomes goal-directed. Loses the
+  "wanders into a non-sequitur" property which is core to her charm.
+- **This is the "guided decoding on the sampler" we explicitly ruled
+  out** in the original write-up. Documenting it here as a known
+  branch, not as a recommendation. If we ever want a "less DAISY,
+  more chatbot" mode, this is one option.
+- **Expected effect:** very low fallthrough, very low distinct-N,
+  near-recitation outputs that all contain the keyword.
+
+### Option 4 — keyword-density reranker [TODO, low risk]
+
+No generator change. Modify the reranker to score by *keyword density*
+(keywords per token of response length) instead of raw overlap count.
+A 12-token response with 1 keyword currently scores the same as a 6-token
+response with 1 keyword — density rerank would prefer the latter.
+
+- **Kernel impact:** none.
+- **Voice impact:** very light. Outputs trend slightly shorter and more
+  on-topic per token.
+- **Expected effect:** modest — mainly tightens up rerank ties when the
+  candidate pool is large (the BM25 era). Doesn't address structural
+  prompt blindness; she'd still generate randomly, the reranker would
+  just prefer denser ties.
+- **Component shape:** swap `OverlapReranker` for a `DensityReranker`.
+  Tiny change.
+- **Worth doing as a follow-on to bm25+seed** — they're complementary,
+  and density rerank costs essentially nothing.
+
 ## Status
 
-This is exploration, not a plan. Sections to flesh out individually if/when
-we pick a direction to actually build.
+The "honest" tech tree from earlier in this document is partially
+implemented:
+
+- ~~PPM / variable-order Markov with backoff~~ (done, opt-in)
+- Temperature / top-p sampling knob (done, *rejected* — see eval)
+- ~~BM25 reranker~~ (done as BM25 scorer — accepted as default)
+- K-turn keyword window (not yet)
+- PPMI + SVD embeddings → retrieve-then-walk (ruled out by Gia's
+  "in-a-bottle" preference)
+- Preference-learned reward for reranking (not yet)
+
+Plus a few items that emerged during evaluation:
+- ~~auto max_length from corpus~~ (done, accepted)
+- ~~prompt-aware seed selection (Option 1)~~ (done, accepted)
+- Options 2-4 above (not yet)
+- K-turn memory swap (the current LastTurnMemory is the minimal version)

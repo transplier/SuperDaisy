@@ -1,19 +1,21 @@
 # Super-DAISY component swaps — comparison matrix
 
-Seven configurations × four corpora, 300 trials each. Reference for which
+Nine configurations × four corpora, 300 trials each. Reference for which
 upgrades to keep and which to drop. Reproduce via `./eval/run_all.sh`.
 
 Configs:
 
-| name | generator | scorer | sampler |
-|---|---|---|---|
-| baseline | classic stride-3 | rarest | uniform |
-| +ppm:2 | PPM:2 | rarest | uniform |
-| +ppm:4 | PPM:4 | rarest | uniform |
-| +bm25 | classic | BM25 top-3 | uniform |
-| +bm25 T=0.7 | classic | BM25 top-3 | temperature 0.7 |
-| +bm25 T=0.5 | classic | BM25 top-3 | temperature 0.5 |
-| full | PPM:4 | BM25 top-3 | uniform |
+| name | generator | scorer | sampler | seed |
+|---|---|---|---|---|
+| baseline | classic stride-3 | rarest | uniform | uniform |
+| +ppm:2 | PPM:2 | rarest | uniform | uniform |
+| +ppm:4 | PPM:4 | rarest | uniform | uniform |
+| +bm25 | classic | BM25 top-3 | uniform | uniform |
+| **+bm25+seed** | classic | BM25 top-3 | uniform | **keyword** |
+| **+bm25+seed+ppm:2** | PPM:2 | BM25 top-3 | uniform | **keyword** |
+| +bm25 T=0.7 | classic | BM25 top-3 | temperature 0.7 | uniform |
+| +bm25 T=0.5 | classic | BM25 top-3 | temperature 0.5 | uniform |
+| full | PPM:4 | BM25 top-3 | uniform | uniform |
 
 | corpus | sentences | word tokens | mean tokens/sentence | auto max_length (chars) |
 |---|---|---|---|---|
@@ -39,51 +41,93 @@ genuine improvement or regression rather than auto-rejecting.
 
 ## Results — MEM.DSY (92 sentences, max_length=70)
 
-| metric | baseline | +ppm:2 | +ppm:4 | +bm25 | +bm25 T=0.7 | +bm25 T=0.5 | full |
+| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
 |---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.767 | 0.767 | 0.767 | **0.267** | 0.267 | 0.267 | 0.267 |
-| **recitation rate** | 0.450 | **0.817** ⚠ | **1.000** ⚠ | 0.360 | 0.367 | 0.367 | **1.000** ⚠ |
-| ugliness rate | 0.090 | 0.130 | 0.157 | 0.077 | 0.063 | 0.063 | 0.000 |
-| acceptance rate | 0.003 | 0.003 | 0.003 | **0.020** | 0.020 | 0.020 | 0.019 |
-| distinct-2 | 0.091 | 0.135 | 0.104 | **0.167** | 0.175 | 0.175 | 0.160 |
-| KL drift from baseline | — | 1.820 | 1.329 | **0.553** | 1.097 | 1.097 | 1.056 |
-| latency p50 (ms) | 16.2 | 38.0 | 39.5 | **4.6** | 30.1 | 38.0 | 6.7 |
+| fallthrough rate | 0.767 | 0.267 | **0.267** | 0.267 | 0.767 | 0.767 | 0.267 |
+| recitation rate | 0.450 | 0.360 | 0.500 | 0.740 | 0.817 ⚠ | 1.000 ⚠ | 1.000 ⚠ |
+| distinct-2 | 0.091 | 0.167 | **0.177** | 0.159 | 0.135 | 0.104 | 0.160 |
+| KL drift from baseline | — | 0.553 | **0.538** | 1.404 | 1.820 | 1.329 | 1.056 |
+| latency p50 (ms) | 16.4 | 6.2 | **0.7** | 0.9 | 38.4 | 40.5 | 8.8 |
 
 ## Results — fortune-haiku (250 sentences, max_length=450)
 
-| metric | baseline | +ppm:2 | +ppm:4 | +bm25 | +bm25 T=0.7 | +bm25 T=0.5 | full |
+| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
 |---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.807 | 0.803 | 0.803 | **0.270** | 0.307 | 0.307 | 0.270 |
-| recitation rate | 0.000 | 0.000 | 0.180 | 0.000 | 0.000 | 0.000 | 0.237 |
-| ugliness rate | 0.110 | 0.097 | 0.097 | 0.260 | 0.260 | 0.260 | 0.120 |
-| acceptance rate | 0.002 | 0.002 | 0.002 | **0.013** | 0.011 | 0.011 | 0.013 |
-| distinct-2 | 0.226 | 0.214 | 0.097 | **0.326** | 0.347 | 0.343 | 0.232 |
-| KL drift from baseline | — | 1.350 | 1.583 | **0.429** | 0.647 | 0.646 | 0.909 |
-| latency p50 (ms) | 89.8 | 177.2 | 212.6 | **83.9** | **501.1** ⚠ | **501.0** ⚠ | 153.6 |
+| fallthrough rate | 0.807 | 0.270 | **0.280** | 0.273 | 0.803 | 0.803 | 0.270 |
+| recitation rate | 0.000 | 0.000 | 0.000 | 0.003 | 0.000 | 0.187 | 0.233 |
+| distinct-2 | 0.226 | 0.326 | **0.363** | 0.368 | 0.225 | 0.108 | 0.243 |
+| KL drift from baseline | — | 0.429 | **0.387** | 0.683 | 1.318 | 1.541 | 0.883 |
+| latency p50 (ms) | 90.5 | 97.1 | **15.9** | 13.2 | 181.5 | 216.2 | 160.3 |
 
 ## Results — movie-5k (5000 sentences, max_length=98)
 
-| metric | baseline | +ppm:2 | +ppm:4 | +bm25 | +bm25 T=0.7 | +bm25 T=0.5 | full |
+| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
 |---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.460 | 0.430 | 0.447 | **0.087** | 0.270 | 0.273 | 0.097 |
-| **recitation rate** | 0.103 | 0.187 | **0.730** ⚠ | 0.040 | 0.050 | 0.043 | **0.673** ⚠ |
-| ugliness rate | 0.107 | 0.110 | 0.107 | 0.207 | 0.197 | 0.197 | 0.157 |
-| acceptance rate | 0.004 | 0.004 | 0.004 | **0.020** | 0.011 | 0.010 | 0.020 |
-| distinct-2 | 0.577 | 0.478 | 0.441 | **0.637** | 0.536 | 0.541 | 0.577 |
-| KL drift from baseline | — | 0.718 | 0.725 | **0.340** | 0.513 | 0.506 | 0.478 |
-| latency p50 (ms) | 29.4 | 66.1 | 67.9 | **12.2** | **508.4** ⚠ | **508.3** ⚠ | 15.5 |
+| fallthrough rate | 0.460 | 0.087 | **0.067** | 0.067 | 0.430 | 0.447 | 0.097 |
+| recitation rate | 0.103 | 0.040 | 0.040 | 0.150 | 0.187 | 0.730 ⚠ | 0.673 ⚠ |
+| distinct-2 | 0.577 | 0.637 | **0.756** | 0.717 | 0.478 | 0.441 | 0.577 |
+| KL drift from baseline | — | 0.340 | **0.350** | 0.422 | 0.718 | 0.725 | 0.478 |
+| latency p50 (ms) | 29.9 | 17.2 | **11.3** | 11.6 | 71.6 | 69.6 | 20.4 |
 
 ## Results — movie-100k (7937 sentences, max_length=98)
 
-| metric | baseline | +ppm:2 | +ppm:4 | +bm25 | +bm25 T=0.7 | +bm25 T=0.5 | full |
+| metric | baseline | +bm25 | **+bm25+seed** | +bm25+seed+ppm:2 | +ppm:2 | +ppm:4 | full |
 |---|---|---|---|---|---|---|---|
-| fallthrough rate | 0.463 | 0.440 | 0.490 | **0.090** | 0.310 | 0.330 | 0.107 |
-| **recitation rate** | 0.060 | 0.087 | **0.687** ⚠ | 0.013 | 0.033 | 0.003 | **0.633** ⚠ |
-| ugliness rate | 0.097 | 0.097 | 0.087 | 0.203 | 0.193 | 0.197 | 0.150 |
-| acceptance rate | 0.004 | 0.005 | 0.004 | **0.022** | 0.013 | 0.014 | 0.022 |
-| distinct-2 | 0.541 | 0.435 | 0.437 | **0.667** | 0.475 | 0.490 | 0.610 |
-| KL drift from baseline | — | 0.829 | 0.797 | **0.291** | 0.426 | 0.422 | 0.443 |
-| latency p50 (ms) | 32.2 | 70.4 | 50.3 | **17.1** | **515.5** ⚠ | **516.6** ⚠ | 20.3 |
+| fallthrough rate | 0.463 | 0.090 | **0.063** | 0.063 | 0.440 | 0.490 | 0.107 |
+| recitation rate | 0.060 | 0.013 | 0.023 | 0.150 | 0.087 | 0.687 ⚠ | 0.633 ⚠ |
+| distinct-2 | 0.541 | 0.667 | **0.788** | 0.768 | 0.435 | 0.439 | 0.612 |
+| KL drift from baseline | — | 0.348 | **0.382** | 0.428 | 0.824 | 0.797 | 0.495 |
+| latency p50 (ms) | 32.5 | 19.1 | **16.0** | 17.9 | 75.7 | 73.4 | 23.1 |
+
+(Temperature variants omitted from these tables — see the "Temperature is a
+clean negative result" section. Full data still in `eval/bm25t05_*.json` and
+`eval/bm25t07_*.json`.)
+
+## Prompt-aware seeding is the second big win
+
+The keyword-aware seed selector picks the walker's starting sentence from
+the pool of sentences that contain a prompt keyword (multiplicity per
+keyword hit, so denser sentences are more likely). Walker behavior is
+otherwise unchanged. Falls back to uniform random when no keyword
+sentences exist.
+
+Effect across corpora, vs `+bm25` (the previous best):
+
+| corpus | bm25 fallthrough | +bm25+seed fallthrough | distinct-2 jump | latency change |
+|---|---|---|---|---|
+| MEM | 0.267 | 0.267 (corpus-limited) | 0.167 → 0.177 | 6 ms → 0.7 ms |
+| fortune | 0.270 | 0.280 | 0.326 → **0.363** | 97 ms → **16 ms (6×)** |
+| movie-5k | 0.087 | **0.067** | 0.637 → **0.756** | 17 ms → 11 ms |
+| movie-100k | 0.090 | **0.063** | 0.667 → **0.788** | 19 ms → 16 ms |
+
+The latency improvement on fortune is the headline number — when the seed
+is already keyword-bearing, the rejection sampler fills its pool in far
+fewer attempts (the loop just exits sooner), so total work drops by 6×.
+On smaller corpora the absolute speedup is less dramatic but the relative
+trend holds.
+
+**Distinct-2 jumps 17-18% on movie corpora** — counterintuitive, but
+explained by the multiplicity-weighted seed pool: keyword-bearing
+sentences are usually a small subset of the corpus, and the walker
+starts from many *different* such sentences across trials, so the walks
+land in distinct corpus regions more reliably than uniform-random starts
+which often re-seed in the same common-prefix area.
+
+**KL drift stays close to bm25's** (~0.35-0.55 nats across the board),
+under the 0.5-nat threshold on 3 of 4 corpora. Style is preserved.
+
+**Qualitative chat sample** on movie-100k — the corpus where the original
+incoherence complaint came from:
+
+| config | response to "Who are you?" (seed=42) |
+|---|---|
+| baseline | _(garbled)_ |
+| +bm25 | "what are you could always take these cars don't care how great light has gone crazy. you can't get over it." |
+| **+bm25+seed** | "you don't move, you understand?! you know what? it's talkradio. you're on these operations. is my worst fear." |
+| **+bm25+seed+ppm:2** | "are you okay?" |
+
+`+bm25+seed+ppm:2` produced an actual conversational reply. The seeded
+variants are noticeably more dialogue-shaped on movie corpora.
 
 ## Temperature is a clean negative result
 
@@ -270,21 +314,22 @@ unambiguous upgrade.
 
 ## Verdict
 
-- **BM25** — accept across the board. Consistent fallthrough drops on
-  every corpus, drift at or under threshold on 3/4 corpora, latency
-  improvement everywhere. Ready as default.
-- **PPM:2** — viable opt-in for movie-scale corpora (~5K+ sentences).
-  Recitation under 20% on movie corpora, light fluency gain over
-  baseline, modest drift.
-- **PPM:4** — opt-in **only for long-sentence corpora** (mean ≥ ~30
-  tokens/sentence, i.e. fortune-like). On short-sentence corpora it
-  recites 69-100% of the time.
+- **BM25** — accept. Foundation of every good config.
+- **Keyword seed selection** — accept. Best stand-alone improvement after
+  BM25, and stacks cleanly with it. Lower fallthrough, higher diversity,
+  faster, drift comparable to BM25-alone.
+- **PPM:2** — viable opt-in. On movie-scale corpora especially, layered
+  on top of bm25+seed it produces noticeably more dialogue-shaped
+  outputs (per the qualitative chat sample above) at the cost of some
+  diversity and a recitation tick-up.
+- **PPM:4** — opt-in **only for long-sentence corpora** (fortune-like).
+  On short-sentence corpora it recites 69-100% of the time.
 - **Temperature** — rejected. Hurts fallthrough, hits the wall-clock cap.
-  See section below.
 - **full (PPM:4 + BM25)** — same recitation issue as PPM:4 alone.
 
-Suggested defaults: BM25 scorer, classic generator, uniform sampler.
-For movie-scale dialogue corpora, PPM:2 is worth trying as the generator.
+Suggested defaults going forward:
+- **General**: BM25 scorer + keyword seed selector + classic generator.
+- **Movie-scale dialogue corpora**: + PPM:2 as the generator on top.
 
 ## Followups
 

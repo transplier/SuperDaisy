@@ -1,9 +1,9 @@
 # Eval — ppm-fortune
 
-_Generated 2026-05-19T23:15:27Z by `bin/eval`._
+_Generated 2026-05-20T03:20:36Z by `bin/eval`._
 
 Corpus: `fortune-haiku-3-5-250.DSY` — 250 sentences, 11974 words
-Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | max_length: `450` chars
+Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `450` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -12,22 +12,22 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 |---|---|
 | fallthrough rate (unconditioned-Markov fallback) | 0.803 |
 | ugliness rate (winner had ugly flag) | 0.097 |
-| recitation rate (response = a corpus sentence verbatim) | 0.180 |
+| recitation rate (response = a corpus sentence verbatim) | 0.187 |
 | acceptance rate (kept / attempted candidates) | 0.002 |
-| distinct-2, across all trials | 0.097 |
-| distinct-2, per-prompt mean (variation within a prompt) | 0.839 |
-| KL(responses ‖ corpus) bigrams, nats | 0.866 |
-| latency p50 (ms) | 212.595 |
-| latency p95 (ms) | 355.885 |
-| KL drift from baseline `baseline-fortune` (nats) | 1.583 |
+| distinct-2, across all trials | 0.108 |
+| distinct-2, per-prompt mean (variation within a prompt) | 0.838 |
+| KL(responses ‖ corpus) bigrams, nats | 0.841 |
+| latency p50 (ms) | 216.158 |
+| latency p95 (ms) | 393.105 |
+| KL drift from baseline `baseline-fortune` (nats) | 1.541 |
 
-Diagnostic counts (kept in JSON): mean attempts 925.677, mean kept 1.497, mean length 48.620 tokens, distinct-3 0.109.
+Diagnostic counts (kept in JSON): mean attempts 919.523, mean kept 1.490, mean length 48.617 tokens, distinct-3 0.123.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
+| hello | the path before you demands patience—what feels unsatisfying now is merely a chapter, not your whole story. trust that this season of discontent is reshaping you for something greater, and soon you will find the courage to paint your life in bold, authentic colors rather than staying within the lines others have drawn for you. |
 | hi daisy | the paths before you are many, and you possess the wisdom to choose well. like a river that flows through varied terrain, your journey will take unexpected turns that ultimately lead you toward growth and fulfillment. trust in your ability to live fully and inspire those around you to do the same. |
 | good morning | you stand at the threshold of a profound transformation, where the limitations you've accepted will soon dissolve like morning mist. the path forward demands both humility and courage to try again. |
 | how are you | your path curves gently like a circle, bringing you back to where you began—but wiser. the completion you seek is already within reach, waiting only for you to interpret the signs life presents. trust that transformation comes not from changing circumstances, but from changing how you perceive them. |

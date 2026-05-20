@@ -1,25 +1,27 @@
 # Stage 3 — Candidate sentence generator.
 #
-# Interface: #call(corpus:, sampler:, rng:, terminators:, max_length:)
+# Interface: #call(seed:, corpus:, sampler:, rng:, terminators:, max_length:)
 #            -> sentence_string
 #
-# Default behavior: pick a sentence start uniformly, then 1st-order Markov
-# walk with stride-3 emission. Every random choice goes through the sampler.
-# Returns when the trailing bigram is a known sentence-ender, when the walk
-# falls off the corpus, or when the sentence exceeds max_length.
+# `seed` is an Array<String> of the sentence-start tokens to begin the
+# walk from — selected by the orchestrator's SeedSelector. Pass an empty
+# array to get an empty response.
+#
+# Default behavior: take the first 3 tokens of seed, then 1st-order
+# Markov walk with stride-3 emission. Every random choice goes through
+# the sampler. Returns when the trailing bigram is a known sentence-
+# ender, when the walk falls off the corpus, or when the sentence
+# exceeds max_length.
 #
 # Ugly-flag detection lives in SuperDaisy::Ugly and is run by the Bot
-# orchestrator on the returned sentence — same heuristic for every
-# generator, so the eval metric is comparable across them.
+# orchestrator on the returned sentence.
 
 module SuperDaisy
   module Components
     class StrideThreeMarkovGenerator
-      def call(corpus:, sampler:, rng:, terminators:, max_length:)
-        sents = corpus.sentences
-        return "" if sents.empty?
+      def call(seed:, corpus:, sampler:, rng:, terminators:, max_length:)
+        return "" if seed.nil? || seed.empty?
 
-        seed = sampler.call(sents, rng)
         words = seed.first(3).dup
 
         loop do

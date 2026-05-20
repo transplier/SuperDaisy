@@ -1,9 +1,9 @@
 # Eval — baseline-movie100k
 
-_Generated 2026-05-19T23:14:08Z by `bin/eval`._
+_Generated 2026-05-20T03:19:11Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
-Generator: `classic` | Scorer: `classic` | Sampler: `uniform` | max_length: `98` chars
+Generator: `classic` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.541 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.974 |
 | KL(responses ‖ corpus) bigrams, nats | 0.218 |
-| latency p50 (ms) | 32.227 |
-| latency p95 (ms) | 35.567 |
+| latency p50 (ms) | 32.526 |
+| latency p95 (ms) | 33.954 |
 
 Diagnostic counts (kept in JSON): mean attempts 813.123, mean kept 3.747, mean length 10.793 tokens, distinct-3 0.609.
 

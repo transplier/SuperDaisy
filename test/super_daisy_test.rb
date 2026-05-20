@@ -319,7 +319,8 @@ class SuperDaisyComponentContractTest < Minitest::Test
   def test_stride_three_markov_generator_returns_string
     c = corpus_with("hello world.", "hello there.", klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::StrideThreeMarkovGenerator.new
-    sentence = g.call(corpus: c,
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
                       sampler: SuperDaisy::Components::UniformSampler.new,
                       rng: Random.new(0),
                       terminators: c.terminator_bigrams,
@@ -328,13 +329,24 @@ class SuperDaisyComponentContractTest < Minitest::Test
     refute_empty sentence
   end
 
+  def test_generator_returns_empty_on_empty_seed
+    c = corpus_with("hello world.", klass: SuperDaisy::Corpus)
+    g = SuperDaisy::Components::StrideThreeMarkovGenerator.new
+    assert_equal "", g.call(seed: [], corpus: c,
+                            sampler: SuperDaisy::Components::UniformSampler.new,
+                            rng: Random.new(0),
+                            terminators: c.terminator_bigrams,
+                            max_length: 70)
+  end
+
   def test_ppm_generator_returns_string_and_emits_corpus_tokens
     c = corpus_with("hello world today.",
                     "hello there friend.",
                     "the quick brown fox.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 3)
-    sentence = g.call(corpus: c,
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
                       sampler: SuperDaisy::Components::UniformSampler.new,
                       rng: Random.new(0),
                       terminators: c.terminator_bigrams,
@@ -350,7 +362,8 @@ class SuperDaisyComponentContractTest < Minitest::Test
     c = corpus_with("the only sentence she has ever seen.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 5)
-    sentence = g.call(corpus: c,
+    sentence = g.call(seed: c.sentences.first,
+                      corpus: c,
                       sampler: SuperDaisy::Components::UniformSampler.new,
                       rng: Random.new(1),
                       terminators: c.terminator_bigrams,
@@ -364,12 +377,12 @@ class SuperDaisyComponentContractTest < Minitest::Test
                     "hello friend.",
                     klass: SuperDaisy::Corpus)
     g = SuperDaisy::Components::PpmMarkovGenerator.new(order: 4)
+    sampler = SuperDaisy::Components::UniformSampler.new
     5.times do |i|
-      sentence = g.call(corpus: c,
-                        sampler: SuperDaisy::Components::UniformSampler.new,
-                        rng: Random.new(i),
-                        terminators: c.terminator_bigrams,
-                        max_length: 70)
+      rng = Random.new(i)
+      seed = sampler.call(c.sentences, rng)
+      sentence = g.call(seed: seed, corpus: c, sampler: sampler, rng: rng,
+                        terminators: c.terminator_bigrams, max_length: 70)
       refute_empty sentence
     end
   end
@@ -402,6 +415,48 @@ class SuperDaisyComponentContractTest < Minitest::Test
       ["clean_one", false, 3],
     ]
     assert_equal "clean_one", r.call(candidates)
+  end
+
+  def test_uniform_seed_selector_returns_a_corpus_sentence
+    c = corpus_with("alpha beta.", "gamma delta.", klass: SuperDaisy::Corpus)
+    s = SuperDaisy::Components::UniformSeedSelector.new
+    seed = s.call(c, SuperDaisy::Components::UniformSampler.new, Random.new(0), keywords: %w[unused])
+    assert_includes c.sentences, seed
+  end
+
+  def test_keyword_seed_selector_biases_toward_keyword_sentences
+    c = corpus_with(
+      "the sky is blue.",
+      "the grass is green.",
+      "i love the platypus very much.",
+      "platypus is a unique animal.",
+      klass: SuperDaisy::Corpus,
+    )
+    s = SuperDaisy::Components::KeywordSeedSelector.new
+    sampler = SuperDaisy::Components::UniformSampler.new
+
+    # 50 draws with keyword=[platypus]: should always land in a sentence
+    # that contains "platypus".
+    50.times do |i|
+      seed = s.call(c, sampler, Random.new(i), keywords: %w[platypus])
+      assert_includes seed.join(" "), "platypus", "seed #{i}: #{seed.inspect}"
+    end
+  end
+
+  def test_keyword_seed_selector_falls_back_to_uniform_when_no_match
+    c = corpus_with("alpha beta.", "gamma delta.", klass: SuperDaisy::Corpus)
+    s = SuperDaisy::Components::KeywordSeedSelector.new
+    seed = s.call(c, SuperDaisy::Components::UniformSampler.new, Random.new(0),
+                  keywords: %w[absent])
+    assert_includes c.sentences, seed
+  end
+
+  def test_build_seed_selector_helper
+    assert_kind_of SuperDaisy::Components::UniformSeedSelector,
+                   SuperDaisy::Components.build_seed_selector(nil)
+    assert_kind_of SuperDaisy::Components::KeywordSeedSelector,
+                   SuperDaisy::Components.build_seed_selector("keyword")
+    assert_raises(ArgumentError) { SuperDaisy::Components.build_seed_selector("nope") }
   end
 
   def test_last_turn_memory_carry_and_record

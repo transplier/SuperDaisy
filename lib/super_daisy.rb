@@ -117,6 +117,12 @@ module SuperDaisy
       sentence_df_index[Corpus.clean(token).downcase] || 0
     end
 
+    # Indices (into `sentences`) of sentences that contain `token`.
+    # Used for prompt-aware seed selection.
+    def sentences_containing(token)
+      sentences_containing_index[Corpus.clean(token).downcase] || EMPTY
+    end
+
     def terminator_bigrams
       @terminator_cache ||= begin
         set = {}
@@ -178,6 +184,22 @@ module SuperDaisy
       end
     end
 
+    def sentences_containing_index
+      @sentences_containing_cache ||= begin
+        h = {}
+        sentences.each_with_index do |sent, idx|
+          seen = {}
+          sent.each do |t|
+            c = Corpus.clean(t).downcase
+            next if seen[c]
+            seen[c] = true
+            (h[c] ||= []) << idx
+          end
+        end
+        h
+      end
+    end
+
     def invalidate_caches!
       @frequency_cache = nil
       @sentences_cache = nil
@@ -185,6 +207,7 @@ module SuperDaisy
       @terminator_cache = nil
       @ngram_cache = nil
       @sentence_df_cache = nil
+      @sentences_containing_cache = nil
     end
   end
 end
@@ -201,6 +224,8 @@ require_relative "super_daisy/components/ppm_markov_generator"
 require_relative "super_daisy/components/keyword_presence_filter"
 require_relative "super_daisy/components/overlap_reranker"
 require_relative "super_daisy/components/last_turn_memory"
+require_relative "super_daisy/components/uniform_seed_selector"
+require_relative "super_daisy/components/keyword_seed_selector"
 require_relative "super_daisy/ugly"
 
 module SuperDaisy
@@ -245,6 +270,20 @@ module SuperDaisy
         raise ArgumentError, "unknown sampler spec: #{spec.inspect}"
       end
     end
+
+    # Parse a seed-selector spec.
+    # "uniform" (default, prompt-blind) | "keyword" (biased toward
+    # sentences containing prompt keywords)
+    def self.build_seed_selector(spec)
+      case spec
+      when nil, "uniform"
+        UniformSeedSelector.new
+      when "keyword"
+        KeywordSeedSelector.new
+      else
+        raise ArgumentError, "unknown seed_selector spec: #{spec.inspect}"
+      end
+    end
   end
 end
 
@@ -252,7 +291,7 @@ module SuperDaisy
   class Bot
     attr_accessor :max_candidates, :timeout, :pool_size, :max_length
     attr_reader :corpus, :last_stats
-    attr_reader :tokenizer, :scorer, :generator, :filter, :reranker, :memory, :sampler
+    attr_reader :tokenizer, :scorer, :generator, :filter, :reranker, :memory, :sampler, :seed_selector
 
     # max_length: char cap on generated sentences. Pass nil (default) to
     # auto-scale from the corpus's mean sentence length × 1.5 — keeps her
@@ -266,6 +305,7 @@ module SuperDaisy
                    reranker:  Components::OverlapReranker.new,
                    memory:    Components::LastTurnMemory.new,
                    sampler:   Components::UniformSampler.new,
+                   seed_selector: Components::UniformSeedSelector.new,
                    max_candidates: 1000, timeout: 0.5, pool_size: 10,
                    max_length: nil, rng: Random.new)
       @corpus = corpus
@@ -276,6 +316,7 @@ module SuperDaisy
       @reranker = reranker
       @memory = memory
       @sampler = sampler
+      @seed_selector = seed_selector
       @max_candidates = max_candidates
       @timeout = timeout
       @pool_size = pool_size
@@ -320,7 +361,7 @@ module SuperDaisy
 
       while candidates.size < @pool_size && attempts < @max_candidates
         attempts += 1
-        sentence = generate(terminators)
+        sentence = generate(terminators, kws)
         if !sentence.empty?
           overlap = @filter.call(sentence, kw_set)
           if kw_set.empty? || overlap > 0
@@ -334,7 +375,7 @@ module SuperDaisy
       # Fallback: no keyword-bearing candidate found within budget. Emit one
       # unfiltered Markov sentence — DAISY's classic "give up gracefully."
       if candidates.empty?
-        sentence = generate(terminators)
+        sentence = generate(terminators, kws)
         @last_stats = {
           attempts: attempts, kept: 0, fallthrough: true,
           ugly: Ugly.judge(sentence, max_length: @max_length),
@@ -355,8 +396,9 @@ module SuperDaisy
 
     private
 
-    def generate(terminators)
-      @generator.call(corpus: @corpus, sampler: @sampler, rng: @rng,
+    def generate(terminators, keywords)
+      seed = @seed_selector.call(@corpus, @sampler, @rng, keywords: keywords)
+      @generator.call(seed: seed, corpus: @corpus, sampler: @sampler, rng: @rng,
                       terminators: terminators, max_length: @max_length)
     end
 

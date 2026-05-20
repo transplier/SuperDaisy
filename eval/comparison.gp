@@ -18,8 +18,8 @@ do for [c in CORPORA] {
   set title  sprintf("Per-prompt fallthrough — BM25 family — %s", c)
   plot sprintf('eval/baseline_%s_per_prompt.dat', c) using 1:2 with linespoints pt 7  ps 0.6 lw 2 title 'baseline', \
        sprintf('eval/bm25_%s_per_prompt.dat', c)     using 1:2 with linespoints pt 9  ps 0.6 lw 2 title '+bm25', \
-       sprintf('eval/bm25t07_%s_per_prompt.dat', c)  using 1:2 with linespoints pt 11 ps 0.6 lw 2 title '+bm25 T=0.7', \
-       sprintf('eval/bm25t05_%s_per_prompt.dat', c)  using 1:2 with linespoints pt 13 ps 0.6 lw 2 title '+bm25 T=0.5'
+       sprintf('eval/bm25seed_%s_per_prompt.dat', c)      using 1:2 with linespoints pt 11 ps 0.6 lw 2 title '+bm25+seed', \
+       sprintf('eval/bm25seed_ppm2_%s_per_prompt.dat', c) using 1:2 with linespoints pt 13 ps 0.6 lw 2 title '+bm25+seed+ppm:2'
 }
 
 # ---------- PPM family fallthrough ----------
@@ -41,8 +41,8 @@ do for [c in CORPORA] {
   set title  sprintf("Sorted latency (ms) — BM25 family — %s", c)
   plot sprintf('eval/baseline_%s_latency.dat', c) using 1:2 with linespoints pt 7  ps 0.4 lw 2 title 'baseline', \
        sprintf('eval/bm25_%s_latency.dat', c)     using 1:2 with linespoints pt 9  ps 0.4 lw 2 title '+bm25', \
-       sprintf('eval/bm25t07_%s_latency.dat', c)  using 1:2 with linespoints pt 11 ps 0.4 lw 2 title '+bm25 T=0.7', \
-       sprintf('eval/bm25t05_%s_latency.dat', c)  using 1:2 with linespoints pt 13 ps 0.4 lw 2 title '+bm25 T=0.5'
+       sprintf('eval/bm25seed_%s_latency.dat', c)      using 1:2 with linespoints pt 11 ps 0.4 lw 2 title '+bm25+seed', \
+       sprintf('eval/bm25seed_ppm2_%s_latency.dat', c) using 1:2 with linespoints pt 13 ps 0.4 lw 2 title '+bm25+seed+ppm:2'
 }
 
 do for [c in CORPORA] {

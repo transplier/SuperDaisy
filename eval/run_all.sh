@@ -66,6 +66,13 @@ for spec in "${CORPORA[@]}"; do
   # PPM at order 2: lower-context PPM as a less-recitation-prone alternative
   bin/eval --personality "$path" --label "ppm2-$tag" --generator ppm:2 $base \
            --report "eval/ppm2_${tag}.md" --data "eval/ppm2_${tag}.json" &
+
+  # Prompt-aware seed selection — bias initial sentence pick toward
+  # keyword-bearing corpus sentences. Tested with BM25 alone and with PPM:2.
+  bin/eval --personality "$path" --label "bm25seed-$tag" --scorer bm25 --seed-selector keyword $base \
+           --report "eval/bm25seed_${tag}.md" --data "eval/bm25seed_${tag}.json" &
+  bin/eval --personality "$path" --label "bm25seed-ppm2-$tag" --scorer bm25 --seed-selector keyword --generator ppm:2 $base \
+           --report "eval/bm25seed_ppm2_${tag}.md" --data "eval/bm25seed_ppm2_${tag}.json" &
 done
 wait
 

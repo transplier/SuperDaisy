@@ -1,9 +1,9 @@
 # Eval — ppm2-movie100k
 
-_Generated 2026-05-19T23:14:44Z by `bin/eval`._
+_Generated 2026-05-20T03:19:50Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
-Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | max_length: `98` chars
+Generator: `ppm:2` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -17,8 +17,8 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | distinct-2, across all trials | 0.435 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.911 |
 | KL(responses ‖ corpus) bigrams, nats | 0.229 |
-| latency p50 (ms) | 70.409 |
-| latency p95 (ms) | 73.697 |
+| latency p50 (ms) | 75.700 |
+| latency p95 (ms) | 95.030 |
 | KL drift from baseline `baseline-movie100k` (nats) | 0.824 |
 
 Diagnostic counts (kept in JSON): mean attempts 816.130, mean kept 3.743, mean length 11.930 tokens, distinct-3 0.471.

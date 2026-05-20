@@ -1,9 +1,9 @@
 # Eval — ppm-movie100k
 
-_Generated 2026-05-19T23:14:41Z by `bin/eval`._
+_Generated 2026-05-20T03:19:51Z by `bin/eval`._
 
 Corpus: `pretrained/movie-100k.DSY` — 7937 sentences, 100012 words
-Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | max_length: `98` chars
+Generator: `ppm:4` | Scorer: `classic` | Sampler: `uniform` | Seed: `uniform` | max_length: `98` chars
 Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 
 ## Metrics
@@ -14,20 +14,20 @@ Prompts: 30 (`eval/prompts.txt`), 10 seeds each, 300 trials
 | ugliness rate (winner had ugly flag) | 0.170 |
 | recitation rate (response = a corpus sentence verbatim) | 0.687 |
 | acceptance rate (kept / attempted candidates) | 0.004 |
-| distinct-2, across all trials | 0.437 |
+| distinct-2, across all trials | 0.439 |
 | distinct-2, per-prompt mean (variation within a prompt) | 0.930 |
-| KL(responses ‖ corpus) bigrams, nats | 0.217 |
-| latency p50 (ms) | 50.311 |
-| latency p95 (ms) | 74.982 |
-| KL drift from baseline `baseline-movie100k` (nats) | 0.801 |
+| KL(responses ‖ corpus) bigrams, nats | 0.216 |
+| latency p50 (ms) | 73.416 |
+| latency p95 (ms) | 125.044 |
+| KL drift from baseline `baseline-movie100k` (nats) | 0.797 |
 
-Diagnostic counts (kept in JSON): mean attempts 824.027, mean kept 3.673, mean length 10.727 tokens, distinct-3 0.479.
+Diagnostic counts (kept in JSON): mean attempts 820.697, mean kept 3.673, mean length 10.723 tokens, distinct-3 0.481.
 
 ## Sample responses (seed=1)
 
 | prompt | response |
 |---|---|
-| hello | but you have to consider all possibilities, sandro. |
+| hello | my wife used to call me lenny. |
 | hi daisy | but you have to consider all possibilities, sandro. |
 | good morning | and that means earl williams dies tomorrow morning and makes a sucker out of us! |
 | how are you | how many... how many people are missing? |

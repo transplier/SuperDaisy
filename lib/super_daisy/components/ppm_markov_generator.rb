@@ -1,22 +1,18 @@
 # Stage 3 alternative — variable-order Markov generator (PPM-style).
 #
-# Interface: #call(corpus:, sampler:, rng:, terminators:, max_length:)
+# Interface: #call(seed:, corpus:, sampler:, rng:, terminators:, max_length:)
 #            -> sentence_string
 #
-# Behavior: try to condition on the last `order` tokens of generated words.
-# If that K-gram never appears in the corpus, back off to K-1 tokens, then
-# K-2, ..., down to 1. Sample one position uniformly among the matches,
-# emit a single next token (stride-1, unlike the classic stride-3
-# generator), repeat. Stop on terminator bigram, length cap, or when no
-# continuation exists at any order.
+# Behavior: starting from `seed` (chosen externally by SeedSelector), try
+# to condition on the last `order` tokens of generated words. If that
+# K-gram never appears in the corpus, back off to K-1 tokens, then K-2,
+# ..., down to 1. Sample one position uniformly among the matches, emit
+# a single next token (stride-1, unlike the classic stride-3 generator).
+# Stop on terminator bigram, length cap, or when no continuation exists
+# at any order.
 #
 # Kernel preserved: every emitted token comes verbatim from the corpus.
-# Backoff is data-driven, not generative. No probability smoothing — we
-# treat the corpus as the ground-truth distribution.
-#
-# Performance note: K-gram lookups are O(1) hash lookups via the corpus's
-# `next_tokens_after` index, lazily built per order and invalidated on
-# learn(). Per-step cost is independent of corpus size.
+# Backoff is data-driven, not generative.
 
 module SuperDaisy
   module Components
@@ -30,11 +26,9 @@ module SuperDaisy
         @order = order
       end
 
-      def call(corpus:, sampler:, rng:, terminators:, max_length:)
-        sents = corpus.sentences
-        return "" if sents.empty?
+      def call(seed:, corpus:, sampler:, rng:, terminators:, max_length:)
+        return "" if seed.nil? || seed.empty?
 
-        seed = sampler.call(sents, rng)
         words = seed.first(3).dup
 
         loop do
@@ -52,8 +46,6 @@ module SuperDaisy
 
       private
 
-      # Pick the next token by trying decreasing context lengths until one
-      # has matches in the corpus, then sampling among them.
       def sample_next(corpus, sampler, rng, words)
         max_k = [@order, words.size].min
         max_k.downto(1) do |k|

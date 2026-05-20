@@ -20,13 +20,14 @@ parser = OptionParser.new do |o|
   o.on("--generator NAME", "Generator (super_daisy only): classic | ppm | ppm:N") { |v| options[:generator] = v }
   o.on("--scorer NAME",    "Scorer (super_daisy only): classic | bm25 | bm25:K") { |v| options[:scorer] = v }
   o.on("--sampler NAME",   "Sampler (super_daisy only): uniform | temperature | temperature:T") { |v| options[:sampler] = v }
+  o.on("--seed-selector NAME", "Seed (super_daisy only): uniform | keyword") { |v| options[:seed_selector] = v }
   o.on("--max-length N", Integer, "Char cap on responses (default: auto from corpus mean × 1.5)") { |v| options[:max_length] = v }
   o.on("-h", "--help") { puts o; exit 0 }
 end
 parser.parse!
 
-if (options[:generator] || options[:scorer] || options[:sampler]) && options[:model] != "super_daisy"
-  abort "--generator, --scorer, --sampler require --model super_daisy"
+if (options[:generator] || options[:scorer] || options[:sampler] || options[:seed_selector]) && options[:model] != "super_daisy"
+  abort "--generator, --scorer, --sampler, --seed-selector require --model super_daisy"
 end
 
 model = MODELS.fetch(options[:model])
@@ -38,12 +39,15 @@ unless options[:personality]
   exit 1
 end
 
-unless File.exist?(options[:personality])
-  warn "personality file not found: #{options[:personality]}"
-  exit 1
-end
-
-corpus = mod::Corpus.load(options[:personality])
+corpus =
+  if File.exist?(options[:personality])
+    mod::Corpus.load(options[:personality])
+  elsif options[:learn]
+    warn "creating new personality at #{options[:personality]}"
+    mod::Corpus.new
+  else
+    abort "personality file not found: #{options[:personality]} (pass --learn to create a new one)"
+  end
 rng = options[:seed] ? Random.new(options[:seed]) : Random.new
 bot_opts = { rng: rng }
 if options.key?(:timeout)
@@ -69,6 +73,13 @@ if options[:sampler]
     bot_opts[:sampler] = SuperDaisy::Components.build_sampler(options[:sampler])
   rescue ArgumentError => e
     abort "--sampler: #{e.message}"
+  end
+end
+if options[:seed_selector]
+  begin
+    bot_opts[:seed_selector] = SuperDaisy::Components.build_seed_selector(options[:seed_selector])
+  rescue ArgumentError => e
+    abort "--seed-selector: #{e.message}"
   end
 end
 bot = mod::Bot.new(corpus, **bot_opts)
