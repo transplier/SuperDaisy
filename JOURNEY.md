@@ -216,79 +216,94 @@ know it."
 
 Available as opt-in for chat use.
 
-### PPMI+SVD: a peek into the future
+### Embeddings: the closeout
 
-To close out the pre-LLM exploration we did one experiment that
-technically sits in a kernel "gray zone" — embeddings.
+The natural endpoint of the pre-LLM exploration was *embeddings*.
+Everything to this point had been either pure counting (BM25, the
+keyword filter, the density reranker) or a Markov walker (classic,
+PPM, plus the prompt-aware seed). None of it knew that "platypus" and
+"wombat" might have anything in common. Embeddings are the classical
+late-90s answer to that question, and they sit right on the edge of
+the kernel rules.
 
 **PPMI** (positive pointwise mutual information) captures which words
 tend to co-occur in the corpus. **SVD** (singular value decomposition)
 compresses that co-occurrence matrix into compact dense vectors — one
-50-dimensional "embedding" per word. This is the technique behind LSA/LSI
-in the late 90s, and the conceptual ancestor of word2vec.
+50-dimensional "embedding" per word. This is the technique behind
+LSA/LSI in the late 90s, and the conceptual ancestor of word2vec.
 
-Why gray zone: the SVD step is a *fit step* — it's not learning weights
-via gradient descent, but it's a matrix factorization, which is more
-fit-y than the rest of DAISY's "just count things in the corpus"
-approach. We did it anyway as a demonstration that the architecture can
-absorb a dense-embedding swap if the kernel rules ever shift.
+Why this is the "gray zone": the SVD step is a *fit step*. Not gradient
+descent, but a matrix factorization — which is more fit-y than the rest
+of DAISY's "just count things" approach. We did it anyway, partly to
+see what dense embeddings would buy us and partly as a demonstration
+that the architecture can absorb a dense-embedding swap if the kernel
+rules ever shift. The implementation is pure Ruby, no gems — a
+truncated symmetric eigendecomposition via power iteration with
+deflation, about 70 lines.
 
-Implementation: pure Ruby, no gems. Truncated symmetric eigendecomposition
-via power iteration with deflation. About 70 lines.
+The embeddings closeout ended up being three connected things, not
+one. We expected only the first; the others showed up along the way.
 
-Result: the seed selector that uses these embeddings to find "sentences
-semantically similar to the prompt centroid" works — it produces
-recognizable dialogue. But here's the curious finding: on the *movie*
-corpora it gave *less* diverse outputs than the simpler "literally
-contains the keyword" version. The PPMI+SVD embeddings collapse
-semantically-related sentences into a tighter neighborhood than the
-broader literal-match pool.
+**1. A semantic seed selector.** The first job to give the embeddings
+was the same one the literal-keyword version did: pick the walker's
+starting sentence by which corpus sentence sits closest to the prompt
+centroid. It worked, in the sense that the architecture absorbed it
+cleanly. But the metric story was curious. On the *movie* corpora it
+gave *less* diverse outputs than the literal-keyword version — the
+embeddings collapse semantically-related sentences into a tighter
+neighborhood than the broader "contains the keyword" pool. On smaller,
+more topical corpora (fortune, MEM) it was a small win, because there
+aren't enough literal matches there for the literal version to find,
+so it falls back to uniform too often. Mixed verdict on the metric;
+clean verdict on the architecture.
 
-On smaller, more topical corpora (fortune, MEM) it was a small win
-because there aren't enough literal matches there, so the literal
-version falls back to uniform too often.
+**2. Caching the SVD.** The SVD takes about a minute on the bigger
+corpora, which is annoying if you're computing it every time the bot
+starts up. We added a small on-disk cache, keyed by a hash of the
+corpus contents and the embedding parameters. First call against a new
+corpus pays the minute; every subsequent call is essentially free.
+The co-occurrence-matrix build is also fork-parallelized — the only
+truly parallel step in the project, because it's embarrassingly so:
+each fork counts co-occurrences for its slice of the corpus, and the
+parent sums the counts.
 
-Mixed verdict on the metric; clean verdict on the architecture (it fits).
+**3. The actual interesting use.** Having built the embeddings, the
+obvious next question was whether to use them more invasively — to
+*guide* the generation itself, not just the seed.
 
-### The growing-centroid guided walker
-
-After PPMI+SVD landed, one obvious question loomed: if we have semantic
-embeddings of every word, could we use them to *guide the generation
-itself*, not just the seed pick?
-
-The naive version — bias every Markov branch toward words near the
-prompt — is exactly the "guided decoding" we'd ruled out earlier as
-character-altering. It collapses output diversity by pulling every step
-toward the same target.
+The naive version of this is exactly the "guided decoding" we'd ruled
+out earlier as character-altering: bias every Markov branch toward
+words near the prompt. It collapses output diversity by pulling every
+step toward the same target.
 
 But there's a clever variant. At each branch, instead of asking "does
 this candidate word look like the prompt?", ask **"does the running
 utterance, including this candidate word, look like the prompt?"** —
-where "running utterance" means the average of all the embeddings of
-the words emitted so far plus the candidate.
+where "running utterance" means the average embedding of the words
+emitted so far plus the candidate.
 
 This single change has a surprising property: **the bias decays
 naturally with sentence length**. The mean of N+1 embeddings barely
-differs from the mean of N embeddings once N is moderately large.
-So the topical pull is strong at the start of generation (where it
+differs from the mean of N embeddings once N is moderately large. So
+the topical pull is strong at the start of generation (where it
 matters most for committing to a topic) and essentially zero by the
 tail of the sentence (where DAISY's signature non-sequitur drift
 needs room to happen).
 
-We built it and ran an α sweep. Two surprises:
+We built it and ran an α sweep over the strength of the pull. Two
+surprises:
 
-1. **Recitation drops sharply.** On MEM, from 50% verbatim to 18%. On
-   movie-100k, from 2.3% down to under 1%. The guided walker has more
-   incentive to *deviate* from corpus paths than the unbiased one,
-   because the embedding-space target gives it a "reward signal" beyond
-   raw frequency.
+- **Recitation drops sharply.** On MEM, from 50% verbatim to 18%. On
+  movie-100k, from 2.3% down to under 1%. The guided walker has more
+  incentive to *deviate* from corpus paths than the unbiased one,
+  because the embedding-space target gives it a "reward signal"
+  beyond raw frequency.
 
-2. **Per-prompt diversity goes *up*, not down.** Every corpus showed
-   *more* variety per prompt under the guided walker. Counterintuitive
-   for a "bias toward something" technique, but explainable in
-   retrospect: the bias is positive pressure toward a *neighborhood* in
-   embedding space, not toward a *specific* word. The walker still
-   explores freely within that neighborhood.
+- **Per-prompt diversity goes *up*, not down.** Every corpus showed
+  *more* variety per prompt. Counterintuitive for a "bias toward
+  something" technique, but explainable: the bias is positive pressure
+  toward a *neighborhood* in embedding space, not toward a *specific*
+  word. The walker still explores freely within that neighborhood.
 
 α had almost no effect across 0.5–2.0. The growing-centroid decay
 flattens it; direction matters more than strength.
@@ -296,19 +311,26 @@ flattens it; direction matters more than strength.
 The catch is performance. At each Markov step we compute a cosine
 similarity for every candidate next-word, which is fast in vectorized
 languages but slow in pure Ruby. On the bigger corpora we ended up
-needing to bump the wall-clock budget from 0.5 to 5 seconds (in the
-eval matrix only) to get readings that weren't truncated. Latency at
+needing to bump the wall-clock budget (in the eval matrix only) from
+0.5 to 5 seconds to get readings that weren't truncated. Latency at
 p50 is roughly 600-900ms — interactive-tolerable but heavy.
 
 KL drift from baseline tells the cleanest character story: fine on
 movie corpora (~0.4 nats, under the reconsider threshold), borderline
 on fortune (~0.7), badly over on MEM (~1.1). The drift correlates with
-how short the corpus's sentences are: the shorter the sentence, the
-longer the bias stays meaningful, the more it shifts the output style.
+how short the corpus's sentences are: shorter sentences mean the bias
+stays meaningful longer, so it shifts the output style more.
 
 Available as `--generator guided[:ALPHA]`. Not enabled by default —
-the latency is too rough for general use and we'd want to vectorize
-the inner loop before promoting it.
+the latency is too rough, and we'd want to vectorize the inner loop
+before promoting it.
+
+What the embeddings closeout taught us, beyond the metric story: the
+*shape* of an intervention matters more than the fact of it. The same
+"bias toward the prompt" idea is either a character-killer or a quiet
+improvement depending on whether the bias decays. That's the kind of
+lesson you can't get by arguing about designs in the abstract — you
+have to build it and measure.
 
 ---
 
