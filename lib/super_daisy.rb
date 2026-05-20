@@ -8,7 +8,9 @@
 # defaults wired in, output is bit-for-bit identical to DAISY for a given
 # seed.
 
+require "etc"
 require_relative "super_daisy/svd"
+require_relative "super_daisy/semantic_cache"
 
 module SuperDaisy
   SENTINEL = "***"
@@ -247,10 +249,25 @@ module SuperDaisy
       )
     end
 
-    # PPMI co-occurrence within `window` tokens, scaled rows, then truncated
-    # symmetric SVD via power iteration. Returns dense K-dim embeddings.
+    # PPMI co-occurrence within `window` tokens, then truncated symmetric
+    # SVD via power iteration. Returns dense K-dim embeddings.
+    #
+    # On-disk sidecar cache keyed by corpus content hash + params, so this
+    # only runs once per (corpus, params) combination. Co-occurrence build
+    # is fork-parallelized across available cores on platforms that
+    # support fork().
     def build_semantic_index(dims:, window:, min_count:, seed:)
-      # 1. Build vocabulary (cleaned, lowercased, frequency >= min_count).
+      content_hash = SemanticCache.content_hash(@tokens)
+      cache_params = { dims: dims, window: window, min_count: min_count, seed: seed }
+      cache_path = SemanticCache.path_for(content_hash, **cache_params)
+
+      cached = SemanticCache.load(cache_path, content_hash, **cache_params)
+      if cached
+        warn "[super_daisy] using cached embeddings: #{cache_path}"
+        return cached
+      end
+
+      # 1. Vocabulary (cleaned, lowercased, frequency >= min_count).
       freqs = Hash.new(0)
       sentences.each do |sent|
         sent.each { |t| freqs[Corpus.clean(t).downcase] += 1 }
@@ -259,16 +276,105 @@ module SuperDaisy
       vocab = freqs.select { |_, c| c >= min_count }.keys.sort
       word_to_idx = {}
       vocab.each_with_index { |w, i| word_to_idx[w] = i }
+      return [word_to_idx, []] if vocab.empty?
 
-      if vocab.empty?
-        return [word_to_idx, []]
+      # 2. Co-occurrence counts. Fork-parallel where supported.
+      warn "[super_daisy] building PPMI co-occurrence (vocab=#{vocab.size}) ..."
+      t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      cooc, row_sum = cooccurrence_counts(word_to_idx, window)
+      warn "[super_daisy]   co-occurrence done in #{(Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0).round(2)}s, nnz=#{cooc.size}"
+
+      total = row_sum.sum.to_f
+      if total.zero?
+        empty = [word_to_idx, Array.new(vocab.size) { Array.new(dims, 0.0) }]
+        SemanticCache.save(cache_path, *empty, content_hash, **cache_params)
+        return empty
       end
 
-      # 2. Sparse symmetric co-occurrence counts. cooc[(i, j)] += 1 for
-      # every pair i,j in the same sentence within `window` tokens.
+      # 3. PPMI: M[i,j] = max(0, log(c_ij * total / (row_i * row_j))).
+      sparse_rows = Array.new(vocab.size) { [] }
+      cooc.each do |(i, j), c|
+        rs_i = row_sum[i]
+        rs_j = row_sum[j]
+        next if rs_i.zero? || rs_j.zero?
+        pmi = Math.log((c * total) / (rs_i * rs_j))
+        sparse_rows[i] << [j, pmi] if pmi > 0
+      end
+
+      # 4. Truncated symmetric eigendecomposition.
+      k = [dims, vocab.size].min
+      warn "[super_daisy] computing top-#{k} eigenvectors ..."
+      t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      _, eigvecs = SVD.call(sparse_rows, k: k, rng: Random.new(seed))
+      warn "[super_daisy]   SVD done in #{(Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0).round(2)}s"
+
+      # 5. Re-shape into per-word vectors.
+      embeddings = Array.new(vocab.size) { Array.new(k, 0.0) }
+      eigvecs.each_with_index do |evec, dim|
+        evec.each_with_index { |val, i| embeddings[i][dim] = val }
+      end
+
+      SemanticCache.save(cache_path, word_to_idx, embeddings, content_hash, **cache_params)
+      warn "[super_daisy] wrote embedding cache: #{cache_path}"
+      [word_to_idx, embeddings]
+    end
+
+    # Counts symmetric co-occurrences within ±window tokens per sentence.
+    # Returns [Hash<[i,j], count>, row_sums Array<Integer>].
+    # Fork-parallel across Etc.nprocessors (capped at 8).
+    def cooccurrence_counts(word_to_idx, window)
+      sents = sentences
+      nproc = if Process.respond_to?(:fork) && sents.size >= 64
+                [Etc.nprocessors, 8].min
+              else
+                1
+              end
+
+      if nproc == 1
+        return cooccurrence_chunk(sents, word_to_idx, window)
+      end
+
+      # Split sentences into nproc roughly-equal chunks.
+      chunk_size = (sents.size / nproc.to_f).ceil
+      chunks = sents.each_slice(chunk_size).to_a
+      tmpfiles = chunks.map.with_index { |_, i| "/tmp/sd_cooc_#{Process.pid}_#{i}.bin" }
+
+      pids = chunks.zip(tmpfiles).map do |chunk, path|
+        fork do
+          cooc, rs = cooccurrence_chunk(chunk, word_to_idx, window)
+          File.open(path, "wb") do |f|
+            f.write([rs.size].pack("L<"))
+            f.write(rs.pack("L<*"))
+            cooc.each do |(i, j), c|
+              f.write([i, j, c].pack("L<3"))
+            end
+          end
+          exit!(0)
+        end
+      end
+      pids.each { |pid| Process.wait(pid) }
+
+      merged = Hash.new(0)
+      total_rs = Array.new(word_to_idx.size, 0)
+      tmpfiles.each do |path|
+        File.open(path, "rb") do |f|
+          n = f.read(4).unpack1("L<")
+          rs = f.read(n * 4).unpack("L<*")
+          rs.each_with_index { |c, i| total_rs[i] += c }
+          while (rec = f.read(12)) && rec.bytesize == 12
+            i, j, c = rec.unpack("L<3")
+            merged[[i, j]] += c
+          end
+        end
+        File.unlink(path)
+      end
+      [merged, total_rs]
+    end
+
+    def cooccurrence_chunk(sents, word_to_idx, window)
       cooc = Hash.new(0)
-      row_sum = Array.new(vocab.size, 0)
-      sentences.each do |sent|
+      row_sum = Array.new(word_to_idx.size, 0)
+      sents.each do |sent|
         ids = sent.map { |t| word_to_idx[Corpus.clean(t).downcase] }
         ids.each_with_index do |i, pos|
           next if i.nil?
@@ -283,32 +389,7 @@ module SuperDaisy
           end
         end
       end
-      total = row_sum.sum.to_f
-      return [word_to_idx, Array.new(vocab.size) { Array.new(dims, 0.0) }] if total.zero?
-
-      # 3. PPMI: M[i,j] = max(0, log(c_ij * total / (row_i * row_j))).
-      # Stored as sparse_rows[i] = [[j, value], ...].
-      sparse_rows = Array.new(vocab.size) { [] }
-      cooc.each do |(i, j), c|
-        rs_i = row_sum[i]
-        rs_j = row_sum[j]
-        next if rs_i.zero? || rs_j.zero?
-        pmi = Math.log((c * total) / (rs_i * rs_j))
-        sparse_rows[i] << [j, pmi] if pmi > 0
-      end
-
-      # 4. Truncated symmetric eigendecomposition via power iteration.
-      k = [dims, vocab.size].min
-      _, eigvecs = SVD.call(sparse_rows, k: k, rng: Random.new(seed))
-
-      # 5. Re-shape into per-word vectors: word i's embedding is the i-th
-      # component across each of the K eigenvectors.
-      embeddings = Array.new(vocab.size) { Array.new(k, 0.0) }
-      eigvecs.each_with_index do |evec, dim|
-        evec.each_with_index { |val, i| embeddings[i][dim] = val }
-      end
-
-      [word_to_idx, embeddings]
+      [cooc, row_sum]
     end
 
     def invalidate_caches!

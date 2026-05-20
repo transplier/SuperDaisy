@@ -239,7 +239,10 @@ implemented:
   was the gray-zone option from the original write-up; we did the SVD-
   on-corpus version, not the external-RAG version Gia's "in-a-bottle"
   rule was about. Metric story is mixed; architecture absorbs it
-  cleanly.)
+  cleanly. On-disk sidecar cache at
+  `$XDG_CACHE_HOME/super_daisy/<hash>-<params>.cache` makes the cold
+  build a one-time cost per (corpus content, params) tuple; the PPMI
+  co-occurrence build is fork-parallelized.)
 - Preference-learned reward for reranking (not yet)
 
 Plus a few items that emerged during evaluation:

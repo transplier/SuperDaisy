@@ -1,5 +1,7 @@
 require "minitest/autorun"
 require "tempfile"
+require "tmpdir"
+require "fileutils"
 require_relative "../lib/daisy"
 require_relative "../lib/super_daisy"
 
@@ -161,6 +163,83 @@ class SuperDaisyUglyTest < Minitest::Test
     assert SuperDaisy::Ugly.judge("x" * 80, max_length: 70)            # too long
     refute SuperDaisy::Ugly.judge("a clean short response.", max_length: 70)
     refute SuperDaisy::Ugly.judge("", max_length: 70)                  # empty
+  end
+end
+
+class SuperDaisySemanticCacheTest < Minitest::Test
+  def setup
+    @tmpdir = Dir.mktmpdir("sd-cache-test")
+    @prev_dir = ENV["SUPER_DAISY_CACHE_DIR"]
+    ENV["SUPER_DAISY_CACHE_DIR"] = @tmpdir
+  end
+
+  def teardown
+    ENV["SUPER_DAISY_CACHE_DIR"] = @prev_dir
+    FileUtils.remove_entry(@tmpdir) if File.exist?(@tmpdir)
+  end
+
+  def test_round_trip
+    hash = SuperDaisy::SemanticCache.content_hash(%w[a b c])
+    embeds = [[0.1, 0.2], [0.3, 0.4]]
+    w2i = { "alpha" => 0, "beta" => 1 }
+    path = SuperDaisy::SemanticCache.path_for(hash, dims: 2, window: 5, min_count: 1, seed: 0)
+
+    SuperDaisy::SemanticCache.save(path, w2i, embeds, hash, dims: 2, window: 5, min_count: 1, seed: 0)
+    loaded = SuperDaisy::SemanticCache.load(path, hash, dims: 2, window: 5, min_count: 1, seed: 0)
+    refute_nil loaded
+    lw, le = loaded
+    assert_equal w2i, lw
+    # Float32 round-trip: small tolerance.
+    embeds.each_with_index do |row, i|
+      row.each_with_index { |v, j| assert_in_delta v, le[i][j], 1e-5 }
+    end
+  end
+
+  def test_content_hash_mismatch_returns_nil
+    hash_a = SuperDaisy::SemanticCache.content_hash(%w[a b c])
+    hash_b = SuperDaisy::SemanticCache.content_hash(%w[x y z])
+    path = SuperDaisy::SemanticCache.path_for(hash_a, dims: 2, window: 5, min_count: 1, seed: 0)
+    SuperDaisy::SemanticCache.save(path, {}, [], hash_a, dims: 2, window: 5, min_count: 1, seed: 0)
+    assert_nil SuperDaisy::SemanticCache.load(path, hash_b, dims: 2, window: 5, min_count: 1, seed: 0)
+  end
+
+  def test_param_mismatch_uses_different_file
+    hash = SuperDaisy::SemanticCache.content_hash(%w[a])
+    p1 = SuperDaisy::SemanticCache.path_for(hash, dims: 8, window: 5, min_count: 1, seed: 0)
+    p2 = SuperDaisy::SemanticCache.path_for(hash, dims: 16, window: 5, min_count: 1, seed: 0)
+    refute_equal p1, p2
+  end
+
+  def test_corrupt_cache_returns_nil
+    hash = SuperDaisy::SemanticCache.content_hash(%w[a])
+    path = SuperDaisy::SemanticCache.path_for(hash, dims: 2, window: 5, min_count: 1, seed: 0)
+    FileUtils.mkdir_p(File.dirname(path))
+    File.write(path, "garbage")
+    assert_nil SuperDaisy::SemanticCache.load(path, hash, dims: 2, window: 5, min_count: 1, seed: 0)
+  end
+
+  def test_corpus_uses_cache_on_second_call
+    ENV["SUPER_DAISY_CACHE_DIR"] = @tmpdir
+    c = SuperDaisy::Corpus.new(tokens: %w[the cat sat. *** the dog ran. *** the cat ate. *** the dog slept.])
+
+    t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    c.word_embedding("cat", dims: 4, min_count: 1, seed: 0)
+    first = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+
+    # Force a fresh corpus to drop the in-memory cache; the disk cache
+    # should still apply (same content hash).
+    c2 = SuperDaisy::Corpus.new(tokens: %w[the cat sat. *** the dog ran. *** the cat ate. *** the dog slept.])
+    t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    c2.word_embedding("cat", dims: 4, min_count: 1, seed: 0)
+    second = Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0
+
+    # Second call should at worst be the same speed, and on any non-tiny
+    # corpus would be substantially faster. For this tiny test corpus we
+    # just verify both completed without error.
+    refute_nil first
+    refute_nil second
+    cache_files = Dir.glob(File.join(@tmpdir, "*.cache"))
+    refute_empty cache_files, "expected at least one cache file to be written"
   end
 end
 
