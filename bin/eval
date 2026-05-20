@@ -32,7 +32,7 @@ OptionParser.new do |o|
   o.on("--report FILE", "Markdown report output (default stdout)") { |v| options[:report] = v }
   o.on("--data FILE", "Write raw stats JSON for future drift comparison") { |v| options[:data] = v }
   o.on("--label NAME", "Variant label in the report (default: corpus basename)") { |v| options[:label] = v }
-  o.on("--generator NAME", "Generator: classic | ppm | ppm:N (default classic)") { |v| options[:generator] = v }
+  o.on("--generator NAME", "Generator: classic | ppm | ppm:N | guided | guided:ALPHA (default classic)") { |v| options[:generator] = v }
   o.on("--scorer NAME", "Scorer: classic | bm25 | bm25:K (default classic)") { |v| options[:scorer] = v }
   o.on("--sampler NAME", "Sampler: uniform | temperature | temperature:T (default uniform)") { |v| options[:sampler] = v }
   o.on("--seed-selector NAME", "Seed: uniform | keyword | semantic | semantic:K (default uniform)") { |v| options[:seed_selector] = v }
